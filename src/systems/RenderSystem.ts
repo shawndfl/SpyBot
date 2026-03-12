@@ -5,16 +5,23 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
-import type { Engine } from '../ecs/Engine';
+import type { World } from '../ecs/World';
+import type { EventBus } from '../ecs/EventSystem';
+import { GameEventNames } from '../events/GameEventNames';
+import { ComponentNames } from '../ecs/ComponentNames';
+import type { Renderer } from '../components/Renderer';
 
 export class RenderSystem extends System {
   private scene = new THREE.Scene();
   private renderer = new THREE.WebGLRenderer({ antialias: true });
   private camera: Camera = new Camera();
-  private accumulator: number = 0;
   private stats: Stats = new Stats();
   private gui: GUI = new GUI();
   private ground: THREE.Mesh | undefined;
+
+  constructor() {
+    super(0);
+  }
 
   initialize(): void {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -30,7 +37,6 @@ export class RenderSystem extends System {
     this.ground = new THREE.Mesh(geometry, material);
 
     this.scene.add(this.ground);
-    this.loadGltf();
     this.initOrbit();
     this.initGui();
     this.createLight();
@@ -59,9 +65,12 @@ export class RenderSystem extends System {
     this.gui.add(this.ground!.rotation, 'y', 0, Math.PI, 0.01).name('Cube Rotation Y');
   }
 
-  loadGltf(): void {
+  loadGltf(path?: string): void {
+    if (!path) {
+      return;
+    }
     const loader = new GLTFLoader();
-    loader.load('player.glb', (gltf) => {
+    loader.load(path, (gltf) => {
       const model = gltf.scene;
       const material = new THREE.MeshPhysicalMaterial();
       model.traverse((child) => {
@@ -73,7 +82,13 @@ export class RenderSystem extends System {
     });
   }
 
-  update(engine: Engine, delta: number): void {
+  update(world: World, delta: number, events: EventBus): void {
+    const [initializeEvent] = events.get(GameEventNames.InitializeLevel);
+    if (initializeEvent) {
+      const renderers = world.getComponents<Renderer>(ComponentNames.Renderer);
+      renderers.forEach((r) => this.loadGltf(r.gltfName));
+      this.loadGltf();
+    }
     this.renderer.render(this.scene, this.camera.camera);
 
     this.stats.update();
