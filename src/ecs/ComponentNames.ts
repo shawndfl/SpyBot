@@ -1,5 +1,5 @@
 export enum ComponentNames {
-  Player = 'Player',
-  Renderer = 'Renderer',
-  Transform = 'Transform',
+  Player = 1,
+  Renderer = 1 << 1,
+  Transform = 1 << 2,
 }

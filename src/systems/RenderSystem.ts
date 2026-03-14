@@ -5,12 +5,11 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
-import type { World } from '../ecs/World';
-import type { EventBus } from '../ecs/EventSystem';
 import { GameEventNames } from '../events/GameEventNames';
 import { ComponentNames } from '../ecs/ComponentNames';
 import type { Renderer } from '../components/Renderer';
 import { GameSky } from '../rendering/Sky';
+import type { UpdateEvent } from '../core/UpdateEvent';
 
 export class RenderSystem extends System {
   private scene = new THREE.Scene();
@@ -23,8 +22,8 @@ export class RenderSystem extends System {
 
   private sky: GameSky;
 
-  constructor() {
-    super(0);
+  constructor(componentMask: number) {
+    super(componentMask);
     this.sky = new GameSky(this.scene, this.renderer, this.gui);
     this.windowResize = this.onWindowResize.bind(this);
   }
@@ -104,7 +103,7 @@ export class RenderSystem extends System {
     });
   }
 
-  update(world: World, delta: number, events: EventBus): void {
+  update({ world, dt, events, commands }: UpdateEvent): void {
     const [initializeEvent] = events.get(GameEventNames.InitializeLevel);
     if (initializeEvent) {
       const renderers = world.getComponents<Renderer>(ComponentNames.Renderer);

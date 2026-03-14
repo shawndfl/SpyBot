@@ -5,33 +5,39 @@ import { InitializeEvent } from '../events/InitializeEvent';
 import { World } from '../ecs/World';
 import { EventBus } from '../ecs/EventSystem';
 import { SceneFactory } from '../scenes/factories/SceneFactory';
+import { MovementSystem } from '../systems/MovementSystem';
+import { ComponentNames } from '../ecs/ComponentNames';
+import type { UpdateEvent } from './UpdateEvent';
+import { CommandBuffer } from '../ecs/CommandBuffer';
 
 export class Engine {
   private timer = new THREE.Timer();
   private accumulator = 0;
   private fixedStep = 1 / 60;
 
-  private _world = new World();
-  //
-  // Systems
-  //
-  private _input: InputSystem;
-  private _render: RenderSystem;
-  private _movement: InputSystem;
+  private _world;
+
   private _firstLoad: boolean = true;
   private _sceneFactory: SceneFactory;
 
+  private _inputSystem: InputSystem;
+
   protected _eventBus: EventBus;
+  protected _command: CommandBuffer;
 
   get world(): World {
     return this._world;
   }
 
   constructor() {
-    this._input = new InputSystem();
-    this._render = new RenderSystem();
-    this._movement = new InputSystem();
+    this._inputSystem = new InputSystem(ComponentNames.Transform);
+    this._world = new World([
+      this._inputSystem,
+      new RenderSystem(ComponentNames.Renderer | ComponentNames.Transform),
+      new MovementSystem(ComponentNames.Player | ComponentNames.Transform),
+    ]);
     this._eventBus = new EventBus();
+    this._command = new CommandBuffer();
     this._sceneFactory = new SceneFactory();
   }
 
@@ -40,8 +46,10 @@ export class Engine {
     const gameScene = this._sceneFactory.createScene('smallTown');
     gameScene.create(this._world);
 
-    this._input.initialize();
-    this._render.initialize();
+    // initialize all the systems
+    for (let system of this._world.systems) {
+      system.initialize();
+    }
   }
 
   run() {
@@ -78,11 +86,20 @@ export class Engine {
       this._firstLoad = false;
     }
 
-    this._input.update(world, delta, events);
-    this._movement.update(world, delta, events);
+    const updateEvents: UpdateEvent = {
+      commands: this._command,
+      dt: delta,
+      events,
+      world,
+    };
 
-    this._render.update(world, delta, events);
+    // update all the systems
+    for (let system of this._world.systems) {
+      system.update(updateEvents);
+    }
 
-    this._input.resetFrameInputs();
+    this._command.flush(this.world);
+
+    this._inputSystem.resetFrameInputs();
   }
 }

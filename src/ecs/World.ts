@@ -2,17 +2,27 @@ import type { Component } from './Component';
 import { ComponentNames } from './ComponentNames';
 import { Entity } from './Entity';
 import { EntityManager } from './EntityManager';
+import type { System } from './System';
 
 /**
  * This class represents the world in an Entity-Component-System (ECS) architecture. It manages entities and their associated components.
  * This is a component centric design, where components are stored in maps keyed by their names, and each component map stores components indexed by entity IDs.
  */
 export class World {
-  private components = new Map<string, Map<number, Component>>();
+  private components = new Map<number, Map<number, Component>>();
   private entityManager: EntityManager = new EntityManager();
+  private entityMasks: number[] = [];
+
+  get systems(): Readonly<System[]> {
+    return this._systems;
+  }
+
+  constructor(private _systems: System[]) {}
 
   createEntity(): Entity {
-    return this.entityManager.create();
+    const entity = this.entityManager.create();
+    this.entityMasks[entity.id] = 0;
+    return entity;
   }
 
   destroyEntity(entity: Entity) {
@@ -33,6 +43,7 @@ export class World {
       return;
     }
     const key = componentName;
+    this.entityMasks[entity.id] &= ~key;
     this.components.get(key)?.delete(entity.id);
   }
 
@@ -45,7 +56,24 @@ export class World {
       this.components.set(key, new Map<number, Component>());
     }
 
+    this.entityMasks[key] |= component.name;
+
     this.components.get(key)!.set(entity.id, component);
+    this.updateEntitySystems(entity);
+  }
+
+  private updateEntitySystems(entity: Entity) {
+    const entityMask = this.entityMasks[entity.id];
+
+    for (const system of this.systems) {
+      const matches = (entityMask & system.mask) === system.mask;
+
+      if (matches) {
+        system.entities.add(entity);
+      } else {
+        system.entities.delete(entity);
+      }
+    }
   }
 
   getComponent(entity: Entity, componentName: ComponentNames): Component {

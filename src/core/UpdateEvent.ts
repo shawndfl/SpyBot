@@ -1,6 +1,6 @@
 import type { CommandBuffer } from '../ecs/CommandBuffer';
+import type { EventBus } from '../ecs/EventSystem';
 import type { World } from '../ecs/World';
-import type { GameEvent } from '../events/GameEvent';
 
 /**
  * This file defines the UpdateEvent interface, which represents the data
@@ -10,7 +10,7 @@ export interface UpdateEvent {
   world: World;
   dt: number;
 
-  gameEvents: GameEvent;
+  events: EventBus;
   /**
    * A command buffer that systems can use to queue up changes to the world (like adding/removing components
    * or destroying entities) that will be applied after all systems have processed the update event.

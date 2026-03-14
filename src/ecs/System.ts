@@ -1,6 +1,5 @@
+import type { UpdateEvent } from '../core/UpdateEvent';
 import type { Entity } from './Entity';
-import type { EventBus } from './EventSystem';
-import type { World } from './World';
 
 /**
  * Very basic System class. Systems should extend this and implement the update method to perform their logic each frame.
@@ -8,13 +7,22 @@ import type { World } from './World';
  * For example, a MovementSystem might look for entities with Transform and Velocity components and update their positions based on their velocities.
  */
 export abstract class System {
-  protected mask;
-  protected entities: Set<Entity>;
+  protected _entities: Set<Entity>;
 
-  constructor(mask: number) {
-    this.mask = mask;
-    this.entities = new Set();
+  get mask(): number {
+    return this._mask;
   }
+
+  get entities(): Set<Entity> {
+    return this._entities;
+  }
+
+  constructor(private _mask: number) {
+    this._entities = new Set();
+  }
+
+  initialize(): void {}
+
   /**
    * This method is called once when the system is added to the world.
    * It can be used for any initialization logic that the system needs before it starts processing entities.
@@ -23,5 +31,5 @@ export abstract class System {
    * @param delta The time delta since the last update in seconds, which can be used for time-based calculations (e.g., movement based on velocity).
    * @param events An event bus that systems can use to emit and listen for events. This allows systems to communicate with each other without direct references, enabling a more decoupled architecture.
    */
-  abstract update(world: World, delta: number, events: EventBus): void;
+  abstract update({ world, dt, events, commands }: UpdateEvent): void;
 }
