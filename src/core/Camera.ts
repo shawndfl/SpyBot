@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 export class Camera {
-  private _camera: THREE.OrthographicCamera = new THREE.OrthographicCamera();
+  private _camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
 
-  get camera(): THREE.Camera {
+  get camera(): THREE.PerspectiveCamera {
     return this._camera;
   }
 
@@ -12,20 +12,10 @@ export class Camera {
   }
 
   initialize(width: number, height: number) {
-    const aspect = width / height;
-    const frustumSize = 1;
-
-    this._camera = new THREE.OrthographicCamera(
-      -frustumSize * aspect,
-      frustumSize * aspect,
-      frustumSize,
-      -frustumSize,
-      0.01,
-      100
-    );
+    this._camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 2000);
 
     // Classic isometric angle
-    this._camera.position.set(1, 1, 1);
-    this._camera.lookAt(0, 0, 0);
+    this._camera.position.set(10, 10, 10);
+    this._camera.lookAt(0, 0, -1);
   }
 }

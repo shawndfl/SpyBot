@@ -1,4 +1,4 @@
-import { Engine } from './ecs/Engine';
+import { Engine } from './core/Engine';
 
 const engine = new Engine();
 engine.initialize();

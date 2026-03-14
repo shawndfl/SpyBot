@@ -10,6 +10,7 @@ import type { EventBus } from '../ecs/EventSystem';
 import { GameEventNames } from '../events/GameEventNames';
 import { ComponentNames } from '../ecs/ComponentNames';
 import type { Renderer } from '../components/Renderer';
+import { GameSky } from '../rendering/Sky';
 
 export class RenderSystem extends System {
   private scene = new THREE.Scene();
@@ -18,16 +19,28 @@ export class RenderSystem extends System {
   private stats: Stats = new Stats();
   private gui: GUI = new GUI();
   private ground: THREE.Mesh | undefined;
+  private windowResize: () => void;
+
+  private sky: GameSky;
 
   constructor() {
     super(0);
+    this.sky = new GameSky(this.scene, this.renderer, this.gui);
+    this.windowResize = this.onWindowResize.bind(this);
   }
 
   initialize(): void {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
 
+    this.sky.initialize();
+
+    document.body.appendChild(this.renderer.domElement);
     document.body.appendChild(this.stats.dom);
+
+    //TODO disconnect this when done
+    window.addEventListener('resize', this.windowResize);
+
+    this.renderer.setClearColor(0xcececf); // light blue-gray
 
     // Example cube
     const geometry = new THREE.PlaneGeometry();
@@ -40,16 +53,26 @@ export class RenderSystem extends System {
     this.initOrbit();
     this.initGui();
     this.createLight();
-    this.renderer.setClearColor(0xcececf); // light blue-gray
   }
 
   initOrbit(): void {
     const controls = new OrbitControls(this.camera.camera, this.renderer.domElement);
+    controls.disconnect();
+    (controls as any)._onContextMenu = () => {};
+    controls.connect(this.renderer.domElement);
+
     controls.enablePan = true;
     controls.enableZoom = true;
     controls.target.set(0, 1, 0);
     controls.position0.set(1, 2, 1);
     controls.update();
+  }
+
+  onWindowResize() {
+    this.camera.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
   createLight(): void {
@@ -61,7 +84,6 @@ export class RenderSystem extends System {
   }
 
   initGui() {
-    this.gui = new GUI();
     this.gui.add(this.ground!.rotation, 'y', 0, Math.PI, 0.01).name('Cube Rotation Y');
   }
 

@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { InputSystem } from '../systems/InputSystem';
 import { RenderSystem } from '../systems/RenderSystem';
-import { World } from './World';
-import { EventBus } from './EventSystem';
-import { WorldBuilder } from '../worlds/WorldBuilder';
 import { InitializeEvent } from '../events/InitializeEvent';
+import { World } from '../ecs/World';
+import { EventBus } from '../ecs/EventSystem';
+import { SceneFactory } from '../scenes/factories/SceneFactory';
 
 export class Engine {
   private timer = new THREE.Timer();
@@ -19,6 +19,7 @@ export class Engine {
   private _render: RenderSystem;
   private _movement: InputSystem;
   private _firstLoad: boolean = true;
+  private _sceneFactory: SceneFactory;
 
   protected _eventBus: EventBus;
 
@@ -31,12 +32,13 @@ export class Engine {
     this._render = new RenderSystem();
     this._movement = new InputSystem();
     this._eventBus = new EventBus();
+    this._sceneFactory = new SceneFactory();
   }
 
   initialize(): void {
-    // build the initial level
-    const builder = new WorldBuilder(this._world);
-    builder.addPlayer();
+    // build the initial game scene
+    const gameScene = this._sceneFactory.createScene('smallTown');
+    gameScene.create(this._world);
 
     this._input.initialize();
     this._render.initialize();
