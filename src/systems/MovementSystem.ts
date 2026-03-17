@@ -1,6 +1,6 @@
 import { Transform } from '../components/Transform';
 import type { UpdateEvent } from '../core/UpdateEvent';
-import { ComponentNames } from '../ecs/ComponentNames';
+import { ComponentMask } from '../ecs/ComponentNames';
 import { System } from '../ecs/System';
 //import { GameEventNames } from '../events/GameEventNames';
 
@@ -9,7 +9,7 @@ export class MovementSystem extends System {
     //const inputEvents = events.get(GameEventNames.InputEvent);
 
     // Get all entities with Transform and Input components
-    const transforms = world.getComponents<Transform>(ComponentNames.Transform);
+    const transforms = world.getComponents<Transform>(ComponentMask.Transform);
     for (let transform of transforms) {
       transform.position.x += 1 * dt; // Move right at 1 unit per second
     }

@@ -6,9 +6,9 @@ import { World } from '../ecs/World';
 import { EventBus } from '../ecs/EventSystem';
 import { SceneFactory } from '../scenes/factories/SceneFactory';
 import { MovementSystem } from '../systems/MovementSystem';
-import { ComponentNames } from '../ecs/ComponentNames';
 import type { UpdateEvent } from './UpdateEvent';
 import { CommandBuffer } from '../ecs/CommandBuffer';
+import { ComponentMask } from '../ecs/ComponentNames';
 
 export class Engine {
   private timer = new THREE.Timer();
@@ -30,11 +30,11 @@ export class Engine {
   }
 
   constructor() {
-    this._inputSystem = new InputSystem(ComponentNames.Transform);
+    this._inputSystem = new InputSystem(ComponentMask.Transform);
     this._world = new World([
       this._inputSystem,
-      new RenderSystem(ComponentNames.Renderer | ComponentNames.Transform),
-      new MovementSystem(ComponentNames.Player | ComponentNames.Transform),
+      new RenderSystem(ComponentMask.Renderer | ComponentMask.Transform | ComponentMask.SunLight),
+      new MovementSystem(ComponentMask.Player | ComponentMask.Transform),
     ]);
     this._eventBus = new EventBus();
     this._command = new CommandBuffer();

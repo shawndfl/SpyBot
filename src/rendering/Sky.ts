@@ -4,13 +4,17 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { Sky } from 'three/addons/objects/Sky.js';
 
 export class GameSky {
-  private scene: THREE.Scene;
+  //private scene: THREE.Scene;
   private renderer: THREE.WebGLRenderer;
 
-  private sky: Sky;
+  private _sky: Sky;
   private sun: THREE.Vector3;
   private gui: GUI;
   private onGuiChanged: () => void;
+
+  get sky(): Sky {
+    return this._sky;
+  }
 
   /// GUI
 
@@ -27,13 +31,9 @@ export class GameSky {
     cloudElevation: 0.5,
   };
 
-  constructor(scene: THREE.Scene, renderer: THREE.WebGLRenderer, gui: GUI) {
-    this.scene = scene;
+  constructor(renderer: THREE.WebGLRenderer, gui: GUI) {
     this.gui = gui;
     this.onGuiChanged = this.guiChanged.bind(this);
-
-    const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
-    scene.add(helper);
 
     this.renderer = renderer;
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -42,7 +42,7 @@ export class GameSky {
     renderer.toneMappingExposure = 0.5;
     document.body.appendChild(renderer.domElement);
 
-    this.sky = new Sky();
+    this._sky = new Sky();
     this.sun = new THREE.Vector3();
   }
 
@@ -73,11 +73,22 @@ export class GameSky {
     this.renderer.toneMappingExposure = effectController.exposure;
   }
 
+  /**
+   * Sets the sun's position given an azimuth and elevation
+   * @param azimuth - in radians
+   * @param elevation - in radians
+   */
+  setSunPosition(azimuth: number, elevation: number): void {
+    this.sun.setFromSphericalCoords(1, Math.PI / 2.0 - elevation, azimuth);
+
+    const uniforms = this.sky.material.uniforms;
+    uniforms['sunPosition'].value.copy(this.sun);
+  }
+
   private initSky() {
     const effectController = this.effectController;
     // Add Sky
     this.sky.scale.setScalar(450);
-    this.scene.add(this.sky);
     const gui = this.gui;
 
     gui.add(effectController, 'turbidity', 0.0, 20.0, 0.1).onChange(this.onGuiChanged);

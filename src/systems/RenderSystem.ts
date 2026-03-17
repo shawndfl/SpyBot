@@ -6,32 +6,47 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
 import { GameEventNames } from '../events/GameEventNames';
-import { ComponentNames } from '../ecs/ComponentNames';
 import type { Renderer } from '../components/Renderer';
-import { GameSky } from '../rendering/Sky';
 import type { UpdateEvent } from '../core/UpdateEvent';
+import { SunLight } from '../components/SunLight';
+import type { IRenderSystem } from './IRenderSystem';
+import { SunManager } from '../lights/SunManager';
+import { ComponentMask } from '../ecs/ComponentNames';
 
-export class RenderSystem extends System {
-  private scene = new THREE.Scene();
-  private renderer = new THREE.WebGLRenderer({ antialias: true });
+export class RenderSystem extends System implements IRenderSystem {
+  private _scene = new THREE.Scene();
+  private _renderer = new THREE.WebGLRenderer({ antialias: true });
+  private _gui: GUI = new GUI();
+
+  private _sunManager: SunManager;
+
   private camera: Camera = new Camera();
   private stats: Stats = new Stats();
-  private gui: GUI = new GUI();
   private ground: THREE.Mesh | undefined;
   private windowResize: () => void;
 
-  private sky: GameSky;
+  public get scene(): THREE.Scene {
+    return this._scene;
+  }
+
+  public get renderer(): THREE.WebGLRenderer {
+    return this._renderer;
+  }
+
+  public get gui(): GUI {
+    return this._gui;
+  }
 
   constructor(componentMask: number) {
     super(componentMask);
-    this.sky = new GameSky(this.scene, this.renderer, this.gui);
+    this._sunManager = new SunManager(this);
     this.windowResize = this.onWindowResize.bind(this);
   }
 
   initialize(): void {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-    this.sky.initialize();
+    this._sunManager.initialize();
 
     document.body.appendChild(this.renderer.domElement);
     document.body.appendChild(this.stats.dom);
@@ -40,6 +55,8 @@ export class RenderSystem extends System {
     window.addEventListener('resize', this.windowResize);
 
     this.renderer.setClearColor(0xcececf); // light blue-gray
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
     // Example cube
     const geometry = new THREE.PlaneGeometry();
@@ -47,11 +64,14 @@ export class RenderSystem extends System {
     geometry.scale(10, 10, 10); // Scale up the plane to make it larger
     const material = new THREE.MeshPhysicalMaterial();
     this.ground = new THREE.Mesh(geometry, material);
+    this.ground.receiveShadow = true;
+
+    //const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
+    //this.scene.add(helper);
 
     this.scene.add(this.ground);
     this.initOrbit();
     this.initGui();
-    this.createLight();
   }
 
   initOrbit(): void {
@@ -74,13 +94,7 @@ export class RenderSystem extends System {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  createLight(): void {
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 10, 7.5);
-    this.scene.add(directionalLight);
-    const ambientLight = new THREE.AmbientLight(0x404040); // soft white light
-    this.scene.add(ambientLight);
-  }
+  updateSun(l: SunLight): void {}
 
   initGui() {
     this.gui.add(this.ground!.rotation, 'y', 0, Math.PI, 0.01).name('Cube Rotation Y');
@@ -97,6 +111,7 @@ export class RenderSystem extends System {
       model.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           (child as THREE.Mesh).material = material;
+          (child as THREE.Mesh).castShadow = true;
         }
       });
       this.scene.add(model);
@@ -106,10 +121,16 @@ export class RenderSystem extends System {
   update({ world, dt, events, commands }: UpdateEvent): void {
     const [initializeEvent] = events.get(GameEventNames.InitializeLevel);
     if (initializeEvent) {
-      const renderers = world.getComponents<Renderer>(ComponentNames.Renderer);
-      renderers.forEach((r) => this.loadGltf(r.gltfName));
-      this.loadGltf();
+      for (let [renderers] of world.query(ComponentMask.Renderer, ComponentMask.Transform)) {
+        this.loadGltf((renderers as Renderer).gltfName);
+      }
     }
+
+    const [light] = world.getComponents<SunLight>(ComponentMask.SunLight);
+
+    this._sunManager.setSunState(light);
+    this._sunManager.update({ world, dt, events, commands });
+
     this.renderer.render(this.scene, this.camera.camera);
 
     this.stats.update();

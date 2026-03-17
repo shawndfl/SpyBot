@@ -1,5 +1,5 @@
 import type { Component } from './Component';
-import { ComponentNames } from './ComponentNames';
+import { ComponentMask } from './ComponentNames';
 import { Entity } from './Entity';
 import { EntityManager } from './EntityManager';
 import type { System } from './System';
@@ -9,7 +9,7 @@ import type { System } from './System';
  * This is a component centric design, where components are stored in maps keyed by their names, and each component map stores components indexed by entity IDs.
  */
 export class World {
-  private components = new Map<number, Map<number, Component>>();
+  private components = new Map<ComponentMask, Map<number, Component>>();
   private entityManager: EntityManager = new EntityManager();
   private entityMasks: number[] = [];
 
@@ -38,7 +38,7 @@ export class World {
     this.entityManager.destroy(entity);
   }
 
-  removeComponent(entity: Entity, componentName: ComponentNames): void {
+  removeComponent(entity: Entity, componentName: ComponentMask): void {
     if (!entity) {
       return;
     }
@@ -47,18 +47,20 @@ export class World {
     this.components.get(key)?.delete(entity.id);
   }
 
-  addComponent(entity: Entity, component: Component): void {
-    if (!entity || !component) {
+  addComponent(entity: Entity, ...components: Component[]): void {
+    if (!entity || !components) {
       return;
     }
-    const key = component.name;
-    if (!this.components.has(key)) {
-      this.components.set(key, new Map<number, Component>());
+    for (let component of components) {
+      const key = component.mask;
+      if (!this.components.has(key)) {
+        this.components.set(key, new Map<number, Component>());
+      }
+
+      this.entityMasks[key] |= component.mask;
+
+      this.components.get(key)!.set(entity.id, component);
     }
-
-    this.entityMasks[key] |= component.name;
-
-    this.components.get(key)!.set(entity.id, component);
     this.updateEntitySystems(entity);
   }
 
@@ -76,14 +78,55 @@ export class World {
     }
   }
 
-  getComponent(entity: Entity, componentName: ComponentNames): Component {
+  getComponent(entity: Entity, componentName: ComponentMask): Component {
     return this.components.get(componentName)?.get(entity.id)!;
   }
 
-  getComponents<T>(componentName: ComponentNames): T[] {
+  /**
+   * Query entities that have all specified components.
+   * Yields a tuple of components in the order of types provided.
+   */
+  *query<T extends ComponentMask>(...components: T[]): Generator<Component[]> {
+    const stores = components.map((type) => this.components.get(type));
+
+    if (stores.some((store) => !store)) {
+      return;
+    }
+
+    let smallestIndex = 0;
+    for (let i = 1; i < stores.length; i++) {
+      if (stores[i]!.size < stores[smallestIndex]!.size) {
+        smallestIndex = i;
+      }
+    }
+
+    const smallestStore = stores[smallestIndex]!;
+
+    for (const [entityId] of smallestStore) {
+      const tuple: Component[] = [];
+      let matches = true;
+
+      for (let i = 0; i < stores.length; i++) {
+        const component = stores[i]!.get(entityId);
+
+        if (!component) {
+          matches = false;
+          break;
+        }
+
+        tuple.push(component);
+      }
+
+      if (matches) {
+        yield tuple;
+      }
+    }
+  }
+
+  getComponents<T>(componentMask: ComponentMask): T[] {
     const components = [];
-    for (let component of this.components.get(componentName)?.values() || []) {
-      if (component.name === componentName) {
+    for (let component of this.components.get(componentMask)?.values() || []) {
+      if (component.mask === componentMask) {
         components.push(component);
       }
     }

@@ -1,5 +1,5 @@
-import type { ComponentNames } from './ComponentNames';
+import type { ComponentMask } from './ComponentNames';
 
 export abstract class Component {
-  abstract get name(): ComponentNames;
+  abstract get mask(): ComponentMask;
 }
