@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { Component } from '../ecs/Component';
 import { MillisecondsInDay } from '../lights/SunManager';
-import { ComponentMask } from '../ecs/ComponentNames';
+import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
 export class SunLight extends Component {
-  get mask(): ComponentMask {
-    return ComponentMask.SunLight;
+  get mask(): number {
+    return ComponentRegistry.getId(SunLight);
   }
 
   direction: THREE.Vector3 = new THREE.Vector3(0, 0, 1);

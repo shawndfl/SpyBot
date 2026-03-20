@@ -1,5 +1,5 @@
 import type { Component } from './Component';
-import type { ComponentMask } from './ComponentNames';
+import type { ComponentCtor } from './ComponentRegistry';
 import type { Entity } from './Entity';
 import type { World } from './World';
 
@@ -14,7 +14,7 @@ export class CommandBuffer {
     this.commands.push((w: World) => w.addComponent(entity, component));
   }
 
-  remove(entity: Entity, componentName: ComponentMask) {
+  remove(entity: Entity, componentName: ComponentCtor) {
     this.commands.push((w: World) => w.removeComponent(entity, componentName));
   }
 

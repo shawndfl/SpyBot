@@ -8,7 +8,14 @@ import { SceneFactory } from '../scenes/factories/SceneFactory';
 import { MovementSystem } from '../systems/MovementSystem';
 import type { UpdateEvent } from './UpdateEvent';
 import { CommandBuffer } from '../ecs/CommandBuffer';
-import { ComponentMask } from '../ecs/ComponentNames';
+
+import { Player } from '../components/Player';
+import { Renderer } from '../components/Renderer';
+import { SunLight } from '../components/SunLight';
+import { Transform } from '../components/Transform';
+import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
+
+ComponentRegistry.register(Player, Renderer, Transform, SunLight);
 
 export class Engine {
   private timer = new THREE.Timer();
@@ -30,11 +37,13 @@ export class Engine {
   }
 
   constructor() {
-    this._inputSystem = new InputSystem(ComponentMask.Transform);
+    const fn = (x: ComponentCtor) => ComponentRegistry.getId(x);
+
+    this._inputSystem = new InputSystem(fn(Transform));
     this._world = new World([
       this._inputSystem,
-      new RenderSystem(ComponentMask.Renderer | ComponentMask.Transform | ComponentMask.SunLight),
-      new MovementSystem(ComponentMask.Player | ComponentMask.Transform),
+      new RenderSystem(fn(Renderer) | fn(Transform) | fn(SunLight)),
+      new MovementSystem(fn(Player) | fn(Transform)),
     ]);
     this._eventBus = new EventBus();
     this._command = new CommandBuffer();

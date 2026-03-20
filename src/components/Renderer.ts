@@ -1,9 +1,9 @@
 import { Component } from '../ecs/Component';
-import { ComponentMask } from '../ecs/ComponentNames';
+import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
 export class Renderer extends Component {
-  get mask(): ComponentMask {
-    return ComponentMask.Renderer;
+  get mask(): number {
+    return ComponentRegistry.getId(Renderer);
   }
 
   setGltfName(path: string): Renderer {

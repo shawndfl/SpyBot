@@ -1,9 +1,10 @@
 import { Component } from '../ecs/Component';
-import { ComponentMask } from '../ecs/ComponentNames';
+import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
 export class Player extends Component {
-  health: number = 100;
-  get mask(): ComponentMask {
-    return ComponentMask.Player;
+  get mask(): number {
+    return ComponentRegistry.getId(Player);
   }
+
+  health: number = 100;
 }

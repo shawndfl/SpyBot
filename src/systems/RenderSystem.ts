@@ -6,12 +6,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
 import { GameEventNames } from '../events/GameEventNames';
-import type { Renderer } from '../components/Renderer';
+import { Renderer } from '../components/Renderer';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { SunLight } from '../components/SunLight';
 import type { IRenderSystem } from './IRenderSystem';
 import { SunManager } from '../lights/SunManager';
-import { ComponentMask } from '../ecs/ComponentNames';
+import { Transform } from '../components/Transform';
 
 export class RenderSystem extends System implements IRenderSystem {
   private _scene = new THREE.Scene();
@@ -121,12 +121,12 @@ export class RenderSystem extends System implements IRenderSystem {
   update({ world, dt, events, commands }: UpdateEvent): void {
     const [initializeEvent] = events.get(GameEventNames.InitializeLevel);
     if (initializeEvent) {
-      for (let [renderers] of world.query(ComponentMask.Renderer, ComponentMask.Transform)) {
+      for (let [renderers] of world.query(Renderer, Transform)) {
         this.loadGltf((renderers as Renderer).gltfName);
       }
     }
 
-    const [light] = world.getComponents<SunLight>(ComponentMask.SunLight);
+    const [light] = world.getComponents(SunLight);
 
     this._sunManager.setSunState(light);
     this._sunManager.update({ world, dt, events, commands });

@@ -1,5 +1,4 @@
-import type { ComponentMask } from './ComponentNames';
-
 export abstract class Component {
-  abstract get mask(): ComponentMask;
+  abstract get mask(): number;
+  public name?: string;
 }

@@ -1,31 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { World } from '../src/ecs/World';
 import { Entity } from '../src/ecs/Entity';
-import { Component } from '../src/ecs/Component';
-import { ComponentMask } from '../src/ecs/ComponentNames';
 import { Transform } from '../src/components/Transform';
 import { SunLight } from '../src/components/SunLight';
-
-class TestComponent extends Component {
-  id: number = 1;
-  get mask(): ComponentMask {
-    return 1 << 5;
-  }
-}
-
-class TestComponent2 extends SunLight {
-  id: number = 2;
-
-  get mask(): ComponentMask {
-    return ComponentMask.Transform;
-  }
-}
+import { Player } from '../src/components/Player';
+import { Vector3 } from 'three';
+import { ComponentRegistry } from '../src/ecs/ComponentRegistry';
 
 describe('World Class', () => {
   let world: World;
 
   beforeEach(() => {
     world = new World([]);
+    ComponentRegistry.register(Transform, SunLight, Player);
   });
 
   it('should create a new entity', () => {
@@ -35,44 +22,44 @@ describe('World Class', () => {
 
   it('should destroy an entity and remove its components', () => {
     const entity = world.createEntity();
-    const component = new TestComponent();
+    const component = new Transform();
     world.addComponent(entity, component);
 
     world.destroyEntity(entity);
 
-    expect(world.getComponent(entity, ComponentMask.Transform)).toBeNullable();
+    expect(world.getComponent(entity, Transform)).toBeNullable();
   });
 
   it('should add a component to an entity', () => {
     const entity = world.createEntity();
-    const component = new TestComponent();
+    const component = new Player();
 
     world.addComponent(entity, component);
 
-    const retrievedComponent = world.getComponent(entity, ComponentMask.Transform);
+    const retrievedComponent = world.getComponent(entity, Player);
     expect(retrievedComponent).toBe(component);
   });
 
   it('should remove a component from an entity', () => {
     const entity = world.createEntity();
-    const component = new TestComponent();
+    const component = new Transform();
     world.addComponent(entity, component);
 
-    world.removeComponent(entity, ComponentMask.Transform);
+    world.removeComponent(entity, Transform);
 
-    expect(world.getComponent(entity, ComponentMask.Transform)).toBeNullable();
+    expect(world.getComponent(entity, Transform)).toBeNullable();
   });
 
   it('should retrieve all components of a specific type', () => {
     const entity1 = world.createEntity();
     const entity2 = world.createEntity();
-    const component1 = new TestComponent();
-    const component2 = new TestComponent();
+    const component1 = new Transform();
+    const component2 = new Transform();
 
     world.addComponent(entity1, component1);
     world.addComponent(entity2, component2);
 
-    const components = world.getComponents<TestComponent>(ComponentMask.Transform);
+    const components = world.getComponents(Transform);
     expect(components).toContain(component1);
     expect(components).toContain(component2);
   });
@@ -80,32 +67,51 @@ describe('World Class', () => {
   it('should query different combos', () => {
     const entity1 = world.createEntity();
     const entity2 = world.createEntity();
-    const component1 = new TestComponent();
-    const component2 = new TestComponent();
-    const component3 = new TestComponent2();
+    const transform1 = new Transform();
+    transform1.name = '0';
+    const transform2 = new Transform();
+    transform2.name = '1';
+    const sunlight = new SunLight();
+    sunlight.name = '1';
 
-    component1.id = entity1.id;
-    component2.id = entity2.id;
-    component3.id = entity2.id;
+    const pos = [(transform1.position = new Vector3(0, 1, 2)), (transform2.position = new Vector3(4, 5, 6))];
+    const sun = [null, (sunlight.ambient = new Vector3(7, 8, 9))];
 
-    world.addComponent(entity1, component1);
-    world.addComponent(entity2, component2, component3);
+    world.addComponent(entity1, transform1);
+    world.addComponent(entity2, transform2, sunlight);
 
-    for (let [transform] of world.query(ComponentMask.Transform)) {
-      expect(transform?.mask).toEqual(ComponentMask.Transform);
+    for (let [transform] of world.query(Transform)) {
+      expect(transform?.mask).toEqual(ComponentRegistry.getId(Transform));
     }
 
-    for (let [Transform, SunLight] of world.query(ComponentMask.Transform, ComponentMask.SunLight)) {
-      expect(Transform!.mask).toEqual(ComponentMask.Transform);
-      expect(SunLight!.mask).toEqual(ComponentMask.SunLight);
+    let i = 0;
+    for (let [transform, sunLight] of world.query(Transform, SunLight)) {
+      expect(transform?.position).toEqual(pos[parseInt(transform.name!)]);
+      expect(sunLight?.ambient).toEqual(sunLight ? sun[parseInt(sunLight.name!)] : null);
     }
 
-    for (let [Transform, SunLight, Renderer] of world.query(
-      ComponentMask.Transform,
-      ComponentMask.SunLight,
-      ComponentMask.Player
-    )) {
+    for (let [transform, sunLight, player] of world.query(Transform, SunLight, Player)) {
       throw 'should be null';
+    }
+  });
+
+  it('should get a list of all the components of a Transform Type', () => {
+    const entity1 = world.createEntity();
+    const entity2 = world.createEntity();
+    const transform1 = new Transform();
+    transform1.name = '0';
+    const transform2 = new Transform();
+    transform2.name = '1';
+    const sunlight = new SunLight();
+
+    const pos = [(transform1.position = new Vector3(0, 1, 2)), (transform2.position = new Vector3(4, 5, 6))];
+
+    world.addComponent(entity1, transform1);
+    world.addComponent(entity2, transform2, sunlight);
+
+    let i = 0;
+    for (let transform of world.getComponents(Transform)) {
+      expect(transform?.position).toEqual(pos[parseInt(transform.name!)]);
     }
   });
 });

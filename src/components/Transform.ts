@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { Component } from '../ecs/Component';
-import { ComponentMask } from '../ecs/ComponentNames';
+import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
 export class Transform extends Component {
-  get mask(): ComponentMask {
-    return ComponentMask.Transform;
+  get mask(): number {
+    return ComponentRegistry.getId(Transform);
   }
   position: THREE.Vector3 = new THREE.Vector3();
   rotation: THREE.Euler = new THREE.Euler();
@@ -18,12 +18,3 @@ export class Transform extends Component {
     return this;
   }
 }
-
-//type ComponentCtor<T extends Component = Component> = new (...args: any[]) => T;
-
-//type InstanceTuple<T extends readonly ComponentCtor[]> = {
-//  [K in keyof T]: T[K] extends ComponentCtor<infer R> ? R : never;
-//};
-
-//const t: ComponentCtor<Transform> = new Transform();
-//console.debug(t);

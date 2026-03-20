@@ -1,5 +1,6 @@
 import type { Component } from './Component';
-import { ComponentMask } from './ComponentNames';
+
+import { ComponentRegistry, type ComponentCtor, type ComponentsFromCtors } from './ComponentRegistry';
 import { Entity } from './Entity';
 import { EntityManager } from './EntityManager';
 import type { System } from './System';
@@ -9,7 +10,7 @@ import type { System } from './System';
  * This is a component centric design, where components are stored in maps keyed by their names, and each component map stores components indexed by entity IDs.
  */
 export class World {
-  private components = new Map<ComponentMask, Map<number, Component>>();
+  private components = new Map<number, Map<number, Component>>();
   private entityManager: EntityManager = new EntityManager();
   private entityMasks: number[] = [];
 
@@ -38,11 +39,11 @@ export class World {
     this.entityManager.destroy(entity);
   }
 
-  removeComponent(entity: Entity, componentName: ComponentMask): void {
+  removeComponent(entity: Entity, componentType: ComponentCtor): void {
     if (!entity) {
       return;
     }
-    const key = componentName;
+    const key = ComponentRegistry.getId(componentType);
     this.entityMasks[entity.id] &= ~key;
     this.components.get(key)?.delete(entity.id);
   }
@@ -78,16 +79,17 @@ export class World {
     }
   }
 
-  getComponent(entity: Entity, componentName: ComponentMask): Component {
-    return this.components.get(componentName)?.get(entity.id)!;
+  getComponent(entity: Entity, componentType: ComponentCtor): Component {
+    const key = ComponentRegistry.getId(componentType);
+    return this.components.get(key)?.get(entity.id)!;
   }
 
   /**
    * Query entities that have all specified components.
    * Yields a tuple of components in the order of types provided.
    */
-  *query<T extends ComponentMask>(...components: T[]): Generator<Component[]> {
-    const stores = components.map((type) => this.components.get(type));
+  *query<T extends ComponentCtor[]>(...components: T): Generator<ComponentsFromCtors<T>> {
+    const stores = components.map((type) => this.components.get(ComponentRegistry.getId(type)));
 
     if (stores.some((store) => !store)) {
       return;
@@ -103,18 +105,18 @@ export class World {
     const smallestStore = stores[smallestIndex]!;
 
     for (const [entityId] of smallestStore) {
-      const tuple: Component[] = [];
+      const tuple = [] as unknown as ComponentsFromCtors<T>;
       let matches = true;
 
       for (let i = 0; i < stores.length; i++) {
-        const component = stores[i]!.get(entityId);
+        const component: Component = stores[i]!.get(entityId)! as ComponentsFromCtors<T>[number];
 
         if (!component) {
           matches = false;
           break;
         }
 
-        tuple.push(component);
+        tuple[i] = component as ComponentsFromCtors<T>[number];
       }
 
       if (matches) {
@@ -123,13 +125,16 @@ export class World {
     }
   }
 
-  getComponents<T>(componentMask: ComponentMask): T[] {
-    const components = [];
-    for (let component of this.components.get(componentMask)?.values() || []) {
-      if (component.mask === componentMask) {
-        components.push(component);
+  getComponents<T extends Component>(componentType: ComponentCtor<T>): T[] {
+    const found: T[] = [];
+    const key = ComponentRegistry.getId(componentType);
+
+    for (const component of this.components.get(key)?.values() ?? []) {
+      if (component.mask === key) {
+        found.push(component as T);
       }
     }
-    return components as T[];
+
+    return found;
   }
 }
