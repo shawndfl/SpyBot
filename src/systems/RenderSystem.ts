@@ -100,29 +100,35 @@ export class RenderSystem extends System implements IRenderSystem {
     this.gui.add(this.ground!.rotation, 'y', 0, Math.PI, 0.01).name('Cube Rotation Y');
   }
 
-  loadGltf(path?: string): void {
+  loadGltf(mesh: THREE.Object3D, path?: string): void {
     if (!path) {
       return;
     }
     const loader = new GLTFLoader();
     loader.load(path, (gltf) => {
       const model = gltf.scene;
+      this.scene.add(mesh);
+
       const material = new THREE.MeshPhysicalMaterial();
+
       model.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           (child as THREE.Mesh).material = material;
           (child as THREE.Mesh).castShadow = true;
         }
       });
-      this.scene.add(model);
+      mesh.add(model);
     });
   }
 
   update({ world, dt, events, commands }: UpdateEvent): void {
     const [initializeEvent] = events.get(GameEventNames.InitializeLevel);
     if (initializeEvent) {
-      for (let [renderers] of world.query(Renderer, Transform)) {
-        this.loadGltf((renderers as Renderer).gltfName);
+      for (let [renderers, transform] of world.query(Renderer, Transform)) {
+        renderers.mesh.position.copy(transform.position);
+        renderers.mesh.rotation.copy(transform.rotation);
+        renderers.mesh.scale.copy(transform.scale);
+        this.loadGltf(renderers.mesh, renderers.gltfName);
       }
     }
 

@@ -13,8 +13,9 @@ export class Transform extends Component {
   constructor() {
     super();
   }
-  setPosition(position: THREE.Vector3): Transform {
-    this.position.set(position.x, position.y, position.z);
+
+  setPosition(x: number, y: number, z: number): Transform {
+    this.position.set(x, y, z);
     return this;
   }
 }

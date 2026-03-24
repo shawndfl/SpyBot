@@ -18,7 +18,7 @@ export class SmallTownScene extends GameScene {
 
     const lampPost = world.createEntity();
     world.addComponent(lampPost, new Renderer().setGltfName('lampPost.glb'));
-    world.addComponent(lampPost, new Transform());
+    world.addComponent(lampPost, new Transform().setPosition(0, 0, -2));
 
     return world;
   }

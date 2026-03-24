@@ -65,8 +65,8 @@ export class Engine {
     requestAnimationFrame(this.run.bind(this));
 
     this.timer.update();
-
-    const delta = this.timer.getDelta();
+    const maxFrameDelay = 0.25;
+    const delta = Math.min(this.timer.getDelta(), maxFrameDelay);
     this.accumulator += delta;
 
     while (this.accumulator >= this.fixedStep) {
