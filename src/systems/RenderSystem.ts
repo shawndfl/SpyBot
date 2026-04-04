@@ -14,7 +14,6 @@ import { SunManager } from '../lights/SunManager';
 import { Transform } from '../components/Transform';
 
 export class RenderSystem extends System implements IRenderSystem {
-  private _scene = new THREE.Scene();
   private _renderer = new THREE.WebGLRenderer({ antialias: true });
   private _gui: GUI = new GUI();
 
@@ -37,7 +36,7 @@ export class RenderSystem extends System implements IRenderSystem {
     return this._gui;
   }
 
-  constructor(componentMask: number) {
+  constructor(componentMask: number, private _scene: THREE.Scene) {
     super(componentMask);
     this._sunManager = new SunManager(this);
     this.windowResize = this.onWindowResize.bind(this);
@@ -121,7 +120,8 @@ export class RenderSystem extends System implements IRenderSystem {
     });
   }
 
-  update({ world, dt, events, commands }: UpdateEvent): void {
+  update(data: UpdateEvent): void {
+    const { world, dt, events, commands } = data;
     const [initializeEvent] = events.get(GameEventNames.InitializeLevel);
     if (initializeEvent) {
       for (let [renderers, transform] of world.query(Renderer, Transform)) {

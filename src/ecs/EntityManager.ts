@@ -31,6 +31,10 @@ export class EntityManager {
     return new Entity(id, this.generations[id]);
   }
 
+  getEntity(id: number): Entity {
+    return new Entity(id, this.generations[id]);
+  }
+
   destroy(entity: Entity) {
     const { id } = entity;
 

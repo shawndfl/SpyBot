@@ -3,7 +3,7 @@ import { World } from '../src/ecs/World';
 import { Entity } from '../src/ecs/Entity';
 import { Transform } from '../src/components/Transform';
 import { SunLight } from '../src/components/SunLight';
-import { Player } from '../src/components/Player';
+import { PlayerComponent } from '../src/components/PlayerComponent';
 import { Vector3 } from 'three';
 import { ComponentRegistry } from '../src/ecs/ComponentRegistry';
 
@@ -12,7 +12,7 @@ describe('World Class', () => {
 
   beforeEach(() => {
     world = new World([]);
-    ComponentRegistry.register(Transform, SunLight, Player);
+    ComponentRegistry.register(Transform, SunLight, PlayerComponent);
   });
 
   it('should create a new entity', () => {

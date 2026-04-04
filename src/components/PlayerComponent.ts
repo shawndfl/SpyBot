@@ -1,9 +1,9 @@
 import { Component } from '../ecs/Component';
 import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
-export class Player extends Component {
+export class PlayerComponent extends Component {
   get mask(): number {
-    return ComponentRegistry.getId(Player);
+    return ComponentRegistry.getId(PlayerComponent);
   }
 
   health: number = 100;

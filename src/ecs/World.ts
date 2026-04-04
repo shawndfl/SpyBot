@@ -1,6 +1,11 @@
 import type { Component } from './Component';
 
-import { ComponentRegistry, type ComponentCtor, type ComponentsFromCtors } from './ComponentRegistry';
+import {
+  ComponentRegistry,
+  type ComponentCtor,
+  type ComponentFromCtor,
+  type ComponentsFromCtors,
+} from './ComponentRegistry';
 import { Entity } from './Entity';
 import { EntityManager } from './EntityManager';
 import type { System } from './System';
@@ -37,6 +42,7 @@ export class World {
     }
 
     this.entityManager.destroy(entity);
+    this.entityMasks[entity.id] = 0;
   }
 
   removeComponent(entity: Entity, componentType: ComponentCtor): void {
@@ -58,11 +64,21 @@ export class World {
         this.components.set(key, new Map<number, Component>());
       }
 
-      this.entityMasks[key] |= component.mask;
+      this.entityMasks[entity.id] |= component.mask;
 
       this.components.get(key)!.set(entity.id, component);
     }
     this.updateEntitySystems(entity);
+  }
+
+  hasComponent(entity: Entity, ...components: ComponentCtor[]): boolean {
+    for (let component of components) {
+      const key = ComponentRegistry.getId(component);
+      if (!!this.components.get(key)?.get(entity.id)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   private updateEntitySystems(entity: Entity) {
@@ -79,9 +95,65 @@ export class World {
     }
   }
 
-  getComponent(entity: Entity, componentType: ComponentCtor): Component {
+  getComponent<T extends ComponentCtor>(entity: Entity, componentType: T): ComponentFromCtor<T> {
     const key = ComponentRegistry.getId(componentType);
-    return this.components.get(key)?.get(entity.id)!;
+    const component = this.components.get(key)?.get(entity.id);
+    if (!component) {
+      throw new Error(`Entity ${entity.id} does not have component ${componentType.name}`);
+    }
+
+    return component as ComponentFromCtor<T>;
+  }
+
+  getHasComponent<T extends ComponentCtor>(entity: Entity, componentType: T): boolean {
+    const key = ComponentRegistry.getId(componentType);
+    const component = this.components.get(key)?.get(entity.id);
+    if (!component) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Query entities that have all specified components.
+   * Yields a tuple of components in the order of types provided.
+   */
+  *queryWithEntity<T extends ComponentCtor[]>(...components: T): Generator<[Entity, ...ComponentsFromCtors<T>]> {
+    const stores = components.map((type) => this.components.get(ComponentRegistry.getId(type)));
+
+    if (stores.some((store) => !store)) {
+      return;
+    }
+
+    let smallestIndex = 0;
+    for (let i = 1; i < stores.length; i++) {
+      if (stores[i]!.size < stores[smallestIndex]!.size) {
+        smallestIndex = i;
+      }
+    }
+
+    const smallestStore = stores[smallestIndex]!;
+
+    for (const [entityId] of smallestStore) {
+      const tuple = [] as unknown as ComponentsFromCtors<T>;
+      let matches = true;
+
+      for (let i = 0; i < stores.length; i++) {
+        const component: Component = stores[i]!.get(entityId)! as ComponentsFromCtors<T>[number];
+
+        if (!component) {
+          matches = false;
+          break;
+        }
+
+        tuple[i] = component as ComponentsFromCtors<T>[number];
+      }
+
+      if (matches) {
+        yield [this.entityManager.getEntity(entityId), ...tuple];
+      }
+    }
   }
 
   /**

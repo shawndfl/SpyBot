@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+import { PointLightComponent } from '../components/Lights/PointLightComponent';
 import { Renderer } from '../components/Renderer';
 import { SunLight } from '../components/SunLight';
 import { Transform } from '../components/Transform';
@@ -18,6 +20,13 @@ export class SmallTownScene extends GameScene {
 
     const lampPost = world.createEntity();
     world.addComponent(lampPost, new Renderer().setGltfName('lampPost.glb'));
+
+    const pointLight = new PointLightComponent();
+    pointLight.castShadow = true;
+    pointLight.color = new THREE.Color(THREE.Color.NAMES.yellow);
+    pointLight.distance = 5;
+
+    world.addComponent(lampPost, pointLight);
     world.addComponent(lampPost, new Transform().setPosition(0, 0, -2));
 
     return world;

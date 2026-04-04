@@ -9,13 +9,15 @@ import { MovementSystem } from '../systems/MovementSystem';
 import type { UpdateEvent } from './UpdateEvent';
 import { CommandBuffer } from '../ecs/CommandBuffer';
 
-import { Player } from '../components/Player';
+import { PlayerComponent } from '../components/PlayerComponent';
 import { Renderer } from '../components/Renderer';
 import { SunLight } from '../components/SunLight';
 import { Transform } from '../components/Transform';
 import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
+import { LightSystem } from '../systems/rendering/LightSystem';
+import { LightComponent } from '../components/Lights/LightComponent';
 
-ComponentRegistry.register(Player, Renderer, Transform, SunLight);
+ComponentRegistry.register(PlayerComponent, Renderer, Transform, SunLight);
 
 export class Engine {
   private timer = new THREE.Timer();
@@ -38,12 +40,14 @@ export class Engine {
 
   constructor() {
     const fn = (x: ComponentCtor) => ComponentRegistry.getId(x);
+    const scene: THREE.Scene = new THREE.Scene();
 
     this._inputSystem = new InputSystem(fn(Transform));
     this._world = new World([
       this._inputSystem,
-      new RenderSystem(fn(Renderer) | fn(Transform) | fn(SunLight)),
-      new MovementSystem(fn(Player) | fn(Transform)),
+      new RenderSystem(fn(Renderer) | fn(Transform) | fn(SunLight), scene),
+      new MovementSystem(fn(PlayerComponent) | fn(Transform)),
+      new LightSystem(fn(Renderer) | fn(Transform) | fn(LightComponent), scene),
     ]);
     this._eventBus = new EventBus();
     this._command = new CommandBuffer();

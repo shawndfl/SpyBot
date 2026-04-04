@@ -6,13 +6,16 @@ export type ComponentsFromCtors<T extends ComponentCtor[]> = {
   [K in keyof T]: T[K] extends ComponentCtor<infer C> ? C : never;
 };
 
+export type ComponentFromCtor<T extends ComponentCtor> = T extends ComponentCtor<infer C> ? C : never;
+
 export class ComponentRegistry {
   private static ids = new Map<ComponentCtor, number>();
   private static nextId = 0;
 
   static getId(ctor: ComponentCtor): number {
     if (!this.ids.has(ctor)) {
-      throw 'Unknown Component: ' + ctor;
+      this.register(ctor);
+      //throw 'Unknown Component: ' + ctor;
     }
 
     return this.ids.get(ctor)!;
@@ -26,6 +29,7 @@ export class ComponentRegistry {
           throw new Error('no more component ids');
         }
         const id = 1 << next;
+        console.debug('registering ' + ctor.name + ' at ' + id);
         this.ids.set(ctor, id);
       }
     }
