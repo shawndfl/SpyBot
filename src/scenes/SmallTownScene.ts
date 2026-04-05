@@ -1,25 +1,27 @@
 import * as THREE from 'three';
-import { PointLightComponent } from '../components/Lights/PointLightComponent';
-import { Renderer } from '../components/Renderer';
+
 import { SunLight } from '../components/SunLight';
 import { Transform } from '../components/Transform';
 import type { World } from '../ecs/World';
 import { GameScene } from './GameScene';
+import { PointLightComponent } from '../components/lights/PointLightComponent';
+import { RendererComponent } from '../components/mesh/RendererComponent';
+import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 
 export class SmallTownScene extends GameScene {
   create(world: World): World {
+    // create player
     const player = world.createEntity();
-    const renderer = new Renderer();
-    renderer.gltfName = 'player.glb';
-
-    world.addComponent(player, renderer);
+    world.addComponent(player, new MeshGlbComponent().setFilename('player.glb'));
     world.addComponent(player, new Transform());
 
+    // create sun
     const sun = world.createEntity();
     world.addComponent(sun, new SunLight().setDayLengthInMs(120000).setStartTime(6));
 
+    // create lamp post
     const lampPost = world.createEntity();
-    world.addComponent(lampPost, new Renderer().setGltfName('lampPost.glb'));
+    world.addComponent(lampPost, new MeshGlbComponent().setFilename('lampPost.glb'));
 
     const pointLight = new PointLightComponent();
     pointLight.castShadow = true;

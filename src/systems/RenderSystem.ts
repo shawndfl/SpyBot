@@ -5,13 +5,14 @@ import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
-import { GameEventNames } from '../events/GameEventNames';
-import { Renderer } from '../components/Renderer';
+
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { SunLight } from '../components/SunLight';
 import type { IRenderSystem } from './IRenderSystem';
 import { SunManager } from '../lights/SunManager';
 import { Transform } from '../components/Transform';
+import { RendererComponent } from '../components/mesh/RendererComponent';
+import { HDRLoader, RGBELoader } from 'three/examples/jsm/Addons.js';
 
 export class RenderSystem extends System implements IRenderSystem {
   private _renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -122,14 +123,11 @@ export class RenderSystem extends System implements IRenderSystem {
 
   update(data: UpdateEvent): void {
     const { world, dt, events, commands } = data;
-    const [initializeEvent] = events.get(GameEventNames.InitializeLevel);
-    if (initializeEvent) {
-      for (let [renderers, transform] of world.query(Renderer, Transform)) {
-        renderers.mesh.position.copy(transform.position);
-        renderers.mesh.rotation.copy(transform.rotation);
-        renderers.mesh.scale.copy(transform.scale);
-        this.loadGltf(renderers.mesh, renderers.gltfName);
-      }
+
+    for (let [renderers, transform] of world.query(RendererComponent, Transform)) {
+      renderers.mesh.position.copy(transform.position);
+      renderers.mesh.rotation.copy(transform.rotation);
+      renderers.mesh.scale.copy(transform.scale);
     }
 
     const [light] = world.getComponents(SunLight);

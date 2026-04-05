@@ -38,7 +38,11 @@ export class World {
 
     // Remove all components for this entity ID
     for (const componentMap of this.components.values()) {
-      componentMap.delete(entity.id);
+      if (componentMap.has(entity.id)) {
+        const component = componentMap.get(entity.id)!;
+        component.destroy();
+        componentMap.delete(entity.id);
+      }
     }
 
     this.entityManager.destroy(entity);
@@ -51,7 +55,13 @@ export class World {
     }
     const key = ComponentRegistry.getId(componentType);
     this.entityMasks[entity.id] &= ~key;
-    this.components.get(key)?.delete(entity.id);
+
+    // if there is a component destroy it
+    if (this.components.get(key)?.has(entity.id)) {
+      const component = this.components.get(key)!.get(entity.id)!;
+      component.destroy();
+      this.components.get(key)!.delete(entity.id);
+    }
   }
 
   addComponent(entity: Entity, ...components: Component[]): void {
@@ -75,10 +85,10 @@ export class World {
     for (let component of components) {
       const key = ComponentRegistry.getId(component);
       if (!!this.components.get(key)?.get(entity.id)) {
-        return false;
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
   private updateEntitySystems(entity: Entity) {

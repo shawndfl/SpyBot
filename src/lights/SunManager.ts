@@ -19,11 +19,16 @@ export class SunManager {
   private _timeScale: number = 1;
   private _latitude: number = LocationOnEarth.latitude;
   private _longitude: number = LocationOnEarth.longitude;
-  private _ambientLight: THREE.AmbientLight = new THREE.AmbientLight(0x808080); // soft white light
+  private _ambientLight: THREE.AmbientLight = new THREE.AmbientLight(0xc0c0c0); // soft white light
 
   private _isSunUp: boolean = false;
 
   constructor(private renderSystem: IRenderSystem) {
+    this.renderSystem.renderer.toneMappingExposure = 2.0; // try 1.5 to 2.5
+
+    //const ambient = new THREE.AmbientLight(0xffffff, 2.0);
+    //this.renderSystem.scene.add(ambient);
+
     this._directionalLight.position.set(5, 10, 7.5);
 
     // setup shadow maps
@@ -33,7 +38,7 @@ export class SunManager {
     this._directionalLight.shadow.camera.near = 0.05;
     this._directionalLight.shadow.camera.far = 50;
 
-    this._sky = new GameSky(this.renderSystem.renderer, this.renderSystem.gui);
+    this._sky = new GameSky(this.renderSystem.renderer, this.renderSystem.scene, this.renderSystem.gui);
 
     // Add stuff to the scene
     this.renderSystem.scene.add(this._directionalLight);
@@ -89,12 +94,20 @@ export class SunManager {
       this._directionalLight.visible = true;
     }
 
+    if (!this.renderSystem.scene.environment) {
+      const date = new Date(this._time);
+      const hours = date.getUTCHours();
+      if (hours > 18 && hours < 20) {
+        const pmrem = new THREE.PMREMGenerator(this.renderSystem.renderer);
+        const envMap = pmrem.fromScene(this.renderSystem.scene).texture;
+        this.renderSystem.scene.environment = envMap;
+      }
+    }
     this._sky.setSunPosition(angles.azimuth, angles.elevation);
   }
 
   update({ world, dt, events, commands }: UpdateEvent): void {
     this.updateSunPosition(dt);
-    this._sky.update(dt);
   }
 
   /**

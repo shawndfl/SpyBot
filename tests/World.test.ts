@@ -32,11 +32,11 @@ describe('World Class', () => {
 
   it('should add a component to an entity', () => {
     const entity = world.createEntity();
-    const component = new Player();
+    const component = new PlayerComponent();
 
     world.addComponent(entity, component);
 
-    const retrievedComponent = world.getComponent(entity, Player);
+    const retrievedComponent = world.getComponent(entity, PlayerComponent);
     expect(retrievedComponent).toBe(component);
   });
 
@@ -90,7 +90,7 @@ describe('World Class', () => {
       expect(sunLight?.ambient).toEqual(sunLight ? sun[parseInt(sunLight.name!)] : null);
     }
 
-    for (let [transform, sunLight, player] of world.query(Transform, SunLight, Player)) {
+    for (let [transform, sunLight, player] of world.query(Transform, SunLight, PlayerComponent)) {
       throw 'should be null';
     }
   });

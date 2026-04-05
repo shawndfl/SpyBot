@@ -11,6 +11,7 @@ export class GameSky {
   private sun: THREE.Vector3;
   private gui: GUI;
   private onGuiChanged: () => void;
+  //private _time: number;
 
   get sky(): Sky {
     return this._sky;
@@ -31,7 +32,7 @@ export class GameSky {
     cloudElevation: 0.5,
   };
 
-  constructor(renderer: THREE.WebGLRenderer, gui: GUI) {
+  constructor(renderer: THREE.WebGLRenderer, private _scene: THREE.Scene, gui: GUI) {
     this.gui = gui;
     this.onGuiChanged = this.guiChanged.bind(this);
 
@@ -103,9 +104,5 @@ export class GameSky {
     folderClouds.add(effectController, 'cloudCoverage', 0, 1, 0.01).name('coverage').onChange(this.onGuiChanged);
     folderClouds.add(effectController, 'cloudDensity', 0, 1, 0.01).name('density').onChange(this.onGuiChanged);
     folderClouds.add(effectController, 'cloudElevation', 0, 1, 0.01).name('elevation').onChange(this.onGuiChanged);
-  }
-
-  update(dt: number) {
-    this.sky.material.uniforms['time'].value = performance.now() * 0.001;
   }
 }

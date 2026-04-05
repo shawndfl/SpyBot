@@ -9,7 +9,7 @@ export class MovementSystem extends System {
     // Get all entities with Transform and Input components
     const transforms = world.getComponents(Transform);
     for (let transform of transforms) {
-      transform.position.x += 1 * dt; // Move right at 1 unit per second
+      //transform.position.x += 1 * dt; // Move right at 1 unit per second
     }
     transforms.forEach((transform) => {});
   }

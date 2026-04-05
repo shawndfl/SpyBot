@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { InputSystem } from '../systems/InputSystem';
 import { RenderSystem } from '../systems/RenderSystem';
-import { InitializeEvent } from '../events/InitializeEvent';
 import { World } from '../ecs/World';
 import { EventBus } from '../ecs/EventSystem';
 import { SceneFactory } from '../scenes/factories/SceneFactory';
@@ -10,15 +9,20 @@ import type { UpdateEvent } from './UpdateEvent';
 import { CommandBuffer } from '../ecs/CommandBuffer';
 
 import { PlayerComponent } from '../components/PlayerComponent';
-import { Renderer } from '../components/Renderer';
 import { SunLight } from '../components/SunLight';
 import { Transform } from '../components/Transform';
 import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
-import { LightSystem } from '../systems/rendering/LightSystem';
+import { LightInitSystem } from '../systems/rendering/LightInitSystem';
+import { LightSyncSystem } from '../systems/rendering/LightSyncSystem';
+import { RenderInitSystem } from '../systems/RenderInitSystem';
+import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
+import { RendererComponent } from '../components/mesh/RendererComponent';
 import { LightComponent } from '../components/Lights/LightComponent';
 
-ComponentRegistry.register(PlayerComponent, Renderer, Transform, SunLight);
-
+/**
+ * This is the engine that runs the game. It creates an instance of the world and adds all
+ * the systems to it in order. This also holds an instance of the THREE.Scene
+ */
 export class Engine {
   private timer = new THREE.Timer();
   private accumulator = 0;
@@ -26,7 +30,7 @@ export class Engine {
 
   private _world;
 
-  private _firstLoad: boolean = true;
+  private _scene: THREE.Scene = new THREE.Scene();
   private _sceneFactory: SceneFactory;
 
   private _inputSystem: InputSystem;
@@ -40,14 +44,18 @@ export class Engine {
 
   constructor() {
     const fn = (x: ComponentCtor) => ComponentRegistry.getId(x);
-    const scene: THREE.Scene = new THREE.Scene();
+
+    const scene = this._scene;
 
     this._inputSystem = new InputSystem(fn(Transform));
     this._world = new World([
       this._inputSystem,
-      new RenderSystem(fn(Renderer) | fn(Transform) | fn(SunLight), scene),
+
       new MovementSystem(fn(PlayerComponent) | fn(Transform)),
-      new LightSystem(fn(Renderer) | fn(Transform) | fn(LightComponent), scene),
+      new LightInitSystem(fn(RendererComponent) | fn(Transform), scene),
+      new LightSyncSystem(fn(RendererComponent) | fn(Transform) | fn(LightComponent), scene),
+      new RenderInitSystem(fn(Transform) | fn(MeshGlbComponent), scene),
+      new RenderSystem(fn(RendererComponent) | fn(Transform) | fn(SunLight), scene),
     ]);
     this._eventBus = new EventBus();
     this._command = new CommandBuffer();
@@ -93,11 +101,6 @@ export class Engine {
     this._eventBus.clear();
     const events = this._eventBus;
     const world = this._world;
-
-    if (this._firstLoad) {
-      this._eventBus.emit(new InitializeEvent());
-      this._firstLoad = false;
-    }
 
     const updateEvents: UpdateEvent = {
       commands: this._command,
