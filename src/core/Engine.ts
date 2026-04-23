@@ -2,14 +2,12 @@ import * as THREE from 'three';
 import { InputSystem } from '../systems/InputSystem';
 import { RenderSystem } from '../systems/RenderSystem';
 import { World } from '../ecs/World';
-import { EventBus } from '../ecs/EventSystem';
 import { SceneFactory } from '../scenes/factories/SceneFactory';
 import { MovementSystem } from '../systems/MovementSystem';
 import type { UpdateEvent } from './UpdateEvent';
 import { CommandBuffer } from '../ecs/CommandBuffer';
 
 import { PlayerComponent } from '../components/PlayerComponent';
-import { SunLight } from '../components/SunLight';
 import { Transform } from '../components/Transform';
 import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
 import { LightInitSystem } from '../systems/rendering/LightInitSystem';
@@ -17,7 +15,9 @@ import { LightSyncSystem } from '../systems/rendering/LightSyncSystem';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
-import { LightComponent } from '../components/Lights/LightComponent';
+import { LightComponent } from '../components/lights/LightComponent';
+import { SunLightComponent } from '../components/SunLightComponent';
+import { EventBus } from '../ecs/EventBus';
 
 /**
  * This is the engine that runs the game. It creates an instance of the world and adds all
@@ -31,6 +31,8 @@ export class Engine {
   private _world;
 
   private _scene: THREE.Scene = new THREE.Scene();
+  private _renderer = new THREE.WebGLRenderer({ antialias: true });
+
   private _sceneFactory: SceneFactory;
 
   private _inputSystem: InputSystem;
@@ -46,6 +48,7 @@ export class Engine {
     const fn = (x: ComponentCtor) => ComponentRegistry.getId(x);
 
     const scene = this._scene;
+    const renderer = this._renderer;
 
     this._inputSystem = new InputSystem(fn(Transform));
     this._world = new World([
@@ -55,7 +58,7 @@ export class Engine {
       new LightInitSystem(fn(RendererComponent) | fn(Transform), scene),
       new LightSyncSystem(fn(RendererComponent) | fn(Transform) | fn(LightComponent), scene),
       new RenderInitSystem(fn(Transform) | fn(MeshGlbComponent), scene),
-      new RenderSystem(fn(RendererComponent) | fn(Transform) | fn(SunLight), scene),
+      new RenderSystem(fn(RendererComponent) | fn(Transform) | fn(SunLightComponent), scene, renderer),
     ]);
     this._eventBus = new EventBus();
     this._command = new CommandBuffer();
@@ -65,7 +68,7 @@ export class Engine {
   initialize(): void {
     // build the initial game scene
     const gameScene = this._sceneFactory.createScene('smallTown');
-    gameScene.create(this._world);
+    gameScene.create(this._world, this._scene, this._renderer);
 
     // initialize all the systems
     for (let system of this._world.systems) {

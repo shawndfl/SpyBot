@@ -1,6 +1,7 @@
+export type EventCtor<T extends GameEvent = GameEvent> = new (...args: any[]) => T;
+
 export abstract class GameEvent {
-  public get type(): string {
-    return this._type;
-  }
-  constructor(private _type: string) {}
+  public abstract get type(): string;
+
+  constructor() {}
 }

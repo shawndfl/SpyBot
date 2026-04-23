@@ -7,10 +7,13 @@ import { GameEventNames } from './GameEventNames';
  * This decouples input handling from specific systems, allowing for more flexible and modular code.
  */
 export class GameInputEvent extends GameEvent {
+  public get type(): string {
+    return GameEventNames.InputEvent;
+  }
   public get payload(): InputManager {
     return this._payload;
   }
   constructor(private readonly _payload: InputManager) {
-    super(GameEventNames.InputEvent);
+    super();
   }
 }

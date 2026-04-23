@@ -3,9 +3,9 @@ import { Component } from '../ecs/Component';
 import { MillisecondsInDay } from '../lights/SunManager';
 import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
-export class SunLight extends Component {
+export class SunLightComponent extends Component {
   get mask(): number {
-    return ComponentRegistry.getId(SunLight);
+    return ComponentRegistry.getId(SunLightComponent);
   }
 
   direction: THREE.Vector3 = new THREE.Vector3(0, 0, 1);
@@ -20,7 +20,7 @@ export class SunLight extends Component {
   latitude?: number;
   longitude?: number;
 
-  setStartTime(hour: number): SunLight {
+  setStartTime(hour: number): SunLightComponent {
     const date = new Date(2026, 0, 1, hour, 0, 0, 0);
     console.debug('time1: ', date.getTime());
     //date.setUTCFullYear(2026, 0, 1);
@@ -34,7 +34,7 @@ export class SunLight extends Component {
    * Set the length of a day in milliseconds. This will affect how fast the sun moves across the sky.
    * @param dayLength
    */
-  setDayLengthInMs(dayLength: number): SunLight {
+  setDayLengthInMs(dayLength: number): SunLightComponent {
     this.millisecondsInDay = dayLength;
     return this;
   }

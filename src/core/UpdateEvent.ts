@@ -1,5 +1,5 @@
 import type { CommandBuffer } from '../ecs/CommandBuffer';
-import type { EventBus } from '../ecs/EventSystem';
+import type { EventBus } from '../ecs/EventBus';
 import type { World } from '../ecs/World';
 
 /**

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { GameSky } from '../rendering/Sky';
 import type { IRenderSystem } from '../systems/IRenderSystem';
-import type { SunLight } from '../components/SunLight';
+import type { SunLightComponent } from '../components/SunLightComponent';
 
 export const LocationOnEarth = {
   latitude: 28.5383, // latitude (Orlando)
@@ -54,7 +54,7 @@ export class SunManager {
     return this._isSunUp;
   }
 
-  setSunState(sunLight: SunLight): void {
+  setSunState(sunLight: SunLightComponent): void {
     if (!sunLight) {
       return;
     }
@@ -94,6 +94,7 @@ export class SunManager {
       this._directionalLight.visible = true;
     }
 
+    /*
     if (!this.renderSystem.scene.environment) {
       const date = new Date(this._time);
       const hours = date.getUTCHours();
@@ -103,6 +104,7 @@ export class SunManager {
         this.renderSystem.scene.environment = envMap;
       }
     }
+      */
     this._sky.setSunPosition(angles.azimuth, angles.elevation);
   }
 

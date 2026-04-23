@@ -1,4 +1,4 @@
-import type { GameEvent } from '../events/GameEvent';
+import type { EventCtor, GameEvent } from '../events/GameEvent';
 import type { GameEventNames } from '../events/GameEventNames';
 
 /**
@@ -16,8 +16,8 @@ export class EventBus {
     this.events.push(event);
   }
 
-  get(type: GameEventNames): GameEvent[] {
-    return this.events.filter((e) => e.type === type);
+  get<T extends GameEvent>(eventType: EventCtor<T>): T[] {
+    return this.events.filter((e) => e instanceof eventType) as T[];
   }
 
   clear(): void {

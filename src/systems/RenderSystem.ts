@@ -7,15 +7,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
 
 import type { UpdateEvent } from '../core/UpdateEvent';
-import { SunLight } from '../components/SunLight';
 import type { IRenderSystem } from './IRenderSystem';
 import { SunManager } from '../lights/SunManager';
 import { Transform } from '../components/Transform';
 import { RendererComponent } from '../components/mesh/RendererComponent';
-import { HDRLoader, RGBELoader } from 'three/examples/jsm/Addons.js';
+import { SunLightComponent } from '../components/SunLightComponent';
 
 export class RenderSystem extends System implements IRenderSystem {
-  private _renderer = new THREE.WebGLRenderer({ antialias: true });
   private _gui: GUI = new GUI();
 
   private _sunManager: SunManager;
@@ -37,7 +35,7 @@ export class RenderSystem extends System implements IRenderSystem {
     return this._gui;
   }
 
-  constructor(componentMask: number, private _scene: THREE.Scene) {
+  constructor(componentMask: number, private _scene: THREE.Scene, private _renderer: THREE.WebGLRenderer) {
     super(componentMask);
     this._sunManager = new SunManager(this);
     this.windowResize = this.onWindowResize.bind(this);
@@ -94,8 +92,6 @@ export class RenderSystem extends System implements IRenderSystem {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  updateSun(l: SunLight): void {}
-
   initGui() {
     this.gui.add(this.ground!.rotation, 'y', 0, Math.PI, 0.01).name('Cube Rotation Y');
   }
@@ -130,7 +126,7 @@ export class RenderSystem extends System implements IRenderSystem {
       renderers.mesh.scale.copy(transform.scale);
     }
 
-    const [light] = world.getComponents(SunLight);
+    const [light] = world.getComponents(SunLightComponent);
 
     this._sunManager.setSunState(light);
     this._sunManager.update({ world, dt, events, commands });

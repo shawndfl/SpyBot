@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import type { World } from '../ecs/World';
 
 /**
@@ -6,5 +7,5 @@ import type { World } from '../ecs/World';
  * including adding entities, components, and systems as needed.
  */
 export abstract class GameScene {
-  abstract create(world: World): World;
+  abstract create(world: World, scene: THREE.Scene, renderer: THREE.WebGLRenderer): World;
 }

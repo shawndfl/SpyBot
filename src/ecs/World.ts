@@ -8,6 +8,7 @@ import {
 } from './ComponentRegistry';
 import { Entity } from './Entity';
 import { EntityManager } from './EntityManager';
+import { ResourceManager } from './ResourceManager';
 import type { System } from './System';
 
 /**
@@ -18,6 +19,11 @@ export class World {
   private components = new Map<number, Map<number, Component>>();
   private entityManager: EntityManager = new EntityManager();
   private entityMasks: number[] = [];
+  private _resources: ResourceManager = new ResourceManager();
+
+  get resources(): ResourceManager {
+    return this._resources;
+  }
 
   get systems(): Readonly<System[]> {
     return this._systems;
