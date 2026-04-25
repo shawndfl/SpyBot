@@ -7,6 +7,7 @@ import { PointLightComponent } from '../components/lights/PointLightComponent';
 import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { SunLightComponent } from '../components/SunLightComponent';
 import { PlayerComponent } from '../components/PlayerComponent';
+import { AnimationComponent } from '../components/AnimationComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -19,6 +20,7 @@ export class SmallTownScene extends GameScene {
     // create player
     const player = world.createEntity();
     world.addComponent(player, new MeshGlbComponent().setFilename('Ness.glb'));
+    world.addComponent(player, new AnimationComponent());
     world.addComponent(player, new PlayerComponent());
     world.addComponent(player, new Transform());
 

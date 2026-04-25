@@ -11,9 +11,11 @@ export class KeyboardAdapter {
   update() {
     const state = this.input.state;
 
-    state.moveX = (this.keys.has('d') ? 1 : 0) - (this.keys.has('a') ? 1 : 0);
+    state.moveX =
+      (this.keys.has('d') || this.keys.has('D') ? 1 : 0) - (this.keys.has('a') || this.keys.has('a') ? 1 : 0);
 
-    state.moveY = (this.keys.has('w') ? 1 : 0) - (this.keys.has('s') ? 1 : 0);
+    state.moveY =
+      (this.keys.has('w') || this.keys.has('D') ? 1 : 0) - (this.keys.has('s') || this.keys.has('S') ? 1 : 0);
 
     state.attack = this.keys.has(' ');
     state.openMenu = this.keys.has('Escape');

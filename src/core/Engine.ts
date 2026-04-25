@@ -18,6 +18,8 @@ import { RendererComponent } from '../components/mesh/RendererComponent';
 import { LightComponent } from '../components/lights/LightComponent';
 import { SunLightComponent } from '../components/SunLightComponent';
 import { EventBus } from '../ecs/EventBus';
+import { AnimationSystem } from '../systems/AnimationSystem';
+import { AnimationComponent } from '../components/AnimationComponent';
 
 /**
  * This is the engine that runs the game. It creates an instance of the world and adds all
@@ -58,6 +60,7 @@ export class Engine {
       new LightInitSystem(fn(RendererComponent) | fn(Transform), scene),
       new LightSyncSystem(fn(RendererComponent) | fn(Transform) | fn(LightComponent), scene),
       new RenderInitSystem(fn(Transform) | fn(MeshGlbComponent), scene),
+      new AnimationSystem(fn(AnimationComponent)),
       new RenderSystem(fn(RendererComponent) | fn(Transform) | fn(SunLightComponent), scene, renderer),
     ]);
     this._eventBus = new EventBus();

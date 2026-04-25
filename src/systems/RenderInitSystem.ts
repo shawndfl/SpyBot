@@ -2,29 +2,31 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { System } from '../ecs/System';
 import type { UpdateEvent } from '../core/UpdateEvent';
-import { Transform } from '../components/Transform';
 import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
+import { AnimationComponent } from '../components/AnimationComponent';
 
 export class RenderInitSystem extends System {
   constructor(componentMask: number, private _scene: THREE.Scene) {
     super(componentMask);
   }
 
-  loadGltf(mesh: THREE.Object3D, path?: string): void {
+  protected loadGltf(mesh: THREE.Object3D, path: string, animation: AnimationComponent): void {
     if (!path) {
       return;
     }
     const loader = new GLTFLoader();
     loader.load(path, (gltf) => {
       const model = gltf.scene;
+      animation.setMixer(new THREE.AnimationMixer(gltf.scene)).setClips(gltf.animations);
+
       this._scene.add(mesh);
 
       model.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
 
-          //mesh.castShadow = true;
+          mesh.castShadow = true;
           //mesh.receiveShadow = true;
 
           // Optional: ensure correct color space
@@ -45,11 +47,11 @@ export class RenderInitSystem extends System {
 
   update({ world, dt, events, commands }: UpdateEvent): void {
     // find all entities with a mesh glb and transform component
-    for (let [entity, glb] of world.queryWithEntity(MeshGlbComponent, Transform)) {
+    for (let [entity, glb, animation] of world.queryWithEntity(MeshGlbComponent, AnimationComponent)) {
       // if there is no renderer component then add one using the glb
       if (!world.hasComponent(entity, RendererComponent)) {
         const mesh = new THREE.Mesh();
-        this.loadGltf(mesh, glb.filename);
+        this.loadGltf(mesh, glb.filename, animation);
         const rendererComponent = new RendererComponent(mesh);
         world.addComponent(entity, rendererComponent);
       }
