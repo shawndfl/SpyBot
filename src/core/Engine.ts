@@ -8,7 +8,7 @@ import type { UpdateEvent } from './UpdateEvent';
 import { CommandBuffer } from '../ecs/CommandBuffer';
 
 import { PlayerComponent } from '../components/PlayerComponent';
-import { Transform } from '../components/Transform';
+import { TransformComponent } from '../components/TransformComponent';
 import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
 import { LightInitSystem } from '../systems/rendering/LightInitSystem';
 import { LightSyncSystem } from '../systems/rendering/LightSyncSystem';
@@ -20,6 +20,11 @@ import { SunLightComponent } from '../components/SunLightComponent';
 import { EventBus } from '../ecs/EventBus';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { AnimationComponent } from '../components/AnimationComponent';
+import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
+import { ConstraintComponent } from '../components/ConstraintComponent';
+import { CameraSyncSystem } from '../systems/CameraSyncSystem';
+import { CameraComponent } from '../components/CameraComponent';
+import type { System } from '../ecs/System';
 
 /**
  * This is the engine that runs the game. It creates an instance of the world and adds all
@@ -52,16 +57,18 @@ export class Engine {
     const scene = this._scene;
     const renderer = this._renderer;
 
-    this._inputSystem = new InputSystem(fn(Transform));
+    this._inputSystem = new InputSystem(fn(TransformComponent));
     this._world = new World([
       this._inputSystem,
 
-      new MovementSystem(fn(PlayerComponent) | fn(Transform)),
-      new LightInitSystem(fn(RendererComponent) | fn(Transform), scene),
-      new LightSyncSystem(fn(RendererComponent) | fn(Transform) | fn(LightComponent), scene),
-      new RenderInitSystem(fn(Transform) | fn(MeshGlbComponent), scene),
+      new MovementSystem(fn(PlayerComponent) | fn(TransformComponent)),
+      new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
+      new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
+      new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
+      new LightSyncSystem(fn(RendererComponent) | fn(TransformComponent) | fn(LightComponent), scene),
+      new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
       new AnimationSystem(fn(AnimationComponent)),
-      new RenderSystem(fn(RendererComponent) | fn(Transform) | fn(SunLightComponent), scene, renderer),
+      new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
     ]);
     this._eventBus = new EventBus();
     this._command = new CommandBuffer();
@@ -99,7 +106,7 @@ export class Engine {
         Gameplay Logic
         Physics Step
         Collision Events
-        Sync Physics → Transform
+        Sync Physics → TransformComponent
         Animation
         Render
         Reset Frame Inputs
@@ -118,10 +125,18 @@ export class Engine {
     // update all the systems
     for (let system of this._world.systems) {
       system.update(updateEvents);
+      //this.debug(system, world);
     }
 
     this._command.flush(this.world);
 
     this._inputSystem.resetFrameInputs();
+  }
+
+  private debug(system: System, world: World): void {
+    const [item] = world.query(CameraComponent, TransformComponent, ConstraintComponent);
+    if (item[0] && item[2] && item[2].source != item[1]) {
+      console.debug('setting: ' + typeof system + ' transform ', item[1].position);
+    }
   }
 }

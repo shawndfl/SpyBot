@@ -4,7 +4,7 @@ import type { Entity } from './Entity';
 /**
  * Very basic System class. Systems should extend this and implement the update method to perform their logic each frame.
  * Systems are responsible for processing entities that have specific components and updating their state accordingly.
- * For example, a MovementSystem might look for entities with Transform and Velocity components and update their positions based on their velocities.
+ * For example, a MovementSystem might look for entities with TransformComponent and Velocity components and update their positions based on their velocities.
  */
 export abstract class System {
   protected _entities: Set<Entity>;

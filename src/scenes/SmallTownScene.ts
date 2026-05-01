@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { Transform } from '../components/Transform';
+import { TransformComponent } from '../components/TransformComponent';
 import type { World } from '../ecs/World';
 import { GameScene } from './GameScene';
 import { PointLightComponent } from '../components/lights/PointLightComponent';
@@ -8,6 +8,8 @@ import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { SunLightComponent } from '../components/SunLightComponent';
 import { PlayerComponent } from '../components/PlayerComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
+import { CameraComponent } from '../components/CameraComponent';
+import { ConstraintComponent } from '../components/ConstraintComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -19,10 +21,24 @@ export class SmallTownScene extends GameScene {
 
     // create player
     const player = world.createEntity();
+    const playerTransform = new TransformComponent().setName('player') as any;
     world.addComponent(player, new MeshGlbComponent().setFilename('Ness.glb'));
     world.addComponent(player, new AnimationComponent());
     world.addComponent(player, new PlayerComponent());
-    world.addComponent(player, new Transform());
+    world.addComponent(player, playerTransform);
+
+    // camera
+    const camera = world.createEntity();
+    world.addComponent(camera, new CameraComponent());
+    const cameraTransform = new TransformComponent().setPosition(10, 10, 10).setName('camera') as any;
+    world.addComponent(camera, cameraTransform);
+
+    // make sure the camera can follow the player
+    const followPlayerConstraint = new ConstraintComponent();
+    followPlayerConstraint.targetOffset = new THREE.Vector3(0, 1.5, 2.5);
+    followPlayerConstraint.source = cameraTransform;
+    followPlayerConstraint.target = playerTransform;
+    world.addComponent(camera, followPlayerConstraint);
 
     // create sun
     const sun = world.createEntity();
@@ -38,7 +54,7 @@ export class SmallTownScene extends GameScene {
     pointLight.distance = 5;
 
     world.addComponent(lampPost, pointLight);
-    world.addComponent(lampPost, new Transform().setPosition(0, 0, -2));
+    world.addComponent(lampPost, new TransformComponent().setPosition(0, 0, -2));
 
     return world;
   }

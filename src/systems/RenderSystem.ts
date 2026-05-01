@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { Camera } from '../core/Camera';
 import Stats from 'three/addons/libs/stats.module.js';
 import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -9,19 +8,24 @@ import { System } from '../ecs/System';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import type { IRenderSystem } from './IRenderSystem';
 import { SunManager } from '../lights/SunManager';
-import { Transform } from '../components/Transform';
+import { TransformComponent } from '../components/TransformComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { SunLightComponent } from '../components/SunLightComponent';
+import { CameraComponent } from '../components/CameraComponent';
+import { GameInputEvent } from '../events/GameInputEvent';
 
 export class RenderSystem extends System implements IRenderSystem {
   private _gui: GUI = new GUI();
 
   private _sunManager: SunManager;
 
-  private camera: Camera = new Camera();
   private stats: Stats = new Stats();
   private ground: THREE.Mesh | undefined;
   private windowResize: () => void;
+
+  private _resizedCalled?: boolean;
+
+  private _orbitControls?: OrbitControls;
 
   public get scene(): THREE.Scene {
     return this._scene;
@@ -68,26 +72,32 @@ export class RenderSystem extends System implements IRenderSystem {
     //this.scene.add(helper);
 
     this.scene.add(this.ground);
-    this.initOrbit();
     this.initGui();
   }
 
-  initOrbit(): void {
-    const controls = new OrbitControls(this.camera.camera, this.renderer.domElement);
-    controls.disconnect();
-    (controls as any)._onContextMenu = () => {};
-    controls.connect(this.renderer.domElement);
+  initOrbit(cameraComponent: CameraComponent): void {
+    if (this._orbitControls?.object == cameraComponent.camera) {
+      return;
+    }
 
-    controls.enablePan = true;
-    controls.enableZoom = true;
-    controls.target.set(0, 1, 0);
-    controls.position0.set(1, 2, 1);
-    controls.update();
+    if (!this._orbitControls) {
+      this._orbitControls = new OrbitControls(cameraComponent.camera, this.renderer.domElement);
+    }
+    this._orbitControls.object = cameraComponent.camera;
+
+    this._orbitControls.disconnect();
+    (this._orbitControls as any)._onContextMenu = () => {};
+    this._orbitControls.connect(this.renderer.domElement);
+
+    this._orbitControls.enablePan = true;
+    this._orbitControls.enableZoom = true;
+    this._orbitControls.target.set(0, 1, 0);
+    this._orbitControls.position0.set(1, 2, 1);
+    this._orbitControls.update();
   }
 
   onWindowResize() {
-    this.camera.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.camera.updateProjectionMatrix();
+    this._resizedCalled = true;
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
@@ -120,7 +130,22 @@ export class RenderSystem extends System implements IRenderSystem {
   update(data: UpdateEvent): void {
     const { world, dt, events, commands } = data;
 
-    for (let [renderers, transform] of world.query(RendererComponent, Transform)) {
+    // handle resize for camera
+    if (this._resizedCalled) {
+      for (let [camera] of world.query(CameraComponent)) {
+        camera.camera.aspect = window.innerWidth / window.innerHeight;
+        camera.camera.updateProjectionMatrix();
+      }
+    }
+
+    //
+    for (let [camera] of world.query(CameraComponent)) {
+      if (camera.useOrbit) {
+        this.initOrbit(camera);
+      }
+    }
+
+    for (let [renderers, transform] of world.query(RendererComponent, TransformComponent)) {
       renderers.mesh.position.copy(transform.position);
       renderers.mesh.rotation.copy(transform.rotation);
       renderers.mesh.scale.copy(transform.scale);
@@ -131,8 +156,14 @@ export class RenderSystem extends System implements IRenderSystem {
     this._sunManager.setSunState(light);
     this._sunManager.update({ world, dt, events, commands });
 
-    this.renderer.render(this.scene, this.camera.camera);
+    // render for each camera
+    for (let [component] of world.query(CameraComponent)) {
+      this.renderer.render(this.scene, component.camera);
+    }
 
     this.stats.update();
+
+    // reset flag
+    this._resizedCalled = false;
   }
 }

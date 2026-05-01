@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { System } from '../../ecs/System';
 import type { UpdateEvent } from '../../core/UpdateEvent';
-import { Transform } from '../../components/Transform';
+import { TransformComponent } from '../../components/TransformComponent';
 import { PointLightComponent } from '../../components/lights/PointLightComponent';
 import { LightComponent } from '../../components/lights/LightComponent';
 
@@ -16,7 +16,7 @@ export class LightInitSystem extends System {
   update({ world, dt, events, commands }: UpdateEvent): void {
     // loop over all the entities that have transforms and point lights and make sure
     // they get light components
-    for (let [entity, ,] of world.queryWithEntity(Transform, PointLightComponent)) {
+    for (let [entity, ,] of world.queryWithEntity(TransformComponent, PointLightComponent)) {
       let lightComponent: LightComponent;
 
       if (world.hasComponent(entity, LightComponent)) {

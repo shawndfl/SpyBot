@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { System } from '../../ecs/System';
 import type { UpdateEvent } from '../../core/UpdateEvent';
-import { Transform } from '../../components/Transform';
+import { TransformComponent } from '../../components/TransformComponent';
 import { PointLightComponent } from '../../components/lights/PointLightComponent';
 import { LightComponent } from '../../components/lights/LightComponent';
 
@@ -16,7 +16,7 @@ export class LightSyncSystem extends System {
   update({ world, dt, events, commands }: UpdateEvent): void {
     // loop over all the light components and make sure the threejs light is up to date
     for (let [, transform, point, lightComponent] of world.queryWithEntity(
-      Transform,
+      TransformComponent,
       PointLightComponent,
       LightComponent
     )) {

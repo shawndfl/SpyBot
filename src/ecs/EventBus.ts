@@ -1,5 +1,4 @@
 import type { EventCtor, GameEvent } from '../events/GameEvent';
-import type { GameEventNames } from '../events/GameEventNames';
 
 /**
  * This file defines a simple EventBus class for managing events in the ECS architecture.

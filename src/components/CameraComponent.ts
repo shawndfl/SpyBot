@@ -1,13 +1,21 @@
 import * as THREE from 'three';
+import { Component } from '../ecs/Component';
+import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
-export class Camera {
+export class CameraComponent extends Component {
   private _camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
+  useOrbit?: boolean;
+
+  get mask(): number {
+    return ComponentRegistry.getId(CameraComponent);
+  }
 
   get camera(): THREE.PerspectiveCamera {
     return this._camera;
   }
 
   constructor() {
+    super();
     this.initialize(window.innerWidth, window.innerHeight);
   }
 

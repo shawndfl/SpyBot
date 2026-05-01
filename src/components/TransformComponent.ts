@@ -2,10 +2,11 @@ import * as THREE from 'three';
 import { Component } from '../ecs/Component';
 import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
-export class Transform extends Component {
+export class TransformComponent extends Component {
   get mask(): number {
-    return ComponentRegistry.getId(Transform);
+    return ComponentRegistry.getId(TransformComponent);
   }
+
   position: THREE.Vector3 = new THREE.Vector3();
   rotation: THREE.Euler = new THREE.Euler();
   scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1);
@@ -14,7 +15,7 @@ export class Transform extends Component {
     super();
   }
 
-  setPosition(x: number, y: number, z: number): Transform {
+  setPosition(x: number, y: number, z: number): TransformComponent {
     this.position.set(x, y, z);
     return this;
   }
