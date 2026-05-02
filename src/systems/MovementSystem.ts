@@ -7,20 +7,23 @@ import { GameInputEvent } from '../events/GameInputEvent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { CameraComponent } from '../components/CameraComponent';
 import { ConstraintComponent } from '../components/ConstraintComponent';
+import { TerrainComponent } from '../components/mesh/TerrainComponent';
 
 export class MovementSystem extends System {
-  private speed = 5.5;
-  private rotationSpeed = 5.5;
-
   update({ world, dt, events, commands }: UpdateEvent): void {
     const [inputEvents] = events.get(GameInputEvent);
 
     if (inputEvents) {
+      let getHeightFromTerrain: (x: number, z: number) => number;
+
+      for (let [terrainComponent] of world.query(TerrainComponent)) {
+        getHeightFromTerrain = terrainComponent.getHeight!;
+      }
       // player update
       for (let [player, transform, animation] of world.query(PlayerComponent, TransformComponent, AnimationComponent)) {
         if (inputEvents.payload.state.moveX != 0 || inputEvents.payload.state.moveY != 0) {
-          const rotate = -inputEvents.payload.state.moveX * this.rotationSpeed * dt;
-          const forward = -inputEvents.payload.state.moveY * this.speed * dt;
+          const rotate = -inputEvents.payload.state.moveX * player.rotationSpeed * dt;
+          const forward = -inputEvents.payload.state.moveY * player.speed * dt;
           transform.rotation.y += rotate;
           const angle = transform.rotation.y;
           const direction = new THREE.Vector3(0, 0, forward);
@@ -28,6 +31,9 @@ export class MovementSystem extends System {
           direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
 
           transform.position.add(direction);
+          const height = getHeightFromTerrain! ? getHeightFromTerrain(transform.position.x, transform.position.z) : 0;
+          transform.position.y = height;
+
           animation.play('Walk');
 
           /*

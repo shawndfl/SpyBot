@@ -25,6 +25,8 @@ import { ConstraintComponent } from '../components/ConstraintComponent';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
 import { CameraComponent } from '../components/CameraComponent';
 import type { System } from '../ecs/System';
+import { TerrainSystem } from '../systems/TerrainSystem';
+import { TerrainComponent } from '../components/mesh/TerrainComponent';
 
 /**
  * This is the engine that runs the game. It creates an instance of the world and adds all
@@ -64,6 +66,7 @@ export class Engine {
       new MovementSystem(fn(PlayerComponent) | fn(TransformComponent)),
       new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
+      new TerrainSystem(fn(TerrainComponent) | fn(TransformComponent), scene),
       new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
       new LightSyncSystem(fn(RendererComponent) | fn(TransformComponent) | fn(LightComponent), scene),
       new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),

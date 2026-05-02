@@ -12,7 +12,6 @@ import { TransformComponent } from '../components/TransformComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { SunLightComponent } from '../components/SunLightComponent';
 import { CameraComponent } from '../components/CameraComponent';
-import { GameInputEvent } from '../events/GameInputEvent';
 
 export class RenderSystem extends System implements IRenderSystem {
   private _gui: GUI = new GUI();
@@ -20,7 +19,6 @@ export class RenderSystem extends System implements IRenderSystem {
   private _sunManager: SunManager;
 
   private stats: Stats = new Stats();
-  private ground: THREE.Mesh | undefined;
   private windowResize: () => void;
 
   private _resizedCalled?: boolean;
@@ -60,18 +58,9 @@ export class RenderSystem extends System implements IRenderSystem {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
-    // Example cube
-    const geometry = new THREE.PlaneGeometry();
-    geometry.rotateX(-Math.PI / 2); // Rotate to lie flat on the XZ plane
-    geometry.scale(10, 10, 10); // Scale up the plane to make it larger
-    const material = new THREE.MeshPhysicalMaterial();
-    this.ground = new THREE.Mesh(geometry, material);
-    this.ground.receiveShadow = true;
+    const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
+    this.scene.add(helper);
 
-    //const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
-    //this.scene.add(helper);
-
-    this.scene.add(this.ground);
     this.initGui();
   }
 
@@ -102,9 +91,7 @@ export class RenderSystem extends System implements IRenderSystem {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  initGui() {
-    this.gui.add(this.ground!.rotation, 'y', 0, Math.PI, 0.01).name('Cube Rotation Y');
-  }
+  initGui() {}
 
   loadGltf(mesh: THREE.Object3D, path?: string): void {
     if (!path) {

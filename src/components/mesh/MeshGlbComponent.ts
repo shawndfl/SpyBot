@@ -8,8 +8,8 @@ export class MeshGlbComponent extends Component {
 
   filename: string = '';
 
-  setFilename(path: string): MeshGlbComponent {
-    this.filename = path;
-    return this;
+  constructor(init?: Partial<MeshGlbComponent>) {
+    super();
+    Object.assign(this, init);
   }
 }

@@ -11,8 +11,9 @@ export class TransformComponent extends Component {
   rotation: THREE.Euler = new THREE.Euler();
   scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1);
 
-  constructor() {
+  constructor(init?: Partial<TransformComponent>) {
     super();
+    Object.assign(this, init);
   }
 
   setPosition(x: number, y: number, z: number): TransformComponent {

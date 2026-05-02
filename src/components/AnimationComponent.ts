@@ -23,31 +23,7 @@ export class AnimationComponent extends Component {
     this.clips = clips;
     return this;
   }
-  /*
-  play(name: string): AnimationComponent {
-    if (!this.mixer) {
-      return this;
-    }
 
-    const clip = THREE.AnimationClip.findByName(this.clips, name);
-    if (!clip) {
-      return this;
-    }
-
-    if (this.currentAction) {
-      this.currentAction.stop();
-    }
-
-    this.currentAction = this.mixer.clipAction(clip);
-    this.currentAction.reset();
-    this.currentAction.play();
-
-    this.currentAnimation = name;
-    this.isPlaying = true;
-
-    return this;
-  }
-*/
   play(name: string, fade = this.transitionTime): AnimationComponent {
     if (!this.mixer) {
       return this;

@@ -10,6 +10,7 @@ import { PlayerComponent } from '../components/PlayerComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { CameraComponent } from '../components/CameraComponent';
 import { ConstraintComponent } from '../components/ConstraintComponent';
+import { TerrainComponent } from '../components/mesh/TerrainComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -21,8 +22,10 @@ export class SmallTownScene extends GameScene {
 
     // create player
     const player = world.createEntity();
-    const playerTransform = new TransformComponent().setName('player') as any;
-    world.addComponent(player, new MeshGlbComponent().setFilename('Ness.glb'));
+    const playerTransform = new TransformComponent({ name: 'player' });
+    const playerComponent = new PlayerComponent();
+    playerComponent.speed = 5.5;
+    world.addComponent(player, new MeshGlbComponent({ filename: 'Ness.glb', name: 'player' }));
     world.addComponent(player, new AnimationComponent());
     world.addComponent(player, new PlayerComponent());
     world.addComponent(player, playerTransform);
@@ -30,12 +33,19 @@ export class SmallTownScene extends GameScene {
     // camera
     const camera = world.createEntity();
     world.addComponent(camera, new CameraComponent());
-    const cameraTransform = new TransformComponent().setPosition(10, 10, 10).setName('camera') as any;
+    const cameraTransform = new TransformComponent({
+      position: new THREE.Vector3(10, 10, 10),
+      name: 'camera',
+    });
     world.addComponent(camera, cameraTransform);
 
     // make sure the camera can follow the player
     const followPlayerConstraint = new ConstraintComponent();
-    followPlayerConstraint.targetOffset = new THREE.Vector3(0, 1.5, 2.5);
+    followPlayerConstraint.targetOffset = new THREE.Vector3(0, 1.5, 4.5);
+    followPlayerConstraint.FarMovementSpeed = 10;
+    followPlayerConstraint.closeMovementSpeed = playerComponent.speed + 0.01;
+    followPlayerConstraint.outerDistance = 10;
+    followPlayerConstraint.innerDistance = 7;
     followPlayerConstraint.source = cameraTransform;
     followPlayerConstraint.target = playerTransform;
     world.addComponent(camera, followPlayerConstraint);
@@ -46,7 +56,7 @@ export class SmallTownScene extends GameScene {
 
     // create lamp post
     const lampPost = world.createEntity();
-    world.addComponent(lampPost, new MeshGlbComponent().setFilename('lampPost.glb'));
+    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
 
     const pointLight = new PointLightComponent();
     pointLight.castShadow = true;
@@ -55,6 +65,19 @@ export class SmallTownScene extends GameScene {
 
     world.addComponent(lampPost, pointLight);
     world.addComponent(lampPost, new TransformComponent().setPosition(0, 0, -2));
+
+    const terrain = world.createEntity();
+    world.addComponent(terrain, new TransformComponent());
+    world.addComponent(
+      terrain,
+      new TerrainComponent({
+        width: 200,
+        depth: 200,
+        segments: 150,
+        repeat: new THREE.Vector2(70, 70),
+        grassTexturePath: '/grass.jpg',
+      })
+    );
 
     return world;
   }

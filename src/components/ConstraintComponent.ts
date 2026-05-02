@@ -37,4 +37,9 @@ export class ConstraintComponent extends Component {
   get mask(): number {
     return ComponentRegistry.getId(ConstraintComponent);
   }
+
+  constructor(init?: Partial<ConstraintComponent>) {
+    super();
+    Object.assign(this, init);
+  }
 }

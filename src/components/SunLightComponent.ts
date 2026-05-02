@@ -38,4 +38,9 @@ export class SunLightComponent extends Component {
     this.millisecondsInDay = dayLength;
     return this;
   }
+
+  constructor(init?: Partial<SunLightComponent>) {
+    super();
+    Object.assign(this, init);
+  }
 }

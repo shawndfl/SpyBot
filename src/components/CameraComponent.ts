@@ -14,8 +14,9 @@ export class CameraComponent extends Component {
     return this._camera;
   }
 
-  constructor() {
+  constructor(init?: Partial<CameraComponent>) {
     super();
+    Object.assign(this, init);
     this.initialize(window.innerWidth, window.innerHeight);
   }
 
