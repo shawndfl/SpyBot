@@ -54,6 +54,7 @@ export class TerrainSystem extends System {
 
     const mesh = new THREE.Mesh(geometry, material);
     mesh.receiveShadow = true;
+    mesh.castShadow = true;
 
     return mesh;
   }

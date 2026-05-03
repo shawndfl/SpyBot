@@ -7,16 +7,15 @@ import { System } from '../ecs/System';
 
 import type { UpdateEvent } from '../core/UpdateEvent';
 import type { IRenderSystem } from './IRenderSystem';
-import { SunManager } from '../lights/SunManager';
 import { TransformComponent } from '../components/TransformComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
-import { SunLightComponent } from '../components/SunLightComponent';
 import { CameraComponent } from '../components/CameraComponent';
+import { GameSky } from '../rendering/Sky';
+import { SunLightComponent } from '../components/SunLightComponent';
 
 export class RenderSystem extends System implements IRenderSystem {
   private _gui: GUI = new GUI();
-
-  private _sunManager: SunManager;
+  private _sky!: GameSky;
 
   private stats: Stats = new Stats();
   private windowResize: () => void;
@@ -39,14 +38,11 @@ export class RenderSystem extends System implements IRenderSystem {
 
   constructor(componentMask: number, private _scene: THREE.Scene, private _renderer: THREE.WebGLRenderer) {
     super(componentMask);
-    this._sunManager = new SunManager(this);
     this.windowResize = this.onWindowResize.bind(this);
   }
 
   initialize(): void {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-    this._sunManager.initialize();
 
     document.body.appendChild(this.renderer.domElement);
     document.body.appendChild(this.stats.dom);
@@ -58,8 +54,12 @@ export class RenderSystem extends System implements IRenderSystem {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
-    const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
-    this.scene.add(helper);
+    this._sky = new GameSky(this._renderer, this._scene, this.gui);
+    this._sky.initialize();
+    this._scene.add(this._sky.sky);
+
+    //const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
+    //this.scene.add(helper);
 
     this.initGui();
   }
@@ -138,14 +138,17 @@ export class RenderSystem extends System implements IRenderSystem {
       renderers.mesh.scale.copy(transform.scale);
     }
 
-    const [light] = world.getComponents(SunLightComponent);
-
-    this._sunManager.setSunState(light);
-    this._sunManager.update({ world, dt, events, commands });
-
     // render for each camera
     for (let [component] of world.query(CameraComponent)) {
       this.renderer.render(this.scene, component.camera);
+    }
+
+    // update the sky from the sun component
+    // this should be set in the SunSystem
+    for (let [sun] of world.query(SunLightComponent)) {
+      if (sun.azimuth && sun.elevation) {
+        this._sky.setSunPosition(sun.azimuth, sun.elevation);
+      }
     }
 
     this.stats.update();

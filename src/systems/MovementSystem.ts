@@ -31,8 +31,6 @@ export class MovementSystem extends System {
           direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
 
           transform.position.add(direction);
-          const height = getHeightFromTerrain! ? getHeightFromTerrain(transform.position.x, transform.position.z) : 0;
-          transform.position.y = height;
 
           animation.play('Walk');
 
@@ -44,6 +42,8 @@ export class MovementSystem extends System {
         } else {
           animation.play('Idle');
         }
+        const height = getHeightFromTerrain! ? getHeightFromTerrain(transform.position.x, transform.position.z) : 0;
+        transform.position.y = height;
       }
 
       // debug

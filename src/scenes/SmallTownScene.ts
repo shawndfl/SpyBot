@@ -40,19 +40,20 @@ export class SmallTownScene extends GameScene {
     world.addComponent(camera, cameraTransform);
 
     // make sure the camera can follow the player
-    const followPlayerConstraint = new ConstraintComponent();
-    followPlayerConstraint.targetOffset = new THREE.Vector3(0, 1.5, 4.5);
-    followPlayerConstraint.FarMovementSpeed = 10;
-    followPlayerConstraint.closeMovementSpeed = playerComponent.speed + 0.01;
-    followPlayerConstraint.outerDistance = 10;
-    followPlayerConstraint.innerDistance = 7;
-    followPlayerConstraint.source = cameraTransform;
-    followPlayerConstraint.target = playerTransform;
+    const followPlayerConstraint = new ConstraintComponent({
+      targetOffset: new THREE.Vector3(0, 1.5, 4.5),
+      FarMovementSpeed: 10,
+      closeMovementSpeed: playerComponent.speed + 0.01,
+      outerDistance: 10,
+      innerDistance: 7,
+      source: cameraTransform,
+      target: playerTransform,
+    });
     world.addComponent(camera, followPlayerConstraint);
 
     // create sun
     const sun = world.createEntity();
-    world.addComponent(sun, new SunLightComponent().setDayLengthInMs(120000).setStartTime(6));
+    world.addComponent(sun, new SunLightComponent().setDayLengthInMs(120000).setStartTime(8));
 
     // create lamp post
     const lampPost = world.createEntity();
@@ -74,7 +75,7 @@ export class SmallTownScene extends GameScene {
         width: 200,
         depth: 200,
         segments: 150,
-        repeat: new THREE.Vector2(70, 70),
+        repeat: new THREE.Vector2(100, 100),
         grassTexturePath: '/grass.jpg',
       })
     );
