@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 
 import { TransformComponent } from '../components/TransformComponent';
-import type { World } from '../ecs/World';
-import { GameScene } from './GameScene';
+import { World } from '../ecs/World';
 import { PointLightComponent } from '../components/lights/PointLightComponent';
 import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { SunLightComponent } from '../components/SunLightComponent';
@@ -11,15 +10,73 @@ import { AnimationComponent } from '../components/AnimationComponent';
 import { CameraComponent } from '../components/CameraComponent';
 import { ConstraintComponent } from '../components/ConstraintComponent';
 import { TerrainComponent } from '../components/mesh/TerrainComponent';
+import type { GameState } from '../core/GameState';
+import type { TransitionContext } from '../core/TransitionContext';
+import type { UpdateEvent } from '../core/UpdateEvent';
+import { InputSystem } from '../systems/InputSystem';
+import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
+import { MovementSystem } from '../systems/MovementSystem';
+import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
+import { CameraSyncSystem } from '../systems/CameraSyncSystem';
+import { TerrainSystem } from '../systems/TerrainSystem';
+import { SunSystem } from '../lights/SunSystem';
+import { LightInitSystem } from '../systems/rendering/LightInitSystem';
+import { LightSyncSystem } from '../systems/rendering/LightSyncSystem';
+import { LightComponent } from '../components/lights/LightComponent';
+import { RendererComponent } from '../components/mesh/RendererComponent';
+import { RenderInitSystem } from '../systems/RenderInitSystem';
+import { AnimationSystem } from '../systems/AnimationSystem';
+import { RenderSystem } from '../systems/RenderSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
-export class SmallTownScene extends GameScene {
-  private renderer?: THREE.WebGLRenderer;
+export class SmallTownState implements GameState {
+  protected _world?: World;
+  private _inputSystem?: InputSystem;
 
-  create(world: World, scene: THREE.Scene, renderer: THREE.WebGLRenderer): World {
-    this.renderer = renderer;
+  constructor(protected _scene: THREE.Scene, protected _renderer: THREE.WebGLRenderer) {}
 
+  enter(context?: TransitionContext): void {
+    this._world = this.createWorld();
+  }
+
+  exit(): void {}
+
+  /**
+   * update the game state
+   * @param updateEvent
+   */
+  update(updateEvent: UpdateEvent): void {
+    // use our world
+    updateEvent.world = this._world!;
+
+    // update all the systems
+    for (let system of this._world!.systems) {
+      system.update(updateEvent);
+    }
+
+    this._inputSystem!.resetFrameInputs();
+  }
+
+  protected createWorld(): World {
+    const fn = (x: ComponentCtor) => ComponentRegistry.getId(x);
+    const scene = this._scene;
+    const renderer = this._renderer;
+
+    this._inputSystem = new InputSystem(fn(TransformComponent));
+    const world = new World([
+      this._inputSystem,
+      new MovementSystem(fn(PlayerComponent) | fn(TransformComponent)),
+      new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
+      new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
+      new TerrainSystem(fn(TerrainComponent) | fn(TransformComponent), scene),
+      new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
+      new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
+      new LightSyncSystem(fn(RendererComponent) | fn(TransformComponent) | fn(LightComponent), scene),
+      new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
+      new AnimationSystem(fn(AnimationComponent)),
+      new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
+    ]);
     // create player
     const player = world.createEntity();
     const playerTransform = new TransformComponent({ name: 'player' });
@@ -79,6 +136,11 @@ export class SmallTownScene extends GameScene {
         grassTexturePath: '/grass.jpg',
       })
     );
+
+    // initialize all the systems
+    for (let system of world.systems) {
+      system.initialize();
+    }
 
     return world;
   }
