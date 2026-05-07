@@ -27,6 +27,9 @@ import { RendererComponent } from '../components/mesh/RendererComponent';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { RenderSystem } from '../systems/RenderSystem';
+import { BoxCollisionSystem } from '../systems/BoxCollisionSystem';
+import { VelocityComponent } from '../components/VelocityComponent';
+import { BoxColliderComponent } from '../components/BoxColliderComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -69,7 +72,9 @@ export class SmallTownState implements GameState {
       new MovementSystem(fn(PlayerComponent) | fn(TransformComponent)),
       new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
+      new BoxCollisionSystem(fn(BoxColliderComponent), scene),
       new TerrainSystem(fn(TerrainComponent) | fn(TransformComponent), scene),
+
       new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
       new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
       new LightSyncSystem(fn(RendererComponent) | fn(TransformComponent) | fn(LightComponent), scene),
@@ -85,6 +90,15 @@ export class SmallTownState implements GameState {
     world.addComponent(player, new MeshGlbComponent({ filename: 'Ness.glb', name: 'player' }));
     world.addComponent(player, new AnimationComponent());
     world.addComponent(player, new PlayerComponent());
+    world.addComponent(
+      player,
+      new BoxColliderComponent({
+        debug: true,
+        offset: new THREE.Vector3(0, 0.5, 0),
+        size: new THREE.Vector3(0.5, 1.2, 0.5),
+        dynamic: true,
+      })
+    );
     world.addComponent(player, playerTransform);
 
     // camera
@@ -98,7 +112,7 @@ export class SmallTownState implements GameState {
 
     // make sure the camera can follow the player
     const followPlayerConstraint = new ConstraintComponent({
-      targetOffset: new THREE.Vector3(0, 1.5, 4.5),
+      targetOffset: new THREE.Vector3(0, 1.5, 5.5),
       FarMovementSpeed: 10,
       closeMovementSpeed: playerComponent.speed + 0.01,
       outerDistance: 10,
@@ -124,6 +138,7 @@ export class SmallTownState implements GameState {
     world.addComponent(lampPost, pointLight);
     world.addComponent(lampPost, new TransformComponent().setPosition(0, 0, -2));
 
+    // terrain
     const terrain = world.createEntity();
     world.addComponent(terrain, new TransformComponent());
     world.addComponent(
@@ -134,6 +149,19 @@ export class SmallTownState implements GameState {
         segments: 150,
         repeat: new THREE.Vector2(100, 100),
         grassTexturePath: '/grass.jpg',
+      })
+    );
+
+    // boxCollider
+    const portalBox = world.createEntity();
+    world.addComponent(
+      portalBox,
+      new BoxColliderComponent({
+        size: new THREE.Vector3(1, 1, 1),
+        debug: true,
+      }),
+      new TransformComponent({
+        position: new THREE.Vector3(0, 0, -10),
       })
     );
 

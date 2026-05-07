@@ -15,50 +15,20 @@ export const LocationOnEarth = {
 export const MillisecondsInDay = 86400000;
 
 export class SunSystem extends System {
-  //private _directionalLight = new THREE.DirectionalLight(0xffffff, 1);
   private _startTime: number = -1;
   private _time: number = -1;
   private _timeScale: number = 1;
   private _latitude: number = LocationOnEarth.latitude;
   private _longitude: number = LocationOnEarth.longitude;
-  private _ambientLight: THREE.AmbientLight = new THREE.AmbientLight(0xc0c0c0); // soft white light
   private _sunOffset: THREE.Vector3 = new THREE.Vector3();
+
+  private _date = new Date();
 
   private _isSunUp: boolean = false;
 
   constructor(componentMask: number, private _scene: THREE.Scene, private _renderer: THREE.WebGLRenderer) {
     super(componentMask);
     this._renderer.toneMappingExposure = 2.0; // try 1.5 to 2.5
-
-    //const ambient = new THREE.AmbientLight(0xffffff, 2.0);
-    //this.renderSystem.scene.add(ambient);
-    /*
-    this._directionalLight.position.set(5, 10, 7.5);
-
-    // setup shadow maps
-    this._directionalLight.castShadow = true;
-    this._directionalLight.shadow.mapSize.width = 2048;
-    this._directionalLight.shadow.mapSize.height = 2048;
-
-    // adjust the shadow camera's size
-    const size = 30;
-    const shadowCam = this._directionalLight.shadow.camera;
-    shadowCam.left = -size;
-    shadowCam.right = size;
-    shadowCam.top = size;
-    shadowCam.bottom = -size;
-    this._directionalLight.shadow.camera.near = 0.1; // 10 cm
-    this._directionalLight.shadow.camera.far = 200; // 200 m
-
-    const shadowCameraHelper = new THREE.CameraHelper(this._directionalLight.shadow.camera);
-
-    // Add stuff to the scene
-    this._scene.add(this._directionalLight);
-    this._scene.add(shadowCameraHelper);
-    
-    */
-
-    this._scene.add(this._ambientLight);
   }
 
   isSunUp(): boolean {
@@ -81,58 +51,11 @@ export class SunSystem extends System {
     this._longitude = sunLight.longitude ?? LocationOnEarth.longitude;
   }
 
-  /*
-  private updateSunPosition_old(dt: number, cameraLocation: THREE.Vector3, sunComponent: SunLightComponent): void {
-    const step = dt * 1000 * this._timeScale;
-    this._time += step;
-    //this._time = 1767271432400; // sun rise
-    const angles = this.sunPosition(this._time, this._latitude, this._longitude);
-    sunComponent.azimuth = angles.azimuth;
-    sunComponent.elevation = angles.elevation;
-
-    const x = Math.cos(angles.elevation) * Math.sin(angles.azimuth);
-    const y = Math.sin(angles.elevation);
-    const z = Math.cos(angles.elevation) * Math.cos(angles.azimuth);
-
-    this._directionalLight.position.x = x;
-    this._directionalLight.position.y = y;
-    this._directionalLight.position.z = z;
-    this._directionalLight.position.multiplyScalar(100);
-    this._directionalLight.shadow.camera.position.copy(cameraLocation);
-    this._directionalLight.shadow.camera.updateProjectionMatrix();
-    //this._directionalLight.position.add(cameraLocation);
-    this._directionalLight.setRotationFromEuler(new THREE.Euler(angles.azimuth, angles.elevation, 0, 'YXZ'));
-
-    this._isSunUp = angles.elevation < 0 || angles.elevation > Math.PI;
-
-    // is it night time
-    if (this._isSunUp) {
-      this._ambientLight.color.setRGB(0.5, 0.5, 0.5);
-      this._directionalLight.visible = false;
-    } else {
-      this._ambientLight.color.setRGB(0.5, 0.5, 0.9);
-      this._directionalLight.visible = true;
-    }
-
-    
-    if (!this.renderSystem.scene.environment) {
-      const date = new Date(this._time);
-      const hours = date.getUTCHours();
-      if (hours > 18 && hours < 20) {
-        const pmrem = new THREE.PMREMGenerator(this._renderer);
-        const envMap = pmrem.fromScene(this.renderSystem.scene).texture;
-        this.renderSystem.scene.environment = envMap;
-      }
-    }
-    
-  }
-  */
-
   update({ world, dt }: UpdateEvent): void {
     // update time
     const step = dt * 1000 * this._timeScale;
     this._time += step;
-    //this._time = 1767271432400; // sun rise
+    //dthis._time = 1767271432400; // sun rise
 
     // update sun.
     for (let [sun] of world.query(SunLightComponent)) {
@@ -147,6 +70,7 @@ export class SunSystem extends System {
 
       this.updateSunPosition(sun, followTarget);
       this.updateShadowCamera(sun, followTarget);
+      this.updateLightTransitions(sun);
 
       if (sun.helper) {
         sun.helper.update();
@@ -155,6 +79,148 @@ export class SunSystem extends System {
       // there should only be one sun
       break;
     }
+  }
+
+  private createSun(sun: SunLightComponent): void {
+    const light = new THREE.DirectionalLight(sun.color, sun.intensity);
+    light.castShadow = true;
+
+    const target = new THREE.Object3D();
+
+    light.target = target;
+
+    light.shadow.mapSize.set(sun.shadowMapSize, sun.shadowMapSize);
+
+    this._scene.add(light);
+    this._scene.add(target);
+
+    sun.light = light;
+    sun.target = target;
+
+    this._scene.add(sun.ambientLight);
+
+    this.configureShadowCamera(sun);
+
+    // set the start time
+    this.setSunState(sun);
+
+    if (sun.debug) {
+      sun.helper = new THREE.CameraHelper(light.shadow.camera);
+      this._scene.add(sun.helper);
+    }
+  }
+
+  // private _ambientFade = new THREE.Vector3();
+  private _lastElevate: number = 0;
+  private updateLightTransitions(sun: SunLightComponent): void {
+    const elevation = sun.elevation!;
+    this._date.setTime(this._time);
+    const isRising = elevation - this._lastElevate > 0;
+    //console.debug(
+    //  'time is: ' + this._date.getUTCHours() + ':' + this._date.getUTCMinutes() + ':' + this._date.getUTCSeconds()
+    //);
+    const maxAngle = Math.PI / 32;
+    const fade = elevation / maxAngle;
+
+    // sun rise
+    if (isRising && elevation >= 0 && elevation <= maxAngle) {
+      sun.intensity = fade;
+    }
+
+    if (!isRising && elevation <= maxAngle && elevation >= 0) {
+      sun.intensity = fade;
+    }
+
+    if (elevation < 0) {
+      sun.intensity = 0;
+    } else if (elevation > maxAngle) {
+      sun.intensity = 1;
+    }
+
+    sun.light!.intensity = sun.intensity;
+    const ambient = sun.ambientDayTime
+      .clone()
+      .multiplyScalar(sun.intensity)
+      .add(sun.ambientNightTime.clone().multiplyScalar(1 - sun.intensity));
+    sun.ambientLight.color.set(ambient.x, ambient.y, ambient.z);
+
+    this._lastElevate = elevation;
+  }
+
+  private updateSunPosition(sun: SunLightComponent, followTransform: TransformComponent): void {
+    const focusPoint = followTransform.position;
+    const angles = this.sunPosition(this._time, this._latitude, this._longitude);
+    sun.azimuth = angles.azimuth;
+    sun.elevation = angles.elevation;
+
+    const x = Math.cos(angles.elevation) * Math.sin(angles.azimuth);
+    const y = Math.sin(angles.elevation);
+    const z = Math.cos(angles.elevation) * Math.cos(angles.azimuth);
+    this._sunOffset.set(x, y, z).multiplyScalar(sun.shadowFar / 2);
+
+    sun.light!.position.copy(focusPoint).add(this._sunOffset);
+    sun.target!.position.copy(focusPoint);
+
+    sun.target!.updateMatrixWorld();
+  }
+
+  private updateShadowCamera(sun: SunLightComponent, followTransform: TransformComponent): void {
+    const shadowCamera = sun.light!.shadow.camera as THREE.OrthographicCamera;
+
+    const shadowCamPosition = this.getLocationBetweenSunAndTarget(sun, followTransform);
+
+    shadowCamera.position.copy(shadowCamPosition); //followTransform.position);
+
+    // Optional: reduce shadow shimmering by snapping to shadow texels
+    const texelSize = (sun.shadowSize * 2) / sun.shadowMapSize;
+
+    shadowCamera.position.x = Math.floor(shadowCamera.position.x / texelSize) * texelSize;
+
+    shadowCamera.position.z = Math.floor(shadowCamera.position.z / texelSize) * texelSize;
+
+    shadowCamera.updateProjectionMatrix();
+  }
+
+  private configureShadowCamera(sun: SunLightComponent): void {
+    const shadowCamera = sun.light!.shadow.camera as THREE.OrthographicCamera;
+    const size = sun.shadowSize;
+
+    shadowCamera.left = -size;
+    shadowCamera.right = size;
+    shadowCamera.top = size;
+    shadowCamera.bottom = -size;
+
+    shadowCamera.near = sun.shadowNear;
+    shadowCamera.far = sun.shadowFar;
+
+    shadowCamera.updateProjectionMatrix();
+  }
+
+  private getCameraTransform(world: World): TransformComponent | undefined {
+    for (const [, transform] of world.query(CameraComponent, TransformComponent)) {
+      return transform;
+    }
+
+    return undefined;
+  }
+
+  private getLocationBetweenSunAndTarget(sun: SunLightComponent, followTransform: TransformComponent): THREE.Vector3 {
+    const sunPos = sun.light?.position.clone();
+    if (!sunPos) {
+      return new THREE.Vector3();
+    }
+    const toSun = sunPos.sub(followTransform.position).normalize();
+    const newPosition = followTransform.position.clone();
+    newPosition.add(toSun.multiplyScalar(10));
+    return newPosition;
+  }
+
+  private getPlayerTransform(world: World): TransformComponent | undefined {
+    for (const [, transform] of world.query(PlayerComponent, TransformComponent)) {
+      return transform;
+    }
+
+    return undefined;
   }
 
   /**
@@ -211,95 +277,5 @@ export class SunSystem extends System {
       azimuth: (azimuth + 2 * Math.PI) % (2 * Math.PI),
       elevation: elevation,
     };
-  }
-
-  private createSun(sun: SunLightComponent): void {
-    const light = new THREE.DirectionalLight(sun.color, sun.intensity);
-    light.castShadow = true;
-
-    const target = new THREE.Object3D();
-
-    light.target = target;
-
-    light.shadow.mapSize.set(sun.shadowMapSize, sun.shadowMapSize);
-
-    this._scene.add(light);
-    this._scene.add(target);
-
-    sun.light = light;
-    sun.target = target;
-
-    this.configureShadowCamera(sun);
-
-    // set the start time
-    this.setSunState(sun);
-
-    if (sun.debug) {
-      sun.helper = new THREE.CameraHelper(light.shadow.camera);
-      this._scene.add(sun.helper);
-    }
-  }
-
-  private updateSunPosition(sun: SunLightComponent, followTransform: TransformComponent): void {
-    const focusPoint = followTransform.position;
-    const angles = this.sunPosition(this._time, this._latitude, this._longitude);
-    sun.azimuth = angles.azimuth;
-    sun.elevation = angles.elevation;
-
-    const x = Math.cos(angles.elevation) * Math.sin(angles.azimuth);
-    const y = Math.sin(angles.elevation);
-    const z = Math.cos(angles.elevation) * Math.cos(angles.azimuth);
-    this._sunOffset.set(x, y, z);
-
-    sun.light!.position.copy(focusPoint).add(this._sunOffset);
-    sun.target!.position.copy(focusPoint);
-
-    sun.target!.updateMatrixWorld();
-  }
-
-  private updateShadowCamera(sun: SunLightComponent, followTransform: TransformComponent): void {
-    const shadowCamera = sun.light!.shadow.camera as THREE.OrthographicCamera;
-
-    shadowCamera.position.copy(followTransform.position);
-
-    // Optional: reduce shadow shimmering by snapping to shadow texels
-    const texelSize = (sun.shadowSize * 2) / sun.shadowMapSize;
-
-    shadowCamera.position.x = Math.floor(shadowCamera.position.x / texelSize) * texelSize;
-
-    shadowCamera.position.z = Math.floor(shadowCamera.position.z / texelSize) * texelSize;
-
-    shadowCamera.updateProjectionMatrix();
-  }
-
-  private configureShadowCamera(sun: SunLightComponent): void {
-    const shadowCamera = sun.light!.shadow.camera as THREE.OrthographicCamera;
-    const size = sun.shadowSize;
-
-    shadowCamera.left = -size;
-    shadowCamera.right = size;
-    shadowCamera.top = size;
-    shadowCamera.bottom = -size;
-
-    shadowCamera.near = sun.shadowNear;
-    shadowCamera.far = sun.shadowFar;
-
-    shadowCamera.updateProjectionMatrix();
-  }
-
-  private getCameraTransform(world: World): TransformComponent | undefined {
-    for (const [, transform] of world.query(CameraComponent, TransformComponent)) {
-      return transform;
-    }
-
-    return undefined;
-  }
-
-  private getPlayerTransform(world: World): TransformComponent | undefined {
-    for (const [, transform] of world.query(PlayerComponent, TransformComponent)) {
-      return transform;
-    }
-
-    return undefined;
   }
 }

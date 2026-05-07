@@ -12,7 +12,7 @@ export class TerrainSystem extends System {
   }
 
   update(data: UpdateEvent): void {
-    const { world, dt, events, commands } = data;
+    const { world } = data;
     for (let [terrainComponent, transform] of world.query(TerrainComponent, TransformComponent)) {
       if (!terrainComponent.mesh) {
         terrainComponent.mesh = this.createTerrainMesh(terrainComponent);

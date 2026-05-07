@@ -9,9 +9,12 @@ export class SunLightComponent extends Component {
   }
 
   direction: THREE.Vector3 = new THREE.Vector3(0, 0, 1);
-  ambient: THREE.Vector3 = new THREE.Vector3(0.2, 0.2, 0.2);
+  ambientDayTime: THREE.Vector3 = new THREE.Vector3(0.7, 0.7, 0.7);
+  ambientNightTime: THREE.Vector3 = new THREE.Vector3(0.7, 0.7, 0.9);
+
   millisecondsInDay: number = MillisecondsInDay;
 
+  ambientLight: THREE.AmbientLight = new THREE.AmbientLight(0xc0c0c0); // soft white light
   light?: THREE.DirectionalLight;
   target?: THREE.Object3D;
   helper?: THREE.CameraHelper;
@@ -19,13 +22,13 @@ export class SunLightComponent extends Component {
   color = 0xffffff;
   intensity = 2;
 
-  shadowSize = 35;
+  shadowSize = 5;
   shadowNear = 1;
   shadowFar = 120;
   shadowMapSize = 2048;
 
-  followCamera = true;
-  debug = true;
+  followCamera = false;
+  debug = false;
 
   /**
    * This is set in SunSystem

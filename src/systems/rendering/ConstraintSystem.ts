@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { ConstraintComponent, DistanceState } from '../../components/ConstraintComponent';
 import { TransformComponent } from '../../components/TransformComponent';
 import type { UpdateEvent } from '../../core/UpdateEvent';
@@ -6,7 +5,7 @@ import { System } from '../../ecs/System';
 
 export class ConstraintSystem extends System {
   update({ world, dt, events, commands }: UpdateEvent): void {
-    for (let [constraint, transform] of world.query(ConstraintComponent, TransformComponent)) {
+    for (let [constraint] of world.query(ConstraintComponent, TransformComponent)) {
       if (!constraint.target || !constraint.source || !constraint.enabled) {
         return;
       }
