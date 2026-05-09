@@ -30,6 +30,8 @@ import { RenderSystem } from '../systems/RenderSystem';
 import { BoxCollisionSystem } from '../systems/BoxCollisionSystem';
 import { VelocityComponent } from '../components/VelocityComponent';
 import { BoxColliderComponent } from '../components/BoxColliderComponent';
+import { BattleBackgroundComponent } from '../components/BattleBackgroundComponent';
+import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -74,6 +76,8 @@ export class SmallTownState implements GameState {
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
       new BoxCollisionSystem(fn(BoxColliderComponent), scene),
       new TerrainSystem(fn(TerrainComponent) | fn(TransformComponent), scene),
+
+      new BattleBackgroundSystem(fn(BattleBackgroundComponent), renderer),
 
       new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
       new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
@@ -164,6 +168,9 @@ export class SmallTownState implements GameState {
         position: new THREE.Vector3(0, 0, -10),
       })
     );
+
+    const battleScene = world.createEntity();
+    world.addComponent(battleScene, new BattleBackgroundComponent({}));
 
     // initialize all the systems
     for (let system of world.systems) {

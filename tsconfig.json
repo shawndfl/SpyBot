@@ -7,6 +7,10 @@
     "types": ["vitest/globals", "vite/client", "vitest"],
     "skipLibCheck": true,
 
+    /* import js background animations */
+    //"allowJs": true,
+    //"noImplicitAny": false,
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

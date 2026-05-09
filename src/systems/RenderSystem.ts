@@ -15,7 +15,7 @@ import { SunLightComponent } from '../components/SunLightComponent';
 
 export class RenderSystem extends System implements IRenderSystem {
   private _gui: GUI = new GUI();
-  private _sky!: GameSky;
+  //private _sky!: GameSky;
 
   private stats: Stats = new Stats();
   private windowResize: () => void;
@@ -54,9 +54,9 @@ export class RenderSystem extends System implements IRenderSystem {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
-    this._sky = new GameSky(this._renderer, this._scene, this.gui);
-    this._sky.initialize();
-    this._scene.add(this._sky.sky);
+    //this._sky = new GameSky(this._renderer, this._scene, this.gui);
+    //this._sky.initialize();
+    //this._scene.add(this._sky.sky);
 
     //const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
     //this.scene.add(helper);
@@ -117,6 +117,8 @@ export class RenderSystem extends System implements IRenderSystem {
   update(data: UpdateEvent): void {
     const { world, dt, events, commands } = data;
 
+    this.renderer.autoClear = false;
+
     // handle resize for camera
     if (this._resizedCalled) {
       for (let [camera] of world.query(CameraComponent)) {
@@ -147,7 +149,7 @@ export class RenderSystem extends System implements IRenderSystem {
     // this should be set in the SunSystem
     for (let [sun] of world.query(SunLightComponent)) {
       if (sun.azimuth && sun.elevation) {
-        this._sky.setSunPosition(sun.azimuth, sun.elevation);
+        //this._sky.setSunPosition(sun.azimuth, sun.elevation);
       }
     }
 
@@ -155,5 +157,8 @@ export class RenderSystem extends System implements IRenderSystem {
 
     // reset flag
     this._resizedCalled = false;
+
+    // other systems could have set this to false
+    this._renderer.autoClear = true;
   }
 }
