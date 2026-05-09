@@ -114,9 +114,6 @@ export class World {
   getComponent<T extends ComponentCtor>(entity: Entity, componentType: T): ComponentFromCtor<T> {
     const key = ComponentRegistry.getId(componentType);
     const component = this.components.get(key)?.get(entity.id);
-    if (!component) {
-      throw new Error(`Entity ${entity.id} does not have component ${componentType.name}`);
-    }
 
     return component as ComponentFromCtor<T>;
   }

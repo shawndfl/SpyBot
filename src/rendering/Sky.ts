@@ -9,7 +9,7 @@ export class GameSky {
 
   private _sky: Sky;
   private sun: THREE.Vector3;
-  private gui: GUI;
+  private gui?: GUI;
   private onGuiChanged: () => void;
   //private _time: number;
 
@@ -32,7 +32,7 @@ export class GameSky {
     cloudElevation: 0.5,
   };
 
-  constructor(renderer: THREE.WebGLRenderer, private _scene: THREE.Scene, gui: GUI) {
+  constructor(renderer: THREE.WebGLRenderer, gui?: GUI) {
     this.gui = gui;
     this.onGuiChanged = this.guiChanged.bind(this);
 
@@ -91,18 +91,19 @@ export class GameSky {
     // Add Sky
     this.sky.scale.setScalar(450);
     const gui = this.gui;
+    if (gui) {
+      gui.add(effectController, 'turbidity', 0.0, 20.0, 0.1).onChange(this.onGuiChanged);
+      gui.add(effectController, 'rayleigh', 0.0, 4, 0.001).onChange(this.onGuiChanged);
+      gui.add(effectController, 'mieCoefficient', 0.0, 0.1, 0.001).onChange(this.onGuiChanged);
+      gui.add(effectController, 'mieDirectionalG', 0.0, 1, 0.001).onChange(this.onGuiChanged);
+      gui.add(effectController, 'elevation', 0, 90, 0.1).onChange(this.onGuiChanged);
+      gui.add(effectController, 'azimuth', -180, 180, 0.1).onChange(this.onGuiChanged);
+      gui.add(effectController, 'exposure', 0, 1, 0.0001).onChange(this.onGuiChanged);
 
-    gui.add(effectController, 'turbidity', 0.0, 20.0, 0.1).onChange(this.onGuiChanged);
-    gui.add(effectController, 'rayleigh', 0.0, 4, 0.001).onChange(this.onGuiChanged);
-    gui.add(effectController, 'mieCoefficient', 0.0, 0.1, 0.001).onChange(this.onGuiChanged);
-    gui.add(effectController, 'mieDirectionalG', 0.0, 1, 0.001).onChange(this.onGuiChanged);
-    gui.add(effectController, 'elevation', 0, 90, 0.1).onChange(this.onGuiChanged);
-    gui.add(effectController, 'azimuth', -180, 180, 0.1).onChange(this.onGuiChanged);
-    gui.add(effectController, 'exposure', 0, 1, 0.0001).onChange(this.onGuiChanged);
-
-    const folderClouds = gui.addFolder('Clouds');
-    folderClouds.add(effectController, 'cloudCoverage', 0, 1, 0.01).name('coverage').onChange(this.onGuiChanged);
-    folderClouds.add(effectController, 'cloudDensity', 0, 1, 0.01).name('density').onChange(this.onGuiChanged);
-    folderClouds.add(effectController, 'cloudElevation', 0, 1, 0.01).name('elevation').onChange(this.onGuiChanged);
+      const folderClouds = gui.addFolder('Clouds');
+      folderClouds.add(effectController, 'cloudCoverage', 0, 1, 0.01).name('coverage').onChange(this.onGuiChanged);
+      folderClouds.add(effectController, 'cloudDensity', 0, 1, 0.01).name('density').onChange(this.onGuiChanged);
+      folderClouds.add(effectController, 'cloudElevation', 0, 1, 0.01).name('elevation').onChange(this.onGuiChanged);
+    }
   }
 }

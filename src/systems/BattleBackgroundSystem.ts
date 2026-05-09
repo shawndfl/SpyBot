@@ -62,7 +62,7 @@ export class BattleBackgroundSystem extends System {
       fps: fps,
       aspectRatio: 0,
       frameSkip: 1,
-      alpha: [0.7, 0.7],
+      alpha: [0.3, 0.3],
       canvas: this._canvas2D,
     });
     battleBg.backgroundEngine.initialize();

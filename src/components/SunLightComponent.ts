@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { Component } from '../ecs/Component';
 import { ComponentRegistry } from '../ecs/ComponentRegistry';
-import { MillisecondsInDay } from '../lights/SunSystem';
+import { MillisecondsInDay } from '../systems/SunSystem';
 
 export class SunLightComponent extends Component {
   get mask(): number {

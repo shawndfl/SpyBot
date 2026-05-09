@@ -19,7 +19,6 @@ import { MovementSystem } from '../systems/MovementSystem';
 import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
 import { TerrainSystem } from '../systems/TerrainSystem';
-import { SunSystem } from '../lights/SunSystem';
 import { LightInitSystem } from '../systems/rendering/LightInitSystem';
 import { LightSyncSystem } from '../systems/rendering/LightSyncSystem';
 import { LightComponent } from '../components/lights/LightComponent';
@@ -28,10 +27,11 @@ import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { RenderSystem } from '../systems/RenderSystem';
 import { BoxCollisionSystem } from '../systems/BoxCollisionSystem';
-import { VelocityComponent } from '../components/VelocityComponent';
+
 import { BoxColliderComponent } from '../components/BoxColliderComponent';
 import { BattleBackgroundComponent } from '../components/BattleBackgroundComponent';
 import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
+import { SunSystem } from '../systems/SunSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 

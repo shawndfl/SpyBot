@@ -6,6 +6,8 @@ import { TransformComponent } from '../components/TransformComponent';
 import { System } from '../ecs/System';
 import type { World } from '../ecs/World';
 import { PlayerComponent } from '../components/PlayerComponent';
+import { GameSky } from '../rendering/Sky';
+import { GuiDebugComponent } from '../components/GuiDebugComponent';
 
 export const LocationOnEarth = {
   latitude: 28.5383, // latitude (Orlando)
@@ -21,6 +23,8 @@ export class SunSystem extends System {
   private _latitude: number = LocationOnEarth.latitude;
   private _longitude: number = LocationOnEarth.longitude;
   private _sunOffset: THREE.Vector3 = new THREE.Vector3();
+
+  private _sky!: GameSky;
 
   private _date = new Date();
 
@@ -58,9 +62,10 @@ export class SunSystem extends System {
     //dthis._time = 1767271432400; // sun rise
 
     // update sun.
-    for (let [sun] of world.query(SunLightComponent)) {
+    for (let [entity, sun] of world.queryWithEntity(SunLightComponent)) {
       if (!sun.light) {
-        this.createSun(sun);
+        let gui = world.getComponent(entity, GuiDebugComponent);
+        this.createSun(sun, gui);
       }
       const followTarget = sun.followCamera ? this.getCameraTransform(world) : this.getPlayerTransform(world);
 
@@ -76,12 +81,14 @@ export class SunSystem extends System {
         sun.helper.update();
       }
 
+      this._sky.setSunPosition(sun.azimuth!, sun.elevation!);
+
       // there should only be one sun
       break;
     }
   }
 
-  private createSun(sun: SunLightComponent): void {
+  private createSun(sun: SunLightComponent, gui?: GuiDebugComponent): void {
     const light = new THREE.DirectionalLight(sun.color, sun.intensity);
     light.castShadow = true;
 
@@ -103,6 +110,10 @@ export class SunSystem extends System {
 
     // set the start time
     this.setSunState(sun);
+
+    this._sky = new GameSky(this._renderer, gui?.gui);
+    this._sky.initialize();
+    this._scene.add(this._sky.sky);
 
     if (sun.debug) {
       sun.helper = new THREE.CameraHelper(light.shadow.camera);
@@ -133,8 +144,11 @@ export class SunSystem extends System {
 
     if (elevation < 0) {
       sun.intensity = 0;
+      this._sky.sky.visible = false;
     } else if (elevation > maxAngle) {
       sun.intensity = 1;
+    } else if (elevation > 0) {
+      this._sky.sky.visible = true;
     }
 
     sun.light!.intensity = sun.intensity;

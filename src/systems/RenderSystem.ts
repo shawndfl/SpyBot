@@ -10,7 +10,6 @@ import type { IRenderSystem } from './IRenderSystem';
 import { TransformComponent } from '../components/TransformComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { CameraComponent } from '../components/CameraComponent';
-import { GameSky } from '../rendering/Sky';
 import { SunLightComponent } from '../components/SunLightComponent';
 
 export class RenderSystem extends System implements IRenderSystem {
