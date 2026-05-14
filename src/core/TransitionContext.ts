@@ -1,1 +1,3 @@
-export interface TransitionContext {}
+export interface TransitionContext {
+  battleId: string;
+}

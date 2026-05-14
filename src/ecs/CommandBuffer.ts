@@ -22,11 +22,12 @@ export interface TransitionRequest {
   context: TransitionContext;
 }
 
+/**
+ * Commands are used to change state of the world.
+ */
 export class CommandBuffer {
   protected commands: GameWorldCommand[];
   protected transitionRequest?: TransitionRequest;
-
-  //TODO handle transition
 
   constructor() {
     this.commands = [];

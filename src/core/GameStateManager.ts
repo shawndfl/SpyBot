@@ -1,3 +1,4 @@
+import type { TransitionRequest } from '../ecs/CommandBuffer';
 import { EmptyGameState } from '../gameStates/EmptyGameState';
 import type { GameState } from './GameState';
 import type { TransitionContext } from './TransitionContext';
@@ -37,5 +38,21 @@ export class GameStateManager {
 
   update(event: UpdateEvent): void {
     this.current()?.update(event);
+  }
+
+  handleTransition(request: TransitionRequest): void {
+    if (request) {
+      switch (request.type) {
+        case 'change':
+          this.change(request.gameState, request.context);
+          return;
+        case 'pop':
+          this.pop();
+          return;
+        case 'push':
+          this.push(request.gameState, request.context);
+          return;
+      }
+    }
   }
 }

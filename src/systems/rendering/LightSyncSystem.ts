@@ -9,11 +9,11 @@ import { LightComponent } from '../../components/lights/LightComponent';
  * This is like a subsystem to the render system for managing lights
  */
 export class LightSyncSystem extends System {
-  constructor(componentMask: number, private _scene: THREE.Scene) {
+  constructor(componentMask: number) {
     super(componentMask);
   }
 
-  update({ world, dt, events, commands }: UpdateEvent): void {
+  update({ world }: UpdateEvent): void {
     // loop over all the light components and make sure the threejs light is up to date
     for (let [, transform, point, lightComponent] of world.queryWithEntity(
       TransformComponent,

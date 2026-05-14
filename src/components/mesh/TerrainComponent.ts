@@ -10,6 +10,7 @@ export class TerrainComponent extends Component {
   width = 100;
   depth = 100;
   segments = 100;
+  heightScale: number = 1;
   repeat: THREE.Vector2 = new THREE.Vector2(10, 10);
 
   grassTexturePath?: string = '/textures/grass.jpg';

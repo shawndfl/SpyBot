@@ -3,6 +3,7 @@ import { System } from '../ecs/System';
 import { TransformComponent } from '../components/TransformComponent';
 import { BoxColliderComponent } from '../components/BoxColliderComponent';
 import type { UpdateEvent } from '../core/UpdateEvent';
+import { BattleState } from '../gameStates/BattleState';
 
 export class BoxCollisionSystem extends System {
   private _tmpPosition = new THREE.Vector3();
@@ -11,7 +12,7 @@ export class BoxCollisionSystem extends System {
     super(componentMask);
   }
 
-  update({ world, dt }: UpdateEvent): void {
+  update({ world, commands }: UpdateEvent): void {
     const allColliders = [...world.query(TransformComponent, BoxColliderComponent)];
 
     for (const [transform, collider] of allColliders) {
@@ -35,6 +36,16 @@ export class BoxCollisionSystem extends System {
         if (collider.debug) {
           const mat = collider.debugMesh?.material as THREE.LineBasicMaterial;
           mat.color.set(0xff0000);
+
+          // enter a battle
+
+          commands.requestTransition({
+            context: {
+              battleId: 'openField',
+            },
+            gameState: new BattleState(),
+            type: 'push',
+          });
         }
       } else {
         if (collider.debug) {

@@ -36,7 +36,7 @@ import { Engine } from '../core/Engine';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
-export class SmallTownState implements GameState {
+export class BattleState implements GameState {
   protected _world?: World;
   private _inputSystem?: InputSystem;
   protected _scene: THREE.Scene = new THREE.Scene();
@@ -153,7 +153,7 @@ export class SmallTownState implements GameState {
         width: 200,
         depth: 200,
         segments: 150,
-        heightScale: 0,
+        heightScale: 1.0,
         repeat: new THREE.Vector2(100, 100),
         grassTexturePath: '/grass.jpg',
       })

@@ -19,7 +19,7 @@ export class TerrainSystem extends System {
         this._scene.add(terrainComponent.mesh);
       }
 
-      terrainComponent.getHeight = (x, z) => this.getHeight(x, z);
+      terrainComponent.getHeight = (x: number, z: number) => this.getHeight(terrainComponent, x, z);
 
       terrainComponent.mesh.position.copy(transform.position);
       terrainComponent.mesh.rotation.copy(transform.rotation);
@@ -38,7 +38,7 @@ export class TerrainSystem extends System {
       const x = position.getX(i);
       const z = position.getZ(i);
 
-      const height = this.getHeight(x, z);
+      const height = this.getHeight(terrain, x, z);
 
       position.setY(i, height);
     }
@@ -59,8 +59,11 @@ export class TerrainSystem extends System {
     return mesh;
   }
 
-  protected getHeight(x: number, z: number): number {
-    return Math.sin(x * 0.15) * 1.5 + Math.cos(z * 0.12) * 1.2 + Math.sin((x + z) * 0.08) * 1.0;
+  protected getHeight(terrainComponent: TerrainComponent, x: number, z: number): number {
+    return (
+      (Math.sin(x * 0.15) * 1.5 + Math.cos(z * 0.12) * 1.2 + Math.sin((x + z) * 0.08) * 1.0) *
+      terrainComponent.heightScale
+    );
   }
 
   private createGrassMaterial(texturePath: string, terrain: TerrainComponent): THREE.MeshStandardMaterial {

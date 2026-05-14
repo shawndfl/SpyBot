@@ -16,18 +16,21 @@ export class Engine {
   private accumulator = 0;
   private fixedStep = 1 / 60;
 
-  private _scene: THREE.Scene = new THREE.Scene();
-  private _renderer = new THREE.WebGLRenderer({ antialias: true });
+  private static _renderer = new THREE.WebGLRenderer({ antialias: true });
 
   protected _eventBus: EventBus;
   protected _command: CommandBuffer;
   protected _gameStateFactory: GamesStateFactory;
   protected _gameStateManager: GameStateManager;
 
+  public static get renderer(): THREE.WebGLRenderer {
+    return this._renderer;
+  }
+
   constructor() {
     this._eventBus = new EventBus();
     this._command = new CommandBuffer();
-    this._gameStateFactory = new GamesStateFactory(this._scene, this._renderer);
+    this._gameStateFactory = new GamesStateFactory();
     this._gameStateManager = new GameStateManager();
   }
 
@@ -54,6 +57,9 @@ export class Engine {
   protected update(delta: number): void {
     const events = this._eventBus;
 
+    // clear out all old events
+    events.clear();
+
     // create the events. Each state will have its own world
     const updateEvents: UpdateEvent = {
       world: null!, // Each state has its own world
@@ -63,7 +69,11 @@ export class Engine {
     };
 
     // update the state
-    this._gameStateManager.current()?.update(updateEvents);
+    this._gameStateManager.update(updateEvents);
+
+    // change state
+    const transition = this._command.consumeTransitionRequest();
+    this._gameStateManager.handleTransition(transition);
 
     // flush commands
     this._command.flush(this._gameStateManager);

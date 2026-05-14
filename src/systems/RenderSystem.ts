@@ -1,21 +1,15 @@
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
-import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
 
 import type { UpdateEvent } from '../core/UpdateEvent';
-import type { IRenderSystem } from './IRenderSystem';
 import { TransformComponent } from '../components/TransformComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { CameraComponent } from '../components/CameraComponent';
-import { SunLightComponent } from '../components/SunLightComponent';
 
-export class RenderSystem extends System implements IRenderSystem {
-  private _gui: GUI = new GUI();
-  //private _sky!: GameSky;
-
+export class RenderSystem extends System {
   private stats: Stats = new Stats();
   private windowResize: () => void;
 
@@ -29,10 +23,6 @@ export class RenderSystem extends System implements IRenderSystem {
 
   public get renderer(): THREE.WebGLRenderer {
     return this._renderer;
-  }
-
-  public get gui(): GUI {
-    return this._gui;
   }
 
   constructor(componentMask: number, private _scene: THREE.Scene, private _renderer: THREE.WebGLRenderer) {
@@ -53,14 +43,8 @@ export class RenderSystem extends System implements IRenderSystem {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
 
-    //this._sky = new GameSky(this._renderer, this._scene, this.gui);
-    //this._sky.initialize();
-    //this._scene.add(this._sky.sky);
-
     //const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
     //this.scene.add(helper);
-
-    this.initGui();
   }
 
   initOrbit(cameraComponent: CameraComponent): void {
@@ -90,8 +74,6 @@ export class RenderSystem extends System implements IRenderSystem {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
-  initGui() {}
-
   loadGltf(mesh: THREE.Object3D, path?: string): void {
     if (!path) {
       return;
@@ -114,7 +96,7 @@ export class RenderSystem extends System implements IRenderSystem {
   }
 
   update(data: UpdateEvent): void {
-    const { world, dt, events, commands } = data;
+    const { world } = data;
 
     this.renderer.autoClear = false;
 
@@ -142,14 +124,6 @@ export class RenderSystem extends System implements IRenderSystem {
     // render for each camera
     for (let [component] of world.query(CameraComponent)) {
       this.renderer.render(this.scene, component.camera);
-    }
-
-    // update the sky from the sun component
-    // this should be set in the SunSystem
-    for (let [sun] of world.query(SunLightComponent)) {
-      if (sun.azimuth && sun.elevation) {
-        //this._sky.setSunPosition(sun.azimuth, sun.elevation);
-      }
     }
 
     this.stats.update();
