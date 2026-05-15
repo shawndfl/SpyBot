@@ -10,8 +10,6 @@ export class EmptyComponent extends Component {
     return ComponentRegistry.getId(EmptyComponent);
   }
 
-  backgroundEngine: any;
-
   constructor(init?: Partial<EmptyComponent>) {
     super();
     Object.assign(this, init);

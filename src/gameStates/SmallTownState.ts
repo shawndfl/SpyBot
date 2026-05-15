@@ -33,6 +33,7 @@ import { BattleBackgroundComponent } from '../components/BattleBackgroundCompone
 import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
 import { SunSystem } from '../systems/SunSystem';
 import { Engine } from '../core/Engine';
+import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -153,7 +154,7 @@ export class SmallTownState implements GameState {
         width: 200,
         depth: 200,
         segments: 150,
-        heightScale: 0,
+        heightScale: 0.2,
         repeat: new THREE.Vector2(100, 100),
         grassTexturePath: '/grass.jpg',
       })
@@ -169,6 +170,11 @@ export class SmallTownState implements GameState {
       }),
       new TransformComponent({
         position: new THREE.Vector3(0, 0, -10),
+      }),
+      new BattleTriggerComponent({
+        context: {
+          battleId: 'openField',
+        },
       })
     );
 

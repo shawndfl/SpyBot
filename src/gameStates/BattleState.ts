@@ -31,6 +31,8 @@ import { BoxCollisionSystem } from '../systems/BoxCollisionSystem';
 import { BoxColliderComponent } from '../components/BoxColliderComponent';
 import { BattleBackgroundComponent } from '../components/BattleBackgroundComponent';
 import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
+import { BattleFieldComponent } from '../components/BattleFieldComponent';
+import { BattleGroundSystem } from '../systems/BattleGroundSystem';
 import { SunSystem } from '../systems/SunSystem';
 import { Engine } from '../core/Engine';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
@@ -77,13 +79,14 @@ export class BattleState implements GameState {
       new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
       new BoxCollisionSystem(fn(BoxColliderComponent), scene),
-      new TerrainSystem(fn(TerrainComponent) | fn(TransformComponent), scene),
+      //new TerrainSystem(fn(TerrainComponent) | fn(TransformComponent), scene),
+      new BattleGroundSystem(fn(BattleFieldComponent) | fn(TransformComponent), scene),
 
       new BattleBackgroundSystem(fn(BattleBackgroundComponent), renderer),
 
-      new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
-      new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
-      new LightSyncSystem(fn(RendererComponent) | fn(TransformComponent) | fn(LightComponent)),
+      //new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
+      //new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
+      //new LightSyncSystem(fn(RendererComponent) | fn(TransformComponent) | fn(LightComponent)),
       new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
       new AnimationSystem(fn(AnimationComponent)),
       new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
@@ -145,35 +148,32 @@ export class BattleState implements GameState {
     world.addComponent(lampPost, new TransformComponent().setPosition(0, 0, -2));
 
     // terrain
+
     const terrain = world.createEntity();
     world.addComponent(terrain, new TransformComponent());
     world.addComponent(
       terrain,
       new TerrainComponent({
-        width: 200,
-        depth: 200,
+        width: 20,
+        depth: 20,
         segments: 150,
-        heightScale: 1.0,
+        heightScale: 0.0,
         repeat: new THREE.Vector2(100, 100),
         grassTexturePath: '/grass.jpg',
       })
     );
 
-    // boxCollider
-    const portalBox = world.createEntity();
-    world.addComponent(
-      portalBox,
-      new BoxColliderComponent({
-        size: new THREE.Vector3(1, 1, 1),
-        debug: true,
-      }),
-      new TransformComponent({
-        position: new THREE.Vector3(0, 0, -10),
-      })
-    );
-
     const battleScene = world.createEntity();
     world.addComponent(battleScene, new BattleBackgroundComponent({}));
+
+    const battleField = world.createEntity();
+    world.addComponent(
+      battleField,
+      new TransformComponent(),
+      new BattleFieldComponent({
+        battleGlbFilename: 'Ground.glb',
+      })
+    );
 
     // initialize all the systems
     for (let system of world.systems) {

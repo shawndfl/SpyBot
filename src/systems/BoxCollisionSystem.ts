@@ -4,6 +4,9 @@ import { TransformComponent } from '../components/TransformComponent';
 import { BoxColliderComponent } from '../components/BoxColliderComponent';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { BattleState } from '../gameStates/BattleState';
+import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
+import type { CommandBuffer } from '../ecs/CommandBuffer';
+import type { World } from '../ecs/World';
 
 export class BoxCollisionSystem extends System {
   private _tmpPosition = new THREE.Vector3();
@@ -14,8 +17,16 @@ export class BoxCollisionSystem extends System {
 
   update({ world, commands }: UpdateEvent): void {
     const allColliders = [...world.query(TransformComponent, BoxColliderComponent)];
+    this.checkForBattles(world, commands, allColliders);
+  }
 
-    for (const [transform, collider] of allColliders) {
+  private checkForBattles(
+    world: World,
+    commands: CommandBuffer,
+    allColliders: [TransformComponent, BoxColliderComponent][]
+  ): void {
+    const battleColliders = [...world.query(TransformComponent, BoxColliderComponent, BattleTriggerComponent)];
+    for (const [transform, collider, battleTriggerComponent] of battleColliders) {
       if (collider.debug) {
         if (!collider.debugMesh) {
           collider.debugMesh = this.createDebugMesh(collider);
@@ -32,7 +43,7 @@ export class BoxCollisionSystem extends System {
         continue;
       }
 
-      if (!this.canMoveTo(transform, collider, transform.position, allColliders)) {
+      if (!this.isTouching(transform, collider, transform.position, allColliders)) {
         if (collider.debug) {
           const mat = collider.debugMesh?.material as THREE.LineBasicMaterial;
           mat.color.set(0xff0000);
@@ -40,9 +51,7 @@ export class BoxCollisionSystem extends System {
           // enter a battle
 
           commands.requestTransition({
-            context: {
-              battleId: 'openField',
-            },
+            context: battleTriggerComponent.context,
             gameState: new BattleState(),
             type: 'push',
           });
@@ -66,7 +75,7 @@ export class BoxCollisionSystem extends System {
     return new THREE.LineSegments(geometry, this._material);
   }
 
-  private canMoveTo(
+  private isTouching(
     selfTransform: TransformComponent,
     selfCollider: BoxColliderComponent,
     nextPosition: THREE.Vector3,
