@@ -34,7 +34,10 @@ import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
 import { BattleFieldComponent } from '../components/BattleFieldComponent';
 import { BattleGroundSystem } from '../systems/BattleGroundSystem';
 import { SunSystem } from '../systems/SunSystem';
+import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 import { Engine } from '../core/Engine';
+import { BattleMenuSystem } from '../systems/BattleMenuSystem';
+import { BattleMenuComponent } from '../components/BattleMenuComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -72,6 +75,23 @@ export class BattleState implements GameState {
     const scene = this._scene;
     const renderer = Engine.renderer;
 
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    // Blender-like, not identical, but usually closest for glTF/PBR
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const rgbeLoader = new HDRLoader();
+
+    rgbeLoader.load('/golden_gate_hills_2k.hdr', (hdr) => {
+      hdr.mapping = THREE.EquirectangularReflectionMapping;
+
+      scene.environment = hdr; // affects PBR materials
+      //scene.background = hdr; // optional: visible sky
+    });
+
     this._inputSystem = new InputSystem(fn(TransformComponent));
     const world = new World([
       this._inputSystem,
@@ -79,8 +99,9 @@ export class BattleState implements GameState {
       new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
       new BoxCollisionSystem(fn(BoxColliderComponent), scene),
-      //new TerrainSystem(fn(TerrainComponent) | fn(TransformComponent), scene),
       new BattleGroundSystem(fn(BattleFieldComponent) | fn(TransformComponent), scene),
+
+      new BattleMenuSystem(fn(BattleMenuComponent)),
 
       new BattleBackgroundSystem(fn(BattleBackgroundComponent), renderer),
 
@@ -148,7 +169,6 @@ export class BattleState implements GameState {
     world.addComponent(lampPost, new TransformComponent().setPosition(0, 0, -2));
 
     // terrain
-
     const terrain = world.createEntity();
     world.addComponent(terrain, new TransformComponent());
     world.addComponent(
@@ -163,6 +183,7 @@ export class BattleState implements GameState {
       })
     );
 
+    // battle environment
     const battleScene = world.createEntity();
     world.addComponent(battleScene, new BattleBackgroundComponent({}));
 
@@ -171,9 +192,13 @@ export class BattleState implements GameState {
       battleField,
       new TransformComponent(),
       new BattleFieldComponent({
-        battleGlbFilename: 'Ground.glb',
+        battleGlbFilename: 'battle_basic.glb',
       })
     );
+
+    // battle ui
+    const battleUi = world.createEntity();
+    world.addComponent(battleUi, new BattleMenuComponent());
 
     // initialize all the systems
     for (let system of world.systems) {

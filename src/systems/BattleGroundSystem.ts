@@ -30,7 +30,7 @@ export class BattleGroundSystem extends System {
           } else if ((child as THREE.Light).isLight) {
             const light = child as THREE.Light;
 
-            light.intensity *= 0.02; // make brighter
+            light.intensity *= 0.002; // make brighter
             light.castShadow = true;
 
             //console.log(light.name, light.type, light.intensity);

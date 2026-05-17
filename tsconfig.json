@@ -5,6 +5,7 @@
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vitest/globals", "vite/client", "vitest"],
+    "jsx": "react-jsx",
     "skipLibCheck": true,
 
     /* import js background animations */
