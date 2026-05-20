@@ -18,10 +18,6 @@ import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry'
 import { MovementSystem } from '../systems/MovementSystem';
 import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
-import { TerrainSystem } from '../systems/TerrainSystem';
-import { LightInitSystem } from '../systems/rendering/LightInitSystem';
-import { LightSyncSystem } from '../systems/rendering/LightSyncSystem';
-import { LightComponent } from '../components/lights/LightComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
@@ -33,7 +29,7 @@ import { BattleBackgroundComponent } from '../components/BattleBackgroundCompone
 import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
 import { BattleFieldComponent } from '../components/BattleFieldComponent';
 import { BattleGroundSystem } from '../systems/BattleGroundSystem';
-import { SunSystem } from '../systems/SunSystem';
+
 import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 import { Engine } from '../core/Engine';
 import { BattleMenuSystem } from '../systems/BattleMenuSystem';
@@ -95,13 +91,12 @@ export class BattleState implements GameState {
     this._inputSystem = new InputSystem(fn(TransformComponent));
     const world = new World([
       this._inputSystem,
+      new BattleMenuSystem(fn(BattleMenuComponent)),
       new MovementSystem(fn(PlayerComponent) | fn(TransformComponent)),
       new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
       new BoxCollisionSystem(fn(BoxColliderComponent), scene),
       new BattleGroundSystem(fn(BattleFieldComponent) | fn(TransformComponent), scene),
-
-      new BattleMenuSystem(fn(BattleMenuComponent)),
 
       new BattleBackgroundSystem(fn(BattleBackgroundComponent), renderer),
 
