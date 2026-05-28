@@ -15,7 +15,6 @@ import type { TransitionContext } from '../core/TransitionContext';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { InputSystem } from '../systems/InputSystem';
 import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
-import { MovementSystem } from '../systems/MovementSystem';
 import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
 import { RendererComponent } from '../components/mesh/RendererComponent';
@@ -92,7 +91,6 @@ export class BattleState implements GameState {
     const world = new World([
       this._inputSystem,
       new BattleMenuSystem(fn(BattleMenuComponent)),
-      new MovementSystem(fn(PlayerComponent) | fn(TransformComponent)),
       new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
       new BoxCollisionSystem(fn(BoxColliderComponent), scene),

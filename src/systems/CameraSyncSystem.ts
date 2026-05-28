@@ -6,7 +6,7 @@ import { System } from '../ecs/System';
 export class CameraSyncSystem extends System {
   update({ world, dt, events, commands }: UpdateEvent): void {
     for (let [cameraComponent, transform] of world.query(CameraComponent, TransformComponent)) {
-      if (cameraComponent.useOrbit) {
+      if (cameraComponent.debugMode) {
         continue;
       }
 

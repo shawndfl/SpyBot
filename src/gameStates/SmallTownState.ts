@@ -34,6 +34,10 @@ import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
 import { SunSystem } from '../systems/SunSystem';
 import { Engine } from '../core/Engine';
 import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
+import { ParticleEmitterSystem } from '../systems/ParticleEmitterSystem';
+import { ParticleEmitterComponent } from '../components/particles/ParticleEmitterComponent';
+import { ParticleEmitterStateComponent } from '../components/particles/ParticleStateComponent';
+import { DebugModeSystem } from '../systems/DebugModeSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -88,6 +92,9 @@ export class SmallTownState implements GameState {
       new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
       new AnimationSystem(fn(AnimationComponent)),
       new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
+      new ParticleEmitterSystem(fn(ParticleEmitterComponent), scene),
+
+      new DebugModeSystem(fn(PlayerComponent)),
     ]);
     // create player
     const player = world.createEntity();
@@ -160,7 +167,7 @@ export class SmallTownState implements GameState {
       })
     );
 
-    // boxCollider
+    // battle boxCollider
     const portalBox = world.createEntity();
     world.addComponent(
       portalBox,
@@ -168,6 +175,20 @@ export class SmallTownState implements GameState {
         size: new THREE.Vector3(1, 1, 1),
         debug: true,
       }),
+      new ParticleEmitterComponent({
+        speedMin: 1.0,
+        speedMax: 5.0,
+        alphaStart: 0.2,
+        alphaEnd: 0.001,
+        minDirection: new THREE.Vector3(-0.05, 1, 0.05),
+        maxDirection: new THREE.Vector3(-0.05, 1, 0.05),
+        colorStart: new THREE.Color(0, 0, 1),
+        colorEnd: new THREE.Color(1, 1, 1),
+        emissionRate: 10,
+        sizeStart: 0.01,
+        sizeEnd: 0.1,
+      }),
+      new ParticleEmitterStateComponent(),
       new TransformComponent({
         position: new THREE.Vector3(0, 0, -10),
       }),

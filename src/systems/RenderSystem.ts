@@ -108,13 +108,6 @@ export class RenderSystem extends System {
       }
     }
 
-    //
-    for (let [camera] of world.query(CameraComponent)) {
-      if (camera.useOrbit) {
-        this.initOrbit(camera);
-      }
-    }
-
     for (let [renderers, transform] of world.query(RendererComponent, TransformComponent)) {
       renderers.mesh.position.copy(transform.position);
       renderers.mesh.rotation.copy(transform.rotation);

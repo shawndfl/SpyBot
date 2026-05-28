@@ -4,7 +4,7 @@ import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
 export class CameraComponent extends Component {
   private _camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
-  useOrbit?: boolean;
+  debugMode?: boolean;
 
   get mask(): number {
     return ComponentRegistry.getId(CameraComponent);

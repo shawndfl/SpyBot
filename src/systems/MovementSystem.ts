@@ -5,8 +5,6 @@ import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
 import { GameInputEvent } from '../events/GameInputEvent';
 import { AnimationComponent } from '../components/AnimationComponent';
-import { CameraComponent } from '../components/CameraComponent';
-import { ConstraintComponent } from '../components/ConstraintComponent';
 import { TerrainComponent } from '../components/mesh/TerrainComponent';
 
 export class MovementSystem extends System {
@@ -44,14 +42,6 @@ export class MovementSystem extends System {
         }
         const height = getHeightFromTerrain! ? getHeightFromTerrain(transform.position.x, transform.position.z) : 0;
         transform.position.y = height;
-      }
-
-      // debug
-      for (let [cameraComponent, constraint] of world.query(CameraComponent, ConstraintComponent)) {
-        if (inputEvents.payload.state.selectJustReleased) {
-          cameraComponent.useOrbit = !cameraComponent.useOrbit;
-          constraint.enabled = !cameraComponent.useOrbit;
-        }
       }
     }
   }
