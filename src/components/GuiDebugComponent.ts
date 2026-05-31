@@ -16,5 +16,8 @@ export class GuiDebugComponent extends Component {
   constructor(init?: Partial<GuiDebugComponent>) {
     super();
     Object.assign(this, init);
+
+    // start off hidden
+    this.gui.hide();
   }
 }

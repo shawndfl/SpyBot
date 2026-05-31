@@ -38,6 +38,8 @@ import { ParticleEmitterSystem } from '../systems/ParticleEmitterSystem';
 import { ParticleEmitterComponent } from '../components/particles/ParticleEmitterComponent';
 import { ParticleEmitterStateComponent } from '../components/particles/ParticleStateComponent';
 import { DebugModeSystem } from '../systems/DebugModeSystem';
+import { DebugHudSystem } from '../systems/DebugHudSystem';
+import { GuiDebugComponent } from '../components/GuiDebugComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -78,6 +80,7 @@ export class SmallTownState implements GameState {
     this._inputSystem = new InputSystem(fn(TransformComponent));
     const world = new World([
       this._inputSystem,
+      new DebugModeSystem(fn(CameraComponent)),
       new MovementSystem(fn(PlayerComponent) | fn(TransformComponent)),
       new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
@@ -93,9 +96,13 @@ export class SmallTownState implements GameState {
       new AnimationSystem(fn(AnimationComponent)),
       new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
       new ParticleEmitterSystem(fn(ParticleEmitterComponent), scene),
-
-      new DebugModeSystem(fn(PlayerComponent)),
+      new DebugHudSystem(fn(GuiDebugComponent)),
     ]);
+
+    // root level entity
+    const sceneRoot = world.createEntity();
+    world.addComponent(sceneRoot, new GuiDebugComponent({}));
+
     // create player
     const player = world.createEntity();
     const playerTransform = new TransformComponent({ name: 'player' });

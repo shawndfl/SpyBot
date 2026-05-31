@@ -7,9 +7,9 @@ export class TransformComponent extends Component {
     return ComponentRegistry.getId(TransformComponent);
   }
 
-  position: THREE.Vector3 = new THREE.Vector3();
-  rotation: THREE.Euler = new THREE.Euler();
-  scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1);
+  readonly position: THREE.Vector3 = new THREE.Vector3();
+  readonly rotation: THREE.Euler = new THREE.Euler();
+  readonly scale: THREE.Vector3 = new THREE.Vector3(1, 1, 1);
 
   constructor(init?: Partial<TransformComponent>) {
     super();

@@ -6,12 +6,19 @@ import { System } from '../ecs/System';
 import { GameInputEvent } from '../events/GameInputEvent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { TerrainComponent } from '../components/mesh/TerrainComponent';
+import { CameraComponent } from '../components/CameraComponent';
 
 export class MovementSystem extends System {
   update({ world, dt, events, commands }: UpdateEvent): void {
     const [inputEvents] = events.get(GameInputEvent);
 
     if (inputEvents) {
+      for (let [camera] of world.query(CameraComponent)) {
+        if (camera.debugMode) {
+          return;
+        }
+      }
+
       let getHeightFromTerrain: (x: number, z: number) => number;
 
       for (let [terrainComponent] of world.query(TerrainComponent)) {

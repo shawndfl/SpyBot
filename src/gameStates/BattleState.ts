@@ -33,6 +33,7 @@ import { HDRLoader } from 'three/examples/jsm/loaders/HDRLoader.js';
 import { Engine } from '../core/Engine';
 import { BattleMenuSystem } from '../systems/BattleMenuSystem';
 import { BattleMenuComponent } from '../components/BattleMenuComponent';
+import { DebugModeSystem } from '../systems/DebugModeSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -90,6 +91,7 @@ export class BattleState implements GameState {
     this._inputSystem = new InputSystem(fn(TransformComponent));
     const world = new World([
       this._inputSystem,
+      new DebugModeSystem(fn(CameraComponent)),
       new BattleMenuSystem(fn(BattleMenuComponent)),
       new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),

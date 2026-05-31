@@ -87,6 +87,7 @@ export class GameSky {
   }
 
   private initSky() {
+    /*
     const effectController = this.effectController;
     // Add Sky
     this.sky.scale.setScalar(450);
@@ -105,5 +106,6 @@ export class GameSky {
       folderClouds.add(effectController, 'cloudDensity', 0, 1, 0.01).name('density').onChange(this.onGuiChanged);
       folderClouds.add(effectController, 'cloudElevation', 0, 1, 0.01).name('elevation').onChange(this.onGuiChanged);
     }
+      */
   }
 }
