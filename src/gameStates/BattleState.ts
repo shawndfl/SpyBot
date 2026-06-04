@@ -137,7 +137,7 @@ export class BattleState implements GameState {
 
     const enemy = world.createEntity();
     world.addComponent(enemy, new MeshGlbComponent({ filename: 'knight.glb', name: 'enemy' }));
-    world.addComponent(enemy, new AnimationComponent());
+    world.addComponent(enemy, new AnimationComponent({ firstAnimation: 'Idle' }));
     world.addComponent(
       enemy,
       new BoxColliderComponent({
@@ -147,7 +147,7 @@ export class BattleState implements GameState {
         dynamic: true,
       })
     );
-    world.addComponent(enemy, new TransformComponent({ name: 'enemy', position: new THREE.Vector3(0, 0, -2) }));
+    world.addComponent(enemy, new TransformComponent({ name: 'enemy', position: new THREE.Vector3(0, 0, -4) }));
 
     // camera
     const camera = world.createEntity();

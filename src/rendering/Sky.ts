@@ -20,16 +20,16 @@ export class GameSky {
   /// GUI
 
   effectController = {
-    turbidity: 10,
-    rayleigh: 3,
-    mieCoefficient: 0.005,
-    mieDirectionalG: 0.7,
+    turbidity: 5.3,
+    rayleigh: 1.46,
+    mieCoefficient: 0.016,
+    mieDirectionalG: 0.631,
     elevation: 2,
     azimuth: 180,
-    exposure: 0,
-    cloudCoverage: 0.4,
-    cloudDensity: 0.4,
-    cloudElevation: 0.5,
+    exposure: 1,
+    cloudCoverage: 0.31,
+    cloudDensity: 0.84,
+    cloudElevation: 0.84,
   };
 
   constructor(renderer: THREE.WebGLRenderer, gui?: GUI) {
@@ -40,7 +40,7 @@ export class GameSky {
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.5;
+    renderer.toneMappingExposure = 1;
     document.body.appendChild(renderer.domElement);
 
     this._sky = new Sky();
@@ -87,7 +87,6 @@ export class GameSky {
   }
 
   private initSky() {
-    /*
     const effectController = this.effectController;
     // Add Sky
     this.sky.scale.setScalar(450);
@@ -106,6 +105,5 @@ export class GameSky {
       folderClouds.add(effectController, 'cloudDensity', 0, 1, 0.01).name('density').onChange(this.onGuiChanged);
       folderClouds.add(effectController, 'cloudElevation', 0, 1, 0.01).name('elevation').onChange(this.onGuiChanged);
     }
-      */
   }
 }

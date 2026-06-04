@@ -64,9 +64,7 @@ export class RenderInitSystem extends System {
 
               // update so characters are not sitting in a t pose
               animation.play('Idle');
-              //action.play();
-              //action.time = 0;
-              //mixer.update(0.0001);
+              animation.playFirst();
             }
           }
 

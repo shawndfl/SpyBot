@@ -15,6 +15,11 @@ export class AnimationComponent extends Component {
   transitionTime = 0.25;
   firstAnimation?: string;
 
+  constructor(init?: Partial<AnimationComponent>) {
+    super();
+    Object.assign(this, init);
+  }
+
   setMixer(mixer: THREE.AnimationMixer): AnimationComponent {
     this.mixer = mixer;
     return this;

@@ -56,15 +56,20 @@ export class SunSystem extends System {
   }
 
   update({ world, dt }: UpdateEvent): void {
-    // update time
-    const step = dt * 1000 * this._timeScale;
-    this._time += step;
-    //dthis._time = 1767271432400; // sun rise
+    let [camera] = [...world.query(CameraComponent)][0];
+
+    if (!camera.debugMode) {
+      // update time
+      const step = dt * 1000 * this._timeScale;
+      this._time += step;
+      //this._time = 1767271432400; // sun rise
+    }
+
+    let [gui] = [...world.query(GuiDebugComponent)][0];
 
     // update sun.
     for (let [entity, sun] of world.queryWithEntity(SunLightComponent)) {
       if (!sun.light) {
-        let gui = world.getComponent(entity, GuiDebugComponent);
         this.createSun(sun, gui);
       }
       const followTarget = sun.followCamera ? this.getCameraTransform(world) : this.getPlayerTransform(world);
