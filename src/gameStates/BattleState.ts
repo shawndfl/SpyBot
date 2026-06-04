@@ -34,6 +34,8 @@ import { Engine } from '../core/Engine';
 import { BattleMenuSystem } from '../systems/BattleMenuSystem';
 import { BattleMenuComponent } from '../components/BattleMenuComponent';
 import { DebugModeSystem } from '../systems/DebugModeSystem';
+import { GuiDebugComponent } from '../components/GuiDebugComponent';
+import { DebugHudSystem } from '../systems/DebugHudSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -106,7 +108,14 @@ export class BattleState implements GameState {
       new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
       new AnimationSystem(fn(AnimationComponent)),
       new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
+
+      new DebugHudSystem(fn(GuiDebugComponent)),
     ]);
+
+    // root level entity
+    const sceneRoot = world.createEntity();
+    world.addComponent(sceneRoot, new GuiDebugComponent({}));
+
     // create player
     const player = world.createEntity();
     const playerTransform = new TransformComponent({ name: 'player' });
@@ -125,6 +134,20 @@ export class BattleState implements GameState {
       })
     );
     world.addComponent(player, playerTransform);
+
+    const enemy = world.createEntity();
+    world.addComponent(enemy, new MeshGlbComponent({ filename: 'knight.glb', name: 'enemy' }));
+    world.addComponent(enemy, new AnimationComponent());
+    world.addComponent(
+      enemy,
+      new BoxColliderComponent({
+        debug: true,
+        offset: new THREE.Vector3(0, 0.5, 0),
+        size: new THREE.Vector3(0.5, 1.2, 0.5),
+        dynamic: true,
+      })
+    );
+    world.addComponent(enemy, new TransformComponent({ name: 'enemy', position: new THREE.Vector3(0, 0, -2) }));
 
     // camera
     const camera = world.createEntity();

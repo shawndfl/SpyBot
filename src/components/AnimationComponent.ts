@@ -13,6 +13,7 @@ export class AnimationComponent extends Component {
   currentActionName?: string;
   isPlaying: boolean = false;
   transitionTime = 0.25;
+  firstAnimation?: string;
 
   setMixer(mixer: THREE.AnimationMixer): AnimationComponent {
     this.mixer = mixer;
@@ -22,6 +23,12 @@ export class AnimationComponent extends Component {
   setClips(clips: THREE.AnimationClip[]): AnimationComponent {
     this.clips = clips;
     return this;
+  }
+
+  playFirst(): void {
+    if (this.firstAnimation) {
+      this.play(this.firstAnimation);
+    }
   }
 
   play(name: string, fade = this.transitionTime): AnimationComponent {

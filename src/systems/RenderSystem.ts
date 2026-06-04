@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
 
@@ -72,27 +71,6 @@ export class RenderSystem extends System {
     this._resizedCalled = true;
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-  }
-
-  loadGltf(mesh: THREE.Object3D, path?: string): void {
-    if (!path) {
-      return;
-    }
-    const loader = new GLTFLoader();
-    loader.load(path, (gltf) => {
-      const model = gltf.scene;
-      this.scene.add(mesh);
-
-      const material = new THREE.MeshPhysicalMaterial();
-
-      model.traverse((child) => {
-        if ((child as THREE.Mesh).isMesh) {
-          (child as THREE.Mesh).material = material;
-          (child as THREE.Mesh).castShadow = true;
-        }
-      });
-      mesh.add(model);
-    });
   }
 
   update(data: UpdateEvent): void {

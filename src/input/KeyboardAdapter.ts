@@ -31,6 +31,11 @@ export class KeyboardAdapter {
     state.openMenuJustReleased = this.keysJustReleased.has('Escape');
     state.selectJustReleased = this.keysJustReleased.has('Enter');
 
+    state.menuDownJustReleased = this.justReleased('arrowDown', 'S', 's');
+    state.menuUpJustReleased = this.justReleased('arrowUp', 'W', 'w');
+    state.menuRightJustReleased = this.justReleased('arrowRight', 'D', 'd');
+    state.menuLeftJustReleased = this.justReleased('arrowLeft', 'A', 'a');
+
     state.debugModeToggle = this.justReleased('B', 'b');
 
     state.cancelJustReleased = this.keysJustReleased.has('Delete');
