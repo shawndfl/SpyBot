@@ -10,6 +10,7 @@ import type { Particle, ParticleInit } from '../particles/Particle';
 
 export class ParticleEmitterSystem extends System {
   private readonly _pool: ParticlePool;
+  private readonly _textureLoader = new THREE.TextureLoader();
 
   private readonly _tempPosition = new THREE.Vector3();
   private readonly _tempVelocity = new THREE.Vector3();
@@ -178,12 +179,63 @@ export class ParticleEmitterSystem extends System {
   }
 
   private createDefaultMaterial(): THREE.Material {
-    return new THREE.PointsMaterial({
-      size: 1,
-      opacity: 1,
-      alphaTest: 0.001,
-      sizeAttenuation: true,
-      vertexColors: true,
+    const texture = this._textureLoader.load('/particle-soft-circle.png');
+
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+
+    return new THREE.ShaderMaterial({
+      uniforms: {
+        map: { value: texture },
+      },
+      vertexShader: `
+        attribute vec2 quadPosition;
+        attribute vec3 instancePosition;
+        attribute vec3 instanceColor;
+        attribute float instanceAlpha;
+        attribute float instanceSize;
+        attribute float instanceRotation;
+
+        varying vec2 vUv;
+        varying vec3 vColor;
+        varying float vAlpha;
+
+        void main() {
+          float angleSin = sin(instanceRotation);
+          float angleCos = cos(instanceRotation);
+          vec2 rotatedPosition = vec2(
+            quadPosition.x * angleCos - quadPosition.y * angleSin,
+            quadPosition.x * angleSin + quadPosition.y * angleCos
+          ) * instanceSize;
+
+          vec4 viewPosition = modelViewMatrix * vec4(instancePosition, 1.0);
+          viewPosition.xy += rotatedPosition;
+
+          vUv = uv;
+          vColor = instanceColor;
+          vAlpha = instanceAlpha;
+
+          gl_Position = projectionMatrix * viewPosition;
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D map;
+
+        varying vec2 vUv;
+        varying vec3 vColor;
+        varying float vAlpha;
+
+        void main() {
+          vec4 textureColor = texture2D(map, vUv);
+          float alpha = textureColor.a * vAlpha;
+
+          if (alpha <= 0.001) {
+            discard;
+          }
+
+          gl_FragColor = vec4(textureColor.rgb * vColor, alpha);
+        }
+      `,
       transparent: true,
       depthWrite: false,
       blending: THREE.AdditiveBlending,

@@ -4,30 +4,43 @@ import type { Particle } from './Particle';
 export class ParticleBatch {
   readonly particles: Particle[] = [];
 
-  readonly positions: Float32Array;
-  readonly colors: Float32Array;
-  readonly sizes: Float32Array;
+  readonly instancePositions: Float32Array;
+  readonly instanceColors: Float32Array;
+  readonly instanceAlphas: Float32Array;
+  readonly instanceSizes: Float32Array;
+  readonly instanceRotations: Float32Array;
 
-  readonly geometry: THREE.BufferGeometry;
-  readonly points: THREE.Points;
+  readonly geometry: THREE.InstancedBufferGeometry;
+  readonly mesh: THREE.Mesh<THREE.InstancedBufferGeometry, THREE.Material>;
 
   aliveCount = 0;
 
   constructor(readonly materialId: string, readonly maxParticles: number, material: THREE.Material) {
-    this.positions = new Float32Array(maxParticles * 3);
-    this.colors = new Float32Array(maxParticles * 3);
-    this.sizes = new Float32Array(maxParticles);
+    this.instancePositions = new Float32Array(maxParticles * 3);
+    this.instanceColors = new Float32Array(maxParticles * 3);
+    this.instanceAlphas = new Float32Array(maxParticles);
+    this.instanceSizes = new Float32Array(maxParticles);
+    this.instanceRotations = new Float32Array(maxParticles);
 
-    this.geometry = new THREE.BufferGeometry();
+    this.geometry = new THREE.InstancedBufferGeometry();
 
-    this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
+    this.geometry.setIndex([0, 1, 2, 2, 1, 3]);
+    this.geometry.setAttribute(
+      'quadPosition',
+      new THREE.BufferAttribute(new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5]), 2)
+    );
+    this.geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), 2));
 
-    this.geometry.setAttribute('color', new THREE.BufferAttribute(this.colors, 3));
+    this.geometry.setAttribute('instancePosition', new THREE.InstancedBufferAttribute(this.instancePositions, 3));
+    this.geometry.setAttribute('instanceColor', new THREE.InstancedBufferAttribute(this.instanceColors, 3));
+    this.geometry.setAttribute('instanceAlpha', new THREE.InstancedBufferAttribute(this.instanceAlphas, 1));
+    this.geometry.setAttribute('instanceSize', new THREE.InstancedBufferAttribute(this.instanceSizes, 1));
+    this.geometry.setAttribute('instanceRotation', new THREE.InstancedBufferAttribute(this.instanceRotations, 1));
+    this.geometry.instanceCount = 0;
 
-    this.geometry.setAttribute('size', new THREE.BufferAttribute(this.sizes, 1));
-
-    this.points = new THREE.Points(this.geometry, material);
-    this.points.renderOrder = 10;
+    this.mesh = new THREE.Mesh(this.geometry, material);
+    this.mesh.frustumCulled = false;
+    this.mesh.renderOrder = 10;
 
     // Preallocate particles
     for (let i = 0; i < maxParticles; i++) {
@@ -112,23 +125,27 @@ export class ParticleBatch {
 
       const i3 = index * 3;
 
-      this.positions[i3 + 0] = particle.position.x;
-      this.positions[i3 + 1] = particle.position.y;
-      this.positions[i3 + 2] = particle.position.z;
+      this.instancePositions[i3 + 0] = particle.position.x;
+      this.instancePositions[i3 + 1] = particle.position.y;
+      this.instancePositions[i3 + 2] = particle.position.z;
 
-      this.colors[i3 + 0] = particle.color.r;
-      this.colors[i3 + 1] = particle.color.g;
-      this.colors[i3 + 2] = particle.color.b;
+      this.instanceColors[i3 + 0] = particle.color.r;
+      this.instanceColors[i3 + 1] = particle.color.g;
+      this.instanceColors[i3 + 2] = particle.color.b;
 
-      this.sizes[index] = particle.size;
+      this.instanceAlphas[index] = particle.alpha;
+      this.instanceSizes[index] = particle.size;
+      this.instanceRotations[index] = particle.rotation;
 
       index++;
     }
 
-    this.geometry.setDrawRange(0, index);
+    this.geometry.instanceCount = index;
 
-    this.geometry.attributes.position.needsUpdate = true;
-    this.geometry.attributes.color.needsUpdate = true;
-    this.geometry.attributes.size.needsUpdate = true;
+    this.geometry.attributes.instancePosition.needsUpdate = true;
+    this.geometry.attributes.instanceColor.needsUpdate = true;
+    this.geometry.attributes.instanceAlpha.needsUpdate = true;
+    this.geometry.attributes.instanceSize.needsUpdate = true;
+    this.geometry.attributes.instanceRotation.needsUpdate = true;
   }
 }

@@ -68,7 +68,7 @@ export class SunSystem extends System {
     let [gui] = [...world.query(GuiDebugComponent)][0];
 
     // update sun.
-    for (let [entity, sun] of world.queryWithEntity(SunLightComponent)) {
+    for (let [, sun] of world.queryWithEntity(SunLightComponent)) {
       if (!sun.light) {
         this.createSun(sun, gui);
       }

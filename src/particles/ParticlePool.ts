@@ -29,7 +29,7 @@ export class ParticlePool {
 
     batch = new ParticleBatch(materialId, maxParticles, material);
 
-    this._scene.add(batch.points);
+    this._scene.add(batch.mesh);
 
     this._batches.set(materialId, batch);
 
@@ -92,7 +92,7 @@ export class ParticlePool {
 
       batch.aliveCount = 0;
 
-      batch.geometry.setDrawRange(0, 0);
+      batch.geometry.instanceCount = 0;
     }
   }
 }

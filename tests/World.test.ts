@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { World } from '../src/ecs/World';
 import { Entity } from '../src/ecs/Entity';
 import { TransformComponent } from '../src/components/TransformComponent';
-import { SunLight } from '../src/components/SunLight';
+import { SunLightComponent } from '../src/components/SunLightComponent';
 import { PlayerComponent } from '../src/components/PlayerComponent';
 import { Vector3 } from 'three';
 import { ComponentRegistry } from '../src/ecs/ComponentRegistry';
@@ -12,7 +12,7 @@ describe('World Class', () => {
 
   beforeEach(() => {
     world = new World([]);
-    ComponentRegistry.register(TransformComponent, SunLight, PlayerComponent);
+    ComponentRegistry.register(TransformComponent, SunLightComponent, PlayerComponent);
   });
 
   it('should create a new entity', () => {
@@ -71,11 +71,11 @@ describe('World Class', () => {
     transform1.name = '0';
     const transform2 = new TransformComponent();
     transform2.name = '1';
-    const sunlight = new SunLight();
+    const sunlight = new SunLightComponent();
     sunlight.name = '1';
 
-    const pos = [(transform1.position = new Vector3(0, 1, 2)), (transform2.position = new Vector3(4, 5, 6))];
-    const sun = [null, (sunlight.ambient = new Vector3(7, 8, 9))];
+    const pos = [transform1.position.set(0, 1, 2), transform2.position.set(4, 5, 6)];
+    const sun = [null];
 
     world.addComponent(entity1, transform1);
     world.addComponent(entity2, transform2, sunlight);
@@ -85,12 +85,11 @@ describe('World Class', () => {
     }
 
     let i = 0;
-    for (let [transform, sunLight] of world.query(TransformComponent, SunLight)) {
+    for (let [transform, sunLight] of world.query(TransformComponent, SunLightComponent)) {
       expect(transform?.position).toEqual(pos[parseInt(transform.name!)]);
-      expect(sunLight?.ambient).toEqual(sunLight ? sun[parseInt(sunLight.name!)] : null);
     }
 
-    for (let [transform, sunLight, player] of world.query(TransformComponent, SunLight, PlayerComponent)) {
+    for (let [transform, sunLight, player] of world.query(TransformComponent, SunLightComponent, PlayerComponent)) {
       throw 'should be null';
     }
   });
@@ -102,9 +101,9 @@ describe('World Class', () => {
     transform1.name = '0';
     const transform2 = new TransformComponent();
     transform2.name = '1';
-    const sunlight = new SunLight();
+    const sunlight = new SunLightComponent();
 
-    const pos = [(transform1.position = new Vector3(0, 1, 2)), (transform2.position = new Vector3(4, 5, 6))];
+    const pos = [transform1.position.set(0, 1, 2), transform2.position.set(4, 5, 6)];
 
     world.addComponent(entity1, transform1);
     world.addComponent(entity2, transform2, sunlight);

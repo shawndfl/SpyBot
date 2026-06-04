@@ -60,8 +60,6 @@ export class RenderInitSystem extends System {
             animation.setMixer(mixer).setClips(gltf.animations);
             const idle = gltf.animations.find((a) => a.name == 'Idle');
             if (idle) {
-              const action = mixer.clipAction(idle);
-
               // update so characters are not sitting in a t pose
               animation.play('Idle');
               animation.playFirst();

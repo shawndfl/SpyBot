@@ -1,5 +1,4 @@
 import { createRoot, type Root } from 'react-dom/client';
-import * as THREE from 'three';
 
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
@@ -12,6 +11,7 @@ import { TransformComponent } from '../components/TransformComponent';
 
 export class DebugHudSystem extends System {
   private _container: HTMLDivElement;
+  //@ts-ignore
   private _root: Root;
 
   constructor(componentMask: number) {
@@ -56,6 +56,4 @@ export class DebugHudSystem extends System {
   private alreadyAdded(guiComponent: GuiDebugComponent): boolean {
     return !!guiComponent.gui.folders.find((f) => f._title == 'CameraPosition');
   }
-
-  private onGuiChangeVec3(point: THREE.Vector3): void {}
 }
