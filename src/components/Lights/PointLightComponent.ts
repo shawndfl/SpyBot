@@ -1,14 +1,7 @@
-import * as THREE from 'three';
-import { Component } from '../../ecs/Component';
-import { ComponentRegistry } from '../../ecs/ComponentRegistry';
+import { LightComponent, LightType } from './LightComponent';
 
-export class PointLightComponent extends Component {
-  get mask(): number {
-    return ComponentRegistry.getId(PointLightComponent);
+export class PointLightComponent extends LightComponent {
+  constructor(init?: Partial<PointLightComponent>) {
+    super({ type: LightType.point, ...init });
   }
-  color: THREE.Color = new THREE.Color(THREE.Color.NAMES.blue);
-  intensity: number = 1;
-  distance: number = 0.5;
-  decay: number = 2;
-  castShadow: boolean = false;
 }

@@ -19,9 +19,8 @@ import { MovementSystem } from '../systems/MovementSystem';
 import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
 import { TerrainSystem } from '../systems/TerrainSystem';
-import { LightInitSystem } from '../systems/rendering/LightInitSystem';
-import { LightSyncSystem } from '../systems/rendering/LightSyncSystem';
 import { LightComponent } from '../components/lights/LightComponent';
+import { LightSystem } from '../systems/rendering/LightSystem';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
@@ -40,6 +39,7 @@ import { ParticleEmitterStateComponent } from '../components/particles/ParticleS
 import { DebugModeSystem } from '../systems/DebugModeSystem';
 import { DebugHudSystem } from '../systems/DebugHudSystem';
 import { GuiDebugComponent } from '../components/GuiDebugComponent';
+import { SpotLightComponent } from '../components/lights/SpotLightComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -90,8 +90,9 @@ export class SmallTownState implements GameState {
       new BattleBackgroundSystem(fn(BattleBackgroundComponent), renderer),
 
       new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
-      new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
-      new LightSyncSystem(fn(RendererComponent) | fn(TransformComponent) | fn(LightComponent)),
+
+      new LightSystem(fn(LightComponent) | fn(TransformComponent), scene),
+
       new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
       new AnimationSystem(fn(AnimationComponent)),
       new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
@@ -118,7 +119,7 @@ export class SmallTownState implements GameState {
         offset: new THREE.Vector3(0, 0.5, 0),
         size: new THREE.Vector3(0.5, 1.2, 0.5),
         dynamic: true,
-      })
+      }),
     );
     world.addComponent(player, playerTransform);
 
@@ -150,14 +151,27 @@ export class SmallTownState implements GameState {
     // create lamp post
     const lampPost = world.createEntity();
     world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
-
-    const pointLight = new PointLightComponent();
-    pointLight.castShadow = true;
-    pointLight.color = new THREE.Color(THREE.Color.NAMES.yellow);
-    pointLight.distance = 5;
-
-    world.addComponent(lampPost, pointLight);
-    world.addComponent(lampPost, new TransformComponent().setPosition(0, 0, -2));
+    world.addComponent(
+      lampPost,
+      new SpotLightComponent({
+        castShadow: true,
+        debug: true,
+        color: new THREE.Color(THREE.Color.NAMES.yellow),
+        distance: 15,
+        decay: 0.65,
+        angle: 0.512,
+        penumbra: 0.58,
+        shadowCameraNear: 0.5,
+        shadowCameraFar: 20,
+        intensity: 10,
+      }),
+    );
+    world.addComponent(
+      lampPost,
+      new TransformComponent({
+        position: new THREE.Vector3(0, 2, -2),
+      }),
+    );
 
     // terrain
     const terrain = world.createEntity();
@@ -171,7 +185,7 @@ export class SmallTownState implements GameState {
         heightScale: 0.2,
         repeat: new THREE.Vector2(100, 100),
         grassTexturePath: '/grass.jpg',
-      })
+      }),
     );
 
     // battle boxCollider
@@ -206,7 +220,7 @@ export class SmallTownState implements GameState {
         context: {
           battleId: 'openField',
         },
-      })
+      }),
     );
 
     const battleScene = world.createEntity();

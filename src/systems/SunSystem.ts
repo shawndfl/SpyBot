@@ -103,8 +103,8 @@ export class SunSystem extends System {
 
     light.shadow.mapSize.set(sun.shadowMapSize, sun.shadowMapSize);
 
-    this._scene.add(light);
-    this._scene.add(target);
+    //this._scene.add(light);
+    //this._scene.add(target);
 
     sun.light = light;
     sun.target = target;

@@ -18,6 +18,8 @@ import { InputSystem } from '../systems/InputSystem';
 import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
 import { CameraAnimationSystem } from '../systems/CameraAnimationSystem';
+import { LightComponent } from '../components/lights/LightComponent';
+import { LightSystem } from '../systems/rendering/LightSystem';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
@@ -104,8 +106,7 @@ export class BattleState implements GameState {
       new BattleBackgroundSystem(fn(BattleBackgroundComponent), renderer),
 
       //new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
-      //new LightInitSystem(fn(RendererComponent) | fn(TransformComponent), scene),
-      //new LightSyncSystem(fn(RendererComponent) | fn(TransformComponent) | fn(LightComponent)),
+      new LightSystem(fn(LightComponent) | fn(TransformComponent), scene),
       new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
       new AnimationSystem(fn(AnimationComponent)),
       new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),

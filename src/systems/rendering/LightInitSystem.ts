@@ -23,13 +23,13 @@ export class LightInitSystem extends System {
         lightComponent = world.getComponent(entity, LightComponent);
       } else {
         lightComponent = new LightComponent(new THREE.PointLight());
-        this._scene.add(lightComponent.light);
+        this._scene.add(lightComponent.light!);
         world.addComponent(entity, lightComponent);
       }
 
       if (!(lightComponent.light instanceof THREE.PointLight)) {
         // remove it from its parent
-        lightComponent.light.parent?.remove(lightComponent.light);
+        lightComponent.light?.parent?.remove(lightComponent.light);
         // create a point light and add it to the scene
         lightComponent.light = new THREE.PointLight();
         this._scene.add(lightComponent.light);

@@ -10,7 +10,10 @@ import { AnimationComponent } from '../components/AnimationComponent';
  * Initialize gltf files and loads their animations into animation components
  */
 export class RenderInitSystem extends System {
-  constructor(componentMask: number, private _scene: THREE.Scene) {
+  constructor(
+    componentMask: number,
+    private _scene: THREE.Scene,
+  ) {
     super(componentMask);
   }
 
@@ -72,14 +75,14 @@ export class RenderInitSystem extends System {
         (err) => {
           console.error('Error loading ' + path, err);
           resolve(false);
-        }
+        },
       );
     });
   }
 
   update({ world, dt, events, commands }: UpdateEvent): void {
     // find all entities with a mesh glb and transform component
-    for (let [entity, glb] of world.queryWithEntity(MeshGlbComponent, AnimationComponent)) {
+    for (let [entity, glb] of world.queryWithEntity(MeshGlbComponent)) {
       // if there is no renderer component then add one using the glb
       if (!world.hasComponent(entity, RendererComponent)) {
         const mesh = new THREE.Mesh();

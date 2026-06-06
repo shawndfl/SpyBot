@@ -35,7 +35,6 @@ export class RenderSystem extends System {
     document.body.appendChild(this.renderer.domElement);
     document.body.appendChild(this.stats.dom);
 
-    //TODO disconnect this when done
     window.addEventListener('resize', this.windowResize);
 
     this.renderer.setClearColor(0xcececf); // light blue-gray
