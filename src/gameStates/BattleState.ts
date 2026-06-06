@@ -8,6 +8,7 @@ import { SunLightComponent } from '../components/SunLightComponent';
 import { PlayerComponent } from '../components/PlayerComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { CameraComponent } from '../components/CameraComponent';
+import { CameraAnimationComponent } from '../components/CameraAnimationComponent';
 import { ConstraintComponent } from '../components/ConstraintComponent';
 import { TerrainComponent } from '../components/mesh/TerrainComponent';
 import type { GameState } from '../core/GameState';
@@ -15,8 +16,8 @@ import type { TransitionContext } from '../core/TransitionContext';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { InputSystem } from '../systems/InputSystem';
 import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
-import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
+import { CameraAnimationSystem } from '../systems/CameraAnimationSystem';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
@@ -95,7 +96,7 @@ export class BattleState implements GameState {
       this._inputSystem,
       new DebugModeSystem(fn(CameraComponent)),
       new BattleMenuSystem(fn(BattleMenuComponent)),
-      new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
+      new CameraAnimationSystem(fn(CameraAnimationComponent) | fn(TransformComponent)),
       new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
       new BoxCollisionSystem(fn(BoxColliderComponent), scene),
       new BattleGroundSystem(fn(BattleFieldComponent) | fn(TransformComponent), scene),
@@ -156,7 +157,15 @@ export class BattleState implements GameState {
       position: new THREE.Vector3(10, 10, 10),
       name: 'camera',
     });
-    world.addComponent(camera, cameraTransform);
+    world.addComponent(
+      camera,
+      cameraTransform,
+      new CameraAnimationComponent({
+        targetPosition: new THREE.Vector3(8, 4, 4),
+        targetDirection: new THREE.Vector3(-0.3, 1.3, 0),
+        duration: 1.5,
+      })
+    );
 
     // make sure the camera can follow the player
     const followPlayerConstraint = new ConstraintComponent({

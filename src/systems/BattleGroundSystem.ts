@@ -27,9 +27,11 @@ export class BattleGroundSystem extends System {
           if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             mesh.receiveShadow = true;
+            //mesh.castShadow = true;
           } else if ((child as THREE.Light).isLight) {
             const light = child as THREE.Light;
 
+            light.position.y = 10;
             light.intensity *= 0.002; // make brighter
             light.castShadow = true;
 
