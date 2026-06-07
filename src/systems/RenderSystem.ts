@@ -24,7 +24,11 @@ export class RenderSystem extends System {
     return this._renderer;
   }
 
-  constructor(componentMask: number, private _scene: THREE.Scene, private _renderer: THREE.WebGLRenderer) {
+  constructor(
+    componentMask: number,
+    private _scene: THREE.Scene,
+    private _renderer: THREE.WebGLRenderer,
+  ) {
     super(componentMask);
     this.windowResize = this.onWindowResize.bind(this);
   }
@@ -83,12 +87,6 @@ export class RenderSystem extends System {
         camera.camera.aspect = window.innerWidth / window.innerHeight;
         camera.camera.updateProjectionMatrix();
       }
-    }
-
-    for (let [renderers, transform] of world.query(RendererComponent, TransformComponent)) {
-      renderers.mesh.position.copy(transform.position);
-      renderers.mesh.rotation.copy(transform.rotation);
-      renderers.mesh.scale.copy(transform.scale);
     }
 
     // render for each camera

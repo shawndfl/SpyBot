@@ -2,7 +2,6 @@ import * as THREE from 'three';
 
 import { TransformComponent } from '../components/TransformComponent';
 import { World } from '../ecs/World';
-import { PointLightComponent } from '../components/lights/PointLightComponent';
 import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { SunLightComponent } from '../components/SunLightComponent';
 import { PlayerComponent } from '../components/PlayerComponent';
@@ -106,7 +105,7 @@ export class SmallTownState implements GameState {
 
     // create player
     const player = world.createEntity();
-    const playerTransform = new TransformComponent({ name: 'player' });
+    const playerTransform = new TransformComponent();
     const playerComponent = new PlayerComponent();
     playerComponent.speed = 5.5;
     world.addComponent(player, new MeshGlbComponent({ filename: 'Ness.glb', name: 'player' }));
@@ -128,7 +127,6 @@ export class SmallTownState implements GameState {
     world.addComponent(camera, new CameraComponent());
     const cameraTransform = new TransformComponent({
       position: new THREE.Vector3(10, 10, 10),
-      name: 'camera',
     });
     world.addComponent(camera, cameraTransform);
 

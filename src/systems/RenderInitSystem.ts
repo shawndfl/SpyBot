@@ -5,6 +5,7 @@ import type { UpdateEvent } from '../core/UpdateEvent';
 import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
+import { TransformComponent } from '../components/TransformComponent';
 
 /**
  * Initialize gltf files and loads their animations into animation components
@@ -25,9 +26,13 @@ export class RenderInitSystem extends System {
    * @param animation
    * @returns
    */
-  protected async loadGltf(mesh: THREE.Object3D, path: string, animation?: AnimationComponent): Promise<boolean> {
+  protected async loadGltf(
+    transform: THREE.Object3D,
+    path: string,
+    animation?: AnimationComponent,
+  ): Promise<THREE.Object3D | undefined> {
     if (!path) {
-      return false;
+      return;
     }
     const loader = new GLTFLoader();
     return new Promise((resolve, reject) => {
@@ -36,8 +41,8 @@ export class RenderInitSystem extends System {
         (gltf) => {
           const model = gltf.scene;
 
-          mesh.add(model);
-          this._scene.add(mesh);
+          transform.add(model);
+          this._scene.add(transform);
 
           model.traverse((child) => {
             if ((child as THREE.Mesh).isMesh) {
@@ -52,12 +57,6 @@ export class RenderInitSystem extends System {
             }
           });
 
-          model.traverse((child) => {
-            if (child instanceof THREE.Mesh) {
-              console.log(' material ' + child.material);
-            }
-          });
-
           if (animation) {
             const mixer = new THREE.AnimationMixer(gltf.scene);
             animation.setMixer(mixer).setClips(gltf.animations);
@@ -69,12 +68,12 @@ export class RenderInitSystem extends System {
             }
           }
 
-          resolve(true);
+          resolve(transform);
         },
         undefined,
         (err) => {
           console.error('Error loading ' + path, err);
-          resolve(false);
+          resolve(undefined);
         },
       );
     });
@@ -82,13 +81,14 @@ export class RenderInitSystem extends System {
 
   update({ world, dt, events, commands }: UpdateEvent): void {
     // find all entities with a mesh glb and transform component
-    for (let [entity, glb] of world.queryWithEntity(MeshGlbComponent)) {
+    for (let [entity, glb, transform] of world.queryWithEntity(MeshGlbComponent, TransformComponent)) {
       // if there is no renderer component then add one using the glb
       if (!world.hasComponent(entity, RendererComponent)) {
-        const mesh = new THREE.Mesh();
+        // see if there is an animation
         const animation = world.getComponent(entity, AnimationComponent);
-        this.loadGltf(mesh, glb.filename, animation);
-        const rendererComponent = new RendererComponent(mesh);
+
+        const rootMesh = this.loadGltf(transform.root, glb.filename, animation);
+        const rendererComponent = new RendererComponent(rootMesh);
         world.addComponent(entity, rendererComponent);
       }
     }

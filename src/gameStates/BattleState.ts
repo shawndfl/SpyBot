@@ -120,7 +120,7 @@ export class BattleState implements GameState {
 
     // create player
     const player = world.createEntity();
-    const playerTransform = new TransformComponent({ name: 'player' });
+    const playerTransform = new TransformComponent();
     const playerComponent = new PlayerComponent();
     playerComponent.speed = 5.5;
     world.addComponent(player, new MeshGlbComponent({ filename: 'Ness.glb', name: 'player' }));
@@ -133,7 +133,7 @@ export class BattleState implements GameState {
         offset: new THREE.Vector3(0, 0.5, 0),
         size: new THREE.Vector3(0.5, 1.2, 0.5),
         dynamic: true,
-      })
+      }),
     );
     world.addComponent(player, playerTransform);
 
@@ -147,16 +147,15 @@ export class BattleState implements GameState {
         offset: new THREE.Vector3(0, 0.5, 0),
         size: new THREE.Vector3(0.5, 1.2, 0.5),
         dynamic: true,
-      })
+      }),
     );
-    world.addComponent(enemy, new TransformComponent({ name: 'enemy', position: new THREE.Vector3(0, 0, -4) }));
+    world.addComponent(enemy, new TransformComponent({ position: new THREE.Vector3(0, 0, -4) }));
 
     // camera
     const camera = world.createEntity();
     world.addComponent(camera, new CameraComponent());
     const cameraTransform = new TransformComponent({
       position: new THREE.Vector3(10, 10, 10),
-      name: 'camera',
     });
     world.addComponent(
       camera,
@@ -165,7 +164,7 @@ export class BattleState implements GameState {
         targetPosition: new THREE.Vector3(8, 4, 4),
         targetDirection: new THREE.Vector3(-0.3, 1.3, 0),
         duration: 1.5,
-      })
+      }),
     );
 
     // make sure the camera can follow the player
@@ -194,7 +193,7 @@ export class BattleState implements GameState {
     pointLight.distance = 5;
 
     world.addComponent(lampPost, pointLight);
-    world.addComponent(lampPost, new TransformComponent().setPosition(0, 0, -2));
+    world.addComponent(lampPost, new TransformComponent({ position: new THREE.Vector3(0, 0, -2) }));
 
     // terrain
     const terrain = world.createEntity();
@@ -208,7 +207,7 @@ export class BattleState implements GameState {
         heightScale: 0.0,
         repeat: new THREE.Vector2(100, 100),
         grassTexturePath: '/grass.jpg',
-      })
+      }),
     );
 
     // battle environment
@@ -221,7 +220,7 @@ export class BattleState implements GameState {
       new TransformComponent(),
       new BattleFieldComponent({
         battleGlbFilename: 'battle_basic.glb',
-      })
+      }),
     );
 
     // battle ui
