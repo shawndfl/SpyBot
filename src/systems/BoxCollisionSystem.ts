@@ -11,7 +11,10 @@ import type { World } from '../ecs/World';
 export class BoxCollisionSystem extends System {
   //private _tmpPosition = new THREE.Vector3();
 
-  constructor(componentMask: number, private scene: THREE.Scene) {
+  constructor(
+    componentMask: number,
+    private scene: THREE.Scene,
+  ) {
     super(componentMask);
   }
 
@@ -23,7 +26,7 @@ export class BoxCollisionSystem extends System {
   private checkForBattles(
     world: World,
     commands: CommandBuffer,
-    allColliders: [TransformComponent, BoxColliderComponent][]
+    allColliders: [TransformComponent, BoxColliderComponent][],
   ): void {
     const battleColliders = [...world.query(TransformComponent, BoxColliderComponent, BattleTriggerComponent)];
     for (const [transform, collider, battleTriggerComponent] of battleColliders) {
@@ -32,7 +35,7 @@ export class BoxCollisionSystem extends System {
           collider.debugMesh = this.createDebugMesh(collider);
           this.scene.add(collider.debugMesh);
         }
-        collider.debugMesh.position.copy(transform.position).add(collider.offset);
+        collider.debugMesh.position.copy(transform.worldPosition).add(collider.offset);
       } else {
         if (collider.debugMesh) {
           this.scene.remove(collider.debugMesh);
@@ -79,7 +82,7 @@ export class BoxCollisionSystem extends System {
     selfTransform: TransformComponent,
     selfCollider: BoxColliderComponent,
     nextPosition: THREE.Vector3,
-    allColliders: [TransformComponent, BoxColliderComponent][]
+    allColliders: [TransformComponent, BoxColliderComponent][],
   ): boolean {
     const selfBox = selfCollider.getBox(nextPosition);
 

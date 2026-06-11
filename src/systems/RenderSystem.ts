@@ -4,8 +4,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
 
 import type { UpdateEvent } from '../core/UpdateEvent';
-import { TransformComponent } from '../components/TransformComponent';
-import { RendererComponent } from '../components/mesh/RendererComponent';
 import { CameraComponent } from '../components/CameraComponent';
 
 export class RenderSystem extends System {

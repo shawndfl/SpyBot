@@ -28,7 +28,10 @@ export class LightSystem extends System {
   private readonly debugStates = new WeakMap<LightComponent, LightDebugState>();
   private nextDebugId = 1;
 
-  constructor(componentMask: number, private scene: THREE.Scene) {
+  constructor(
+    componentMask: number,
+    private scene: THREE.Scene,
+  ) {
     super(componentMask);
   }
 
@@ -45,7 +48,7 @@ export class LightSystem extends System {
       light.castShadow = lightComponent.castShadow;
 
       // sync position of the light
-      light.position.copy(transform.position);
+      light.position.copy(transform.worldPosition);
 
       // handle spot light
       if (light instanceof THREE.SpotLight) {
@@ -104,9 +107,12 @@ export class LightSystem extends System {
     const colorControl = { color: `#${lightComponent.color.getHexString()}` };
 
     folder.add(lightComponent, 'type', Object.values(LightType)).name('type').listen();
-    folder.addColor(colorControl, 'color').name('color').onChange((color: string) => {
-      lightComponent.color.set(color);
-    });
+    folder
+      .addColor(colorControl, 'color')
+      .name('color')
+      .onChange((color: string) => {
+        lightComponent.color.set(color);
+      });
     folder.add(lightComponent, 'intensity', 0, 20, 0.01).name('intensity').listen();
 
     const positionFolder = folder.addFolder('Position');
@@ -131,7 +137,10 @@ export class LightSystem extends System {
 
     if (lightComponent.type === LightType.spot) {
       const spotFolder = folder.addFolder('Spot');
-      spotFolder.add(lightComponent, 'angle', 0.01, Math.PI / 2, 0.001).name('angle').listen();
+      spotFolder
+        .add(lightComponent, 'angle', 0.01, Math.PI / 2, 0.001)
+        .name('angle')
+        .listen();
       spotFolder.add(lightComponent, 'penumbra', 0, 1, 0.01).name('penumbra').listen();
     }
 
@@ -288,8 +297,8 @@ export class LightSystem extends System {
     if (lightComponent.target) {
       lightComponent.lightTarget.position.copy(lightComponent.target);
     } else {
-      this.spotDirection.set(0, 0, -1).applyEuler(transform.rotation).normalize();
-      lightComponent.lightTarget.position.copy(transform.position).add(this.spotDirection);
+      this.spotDirection.set(0, 0, -1).applyQuaternion(transform.worldRotation).normalize();
+      lightComponent.lightTarget.position.copy(transform.worldPosition).add(this.spotDirection);
     }
 
     light.target = lightComponent.lightTarget;
@@ -299,7 +308,7 @@ export class LightSystem extends System {
   private syncDirectionalLight(
     light: THREE.DirectionalLight,
     lightComponent: LightComponent,
-    transform: TransformComponent
+    transform: TransformComponent,
   ): void {
     if (!lightComponent.lightTarget) {
       lightComponent.lightTarget = new THREE.Object3D();
@@ -309,8 +318,8 @@ export class LightSystem extends System {
     if (lightComponent.target) {
       lightComponent.lightTarget.position.copy(lightComponent.target);
     } else {
-      this.spotDirection.set(0, 0, -1).applyEuler(transform.rotation).normalize();
-      lightComponent.lightTarget.position.copy(transform.position).add(this.spotDirection);
+      this.spotDirection.set(0, 0, -1).applyQuaternion(transform.worldRotation).normalize();
+      lightComponent.lightTarget.position.copy(transform.worldPosition).add(this.spotDirection);
     }
 
     light.target = lightComponent.lightTarget;

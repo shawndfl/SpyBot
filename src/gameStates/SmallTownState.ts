@@ -105,10 +105,10 @@ export class SmallTownState implements GameState {
 
     // create player
     const player = world.createEntity();
-    const playerTransform = new TransformComponent();
+    const playerTransform = new TransformComponent({ scale: new THREE.Vector3(1, 1, -1) });
     const playerComponent = new PlayerComponent();
     playerComponent.speed = 5.5;
-    world.addComponent(player, new MeshGlbComponent({ filename: 'Ness.glb', name: 'player' }));
+    world.addComponent(player, new MeshGlbComponent({ filename: 'player.glb', name: 'player' }));
     world.addComponent(player, new AnimationComponent());
     world.addComponent(player, new PlayerComponent());
     world.addComponent(
@@ -148,9 +148,15 @@ export class SmallTownState implements GameState {
 
     // create lamp post
     const lampPost = world.createEntity();
+    const lampPostTransform = new TransformComponent({
+      position: new THREE.Vector3(0, 0, -2),
+    });
     world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
+    world.addComponent(lampPost, lampPostTransform);
+
+    const lampLight = world.createEntity();
     world.addComponent(
-      lampPost,
+      lampLight,
       new SpotLightComponent({
         castShadow: true,
         debug: true,
@@ -165,10 +171,10 @@ export class SmallTownState implements GameState {
       }),
     );
     world.addComponent(
-      lampPost,
+      lampLight,
       new TransformComponent({
-        position: new THREE.Vector3(0, 2, -2),
-      }),
+        position: new THREE.Vector3(0, 2, 0),
+      }).parentTo(lampPostTransform.root),
     );
 
     // terrain

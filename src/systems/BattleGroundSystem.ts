@@ -6,7 +6,10 @@ import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
 
 export class BattleGroundSystem extends System {
-  constructor(componentMask: number, private _scene: THREE.Scene) {
+  constructor(
+    componentMask: number,
+    private _scene: THREE.Scene,
+  ) {
     super(componentMask);
   }
 
@@ -53,7 +56,7 @@ export class BattleGroundSystem extends System {
       (error) => {
         console.error(`Failed to load battle ground GLB: ${battleField.battleGlbFilename}`, error);
         battleField.isLoading = false;
-      }
+      },
     );
   }
 
@@ -76,9 +79,9 @@ export class BattleGroundSystem extends System {
         continue;
       }
 
-      battleField.groundMesh.position.copy(transform.position);
-      battleField.groundMesh.rotation.copy(transform.rotation);
-      battleField.groundMesh.scale.copy(transform.scale);
+      battleField.groundMesh.position.copy(transform.worldPosition);
+      battleField.groundMesh.setRotationFromQuaternion(transform.worldRotation);
+      battleField.groundMesh.scale.copy(transform.worldScale);
     }
   }
 }

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 import { TransformComponent } from '../components/TransformComponent';
 import { World } from '../ecs/World';
-import { PointLightComponent } from '../components/lights/PointLightComponent';
+
 import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { SunLightComponent } from '../components/SunLightComponent';
 import { PlayerComponent } from '../components/PlayerComponent';
@@ -10,7 +10,7 @@ import { AnimationComponent } from '../components/AnimationComponent';
 import { CameraComponent } from '../components/CameraComponent';
 import { CameraAnimationComponent } from '../components/CameraAnimationComponent';
 import { ConstraintComponent } from '../components/ConstraintComponent';
-import { TerrainComponent } from '../components/mesh/TerrainComponent';
+
 import type { GameState } from '../core/GameState';
 import type { TransitionContext } from '../core/TransitionContext';
 import type { UpdateEvent } from '../core/UpdateEvent';
@@ -120,10 +120,13 @@ export class BattleState implements GameState {
 
     // create player
     const player = world.createEntity();
-    const playerTransform = new TransformComponent();
+    const playerTransform = new TransformComponent({
+      rotation: new THREE.Euler(0, Math.PI, 0, 'YXZ'),
+      position: new THREE.Vector3(0, 0, 5),
+    });
     const playerComponent = new PlayerComponent();
     playerComponent.speed = 5.5;
-    world.addComponent(player, new MeshGlbComponent({ filename: 'Ness.glb', name: 'player' }));
+    world.addComponent(player, new MeshGlbComponent({ filename: 'player.glb', name: 'player' }));
     world.addComponent(player, new AnimationComponent());
     world.addComponent(player, new PlayerComponent());
     world.addComponent(
@@ -162,53 +165,14 @@ export class BattleState implements GameState {
       cameraTransform,
       new CameraAnimationComponent({
         targetPosition: new THREE.Vector3(8, 4, 4),
-        targetDirection: new THREE.Vector3(-0.3, 1.3, 0),
+        targetDirection: new THREE.Vector3(0.9, 0.386, 0.194),
         duration: 1.5,
       }),
     );
 
-    // make sure the camera can follow the player
-    const followPlayerConstraint = new ConstraintComponent({
-      targetOffset: new THREE.Vector3(0, 1.5, 5.5),
-      FarMovementSpeed: 10,
-      closeMovementSpeed: playerComponent.speed + 0.01,
-      outerDistance: 10,
-      innerDistance: 7,
-      source: cameraTransform,
-      target: playerTransform,
-    });
-    world.addComponent(camera, followPlayerConstraint);
-
     // create sun
     const sun = world.createEntity();
     world.addComponent(sun, new SunLightComponent().setDayLengthInMs(120000).setStartTime(8));
-
-    // create lamp post
-    const lampPost = world.createEntity();
-    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
-
-    const pointLight = new PointLightComponent();
-    pointLight.castShadow = true;
-    pointLight.color = new THREE.Color(THREE.Color.NAMES.yellow);
-    pointLight.distance = 5;
-
-    world.addComponent(lampPost, pointLight);
-    world.addComponent(lampPost, new TransformComponent({ position: new THREE.Vector3(0, 0, -2) }));
-
-    // terrain
-    const terrain = world.createEntity();
-    world.addComponent(terrain, new TransformComponent());
-    world.addComponent(
-      terrain,
-      new TerrainComponent({
-        width: 20,
-        depth: 20,
-        segments: 150,
-        heightScale: 0.0,
-        repeat: new THREE.Vector2(100, 100),
-        grassTexturePath: '/grass.jpg',
-      }),
-    );
 
     // battle environment
     const battleScene = world.createEntity();

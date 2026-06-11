@@ -4,11 +4,14 @@ import { ComponentRegistry } from '../ecs/ComponentRegistry';
 
 export interface TransformComponentInit {
   position: THREE.Vector3;
-  rotation: THREE.Vector3;
+  rotation: THREE.Euler;
   scale: THREE.Vector3;
 }
 
 export class TransformComponent extends Component {
+  private _tempVector3: THREE.Vector3 = new THREE.Vector3();
+  private _tempRotation: THREE.Quaternion = new THREE.Quaternion();
+
   get mask(): number {
     return ComponentRegistry.getId(TransformComponent);
   }
@@ -22,12 +25,34 @@ export class TransformComponent extends Component {
   get position(): THREE.Vector3 {
     return this._root.position;
   }
+
   get rotation(): THREE.Euler {
     return this._root.rotation;
   }
 
   get scale(): THREE.Vector3 {
     return this._root.scale;
+  }
+
+  get worldDirection(): Readonly<THREE.Vector3> {
+    return this._root.getWorldDirection(this._tempVector3);
+  }
+
+  get worldPosition(): Readonly<THREE.Vector3> {
+    return this._root.getWorldPosition(this._tempVector3);
+  }
+
+  get worldRotation(): Readonly<THREE.Quaternion> {
+    return this._root.getWorldQuaternion(this._tempRotation);
+  }
+
+  get worldScale(): Readonly<THREE.Vector3> {
+    return this._root.getWorldScale(this._tempVector3);
+  }
+
+  parentTo(target: THREE.Object3D): TransformComponent {
+    target.add(this._root);
+    return this;
   }
 
   constructor(init?: Partial<TransformComponentInit>) {

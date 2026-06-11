@@ -30,7 +30,11 @@ export class SunSystem extends System {
 
   private _isSunUp: boolean = false;
 
-  constructor(componentMask: number, private _scene: THREE.Scene, private _renderer: THREE.WebGLRenderer) {
+  constructor(
+    componentMask: number,
+    private _scene: THREE.Scene,
+    private _renderer: THREE.WebGLRenderer,
+  ) {
     super(componentMask);
     this._renderer.toneMappingExposure = 2.0; // try 1.5 to 2.5
   }
@@ -103,8 +107,8 @@ export class SunSystem extends System {
 
     light.shadow.mapSize.set(sun.shadowMapSize, sun.shadowMapSize);
 
-    //this._scene.add(light);
-    //this._scene.add(target);
+    this._scene.add(light);
+    this._scene.add(target);
 
     sun.light = light;
     sun.target = target;
@@ -252,7 +256,7 @@ export class SunSystem extends System {
   private sunPosition(
     time: number,
     lat: number,
-    lon: number
+    lon: number,
   ): {
     azimuth: number;
     elevation: number;

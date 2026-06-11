@@ -46,9 +46,22 @@ export class DebugHudSystem extends System {
         folder.add(cameraTransform.position, 'y').listen().decimals(3);
         folder.add(cameraTransform.position, 'z').listen().decimals(3);
         const folder2 = gui.addFolder('CameraDirection');
-        folder2.add(cameraTransform.rotation, 'x').listen().decimals(3);
-        folder2.add(cameraTransform.rotation, 'y').listen().decimals(3);
-        folder2.add(cameraTransform.rotation, 'z').listen().decimals(3);
+
+        const directionDebug = {
+          get x() {
+            return cameraTransform.worldDirection.x;
+          },
+          get y() {
+            return cameraTransform.worldDirection.y;
+          },
+          get z() {
+            return cameraTransform.worldDirection.z;
+          },
+        };
+
+        folder2.add(directionDebug, 'x').listen().decimals(3);
+        folder2.add(directionDebug, 'y').listen().decimals(3);
+        folder2.add(directionDebug, 'z').listen().decimals(3);
       }
     }
   }

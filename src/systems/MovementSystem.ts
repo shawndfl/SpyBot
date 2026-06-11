@@ -37,7 +37,7 @@ export class MovementSystem extends System {
 
           transform.position.add(direction);
 
-          animation.play('Walk');
+          animation.play('Running');
 
           /*
           const scaleX = inputEvents.payload.state.moveX * this.speed * dt;
