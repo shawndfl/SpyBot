@@ -150,7 +150,7 @@ export class SunSystem extends System {
       sun.intensity = fade;
     }
 
-    if (elevation < 0) {
+    if (elevation <= 0) {
       sun.intensity = 0;
       this._sky.sky.visible = false;
     } else if (elevation > maxAngle) {
@@ -158,6 +158,8 @@ export class SunSystem extends System {
     } else if (elevation > 0) {
       this._sky.sky.visible = true;
     }
+
+    sun.isDayTime = elevation > 0;
 
     sun.light!.intensity = sun.intensity;
     const ambient = sun.ambientDayTime

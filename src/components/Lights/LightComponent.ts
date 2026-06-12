@@ -19,6 +19,8 @@ export class LightComponent extends Component {
   decay: number = 2;
   castShadow: boolean = false;
 
+  visible: boolean = true;
+
   angle: number = Math.PI / 3;
   penumbra: number = 0;
   target?: THREE.Vector3;
@@ -42,7 +44,7 @@ export class LightComponent extends Component {
     return ComponentRegistry.getId(LightComponent);
   }
 
-  constructor(init?: Partial<LightComponent> | THREE.Light) {
+  constructor(init?: Partial<LightComponent>) {
     super();
 
     if (init instanceof THREE.Light) {

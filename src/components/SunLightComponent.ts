@@ -22,6 +22,11 @@ export class SunLightComponent extends Component {
   color = 0xffffff;
   intensity = 2;
 
+  /**
+   * SunSystem sets this value as the sun moves
+   */
+  isDayTime?: boolean;
+
   shadowSize = 5;
   shadowNear = 1;
   shadowFar = 120;

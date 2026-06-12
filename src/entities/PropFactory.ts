@@ -4,6 +4,8 @@ import { TransformComponent } from '../components/TransformComponent';
 import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 
 import { PointLightComponent } from '../components/lights/PointLightComponent';
+import { LampPostComponent } from '../components/LampPostComponent';
+import { LinkedEntity } from '../components/LinkedEntity';
 
 export interface LampPostArgs {
   position: THREE.Vector3;
@@ -26,13 +28,16 @@ export class PropFactory {
 
     // create lamp post
     const lampPost = world.createEntity();
+    const lampLight = world.createEntity();
+
     const lampPostTransform = new TransformComponent({
       position: position,
     });
-    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
-    world.addComponent(lampPost, lampPostTransform);
 
-    const lampLight = world.createEntity();
+    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
+    world.addComponent(lampPost, new LampPostComponent());
+    world.addComponent(lampPost, lampPostTransform);
+    world.addComponent(lampPost, new LinkedEntity({ name: 'light', entity: lampLight }));
 
     world.addComponent(
       lampLight,

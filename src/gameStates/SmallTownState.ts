@@ -34,6 +34,7 @@ import { DebugHudSystem } from '../systems/DebugHudSystem';
 import { GuiDebugComponent } from '../components/GuiDebugComponent';
 import { PropFactory } from '../entities/PropFactory';
 import { EnemySpawnFactory } from '../entities/EnemySpawnFactory';
+import { LampPostSystem } from '../systems/LampPostSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -88,6 +89,7 @@ export class SmallTownState implements GameState {
 
       new SunSystem(scene, renderer),
 
+      new LampPostSystem(),
       new LightSystem(scene),
 
       new AnimationSystem(),

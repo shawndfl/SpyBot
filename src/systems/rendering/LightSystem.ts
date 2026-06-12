@@ -36,6 +36,12 @@ export class LightSystem extends System {
     for (const [transform, lightComponent] of world.query(TransformComponent, LightComponent)) {
       const light = this.getOrCreateLight(lightComponent);
 
+      if (!lightComponent.visible) {
+        light.visible = false;
+        continue;
+      }
+
+      light.visible = true;
       light.color.copy(lightComponent.color);
       light.intensity = lightComponent.intensity;
       if (light instanceof THREE.PointLight || light instanceof THREE.SpotLight) {
