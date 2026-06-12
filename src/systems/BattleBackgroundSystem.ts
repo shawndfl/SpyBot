@@ -16,8 +16,8 @@ export class BattleBackgroundSystem extends System {
   private _bgCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
   private _bgTexture?: THREE.CanvasTexture;
 
-  constructor(componentMask: number, private _renderer: THREE.WebGLRenderer) {
-    super(componentMask);
+  constructor(private _renderer: THREE.WebGLRenderer) {
+    super();
   }
 
   update({ world, dt }: UpdateEvent): void {

@@ -6,11 +6,8 @@ import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
 
 export class BattleGroundSystem extends System {
-  constructor(
-    componentMask: number,
-    private _scene: THREE.Scene,
-  ) {
-    super(componentMask);
+  constructor(private _scene: THREE.Scene) {
+    super();
   }
 
   private loadGround(battleField: BattleFieldComponent): void {

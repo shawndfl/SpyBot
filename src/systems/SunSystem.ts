@@ -31,11 +31,10 @@ export class SunSystem extends System {
   private _isSunUp: boolean = false;
 
   constructor(
-    componentMask: number,
     private _scene: THREE.Scene,
     private _renderer: THREE.WebGLRenderer,
   ) {
-    super(componentMask);
+    super();
     this._renderer.toneMappingExposure = 2.0; // try 1.5 to 2.5
   }
 

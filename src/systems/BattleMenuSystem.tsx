@@ -10,8 +10,8 @@ export class BattleMenuSystem extends System {
   private _container: HTMLDivElement;
   private _root: Root;
 
-  constructor(componentMask: number) {
-    super(componentMask);
+  constructor() {
+    super();
 
     this._container = document.createElement('div');
     this._container.className = 'battle-menu-root';

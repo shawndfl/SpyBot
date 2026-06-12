@@ -11,11 +11,8 @@ import type { World } from '../ecs/World';
 export class BoxCollisionSystem extends System {
   //private _tmpPosition = new THREE.Vector3();
 
-  constructor(
-    componentMask: number,
-    private scene: THREE.Scene,
-  ) {
-    super(componentMask);
+  constructor(private scene: THREE.Scene) {
+    super();
   }
 
   update({ world, commands }: UpdateEvent): void {

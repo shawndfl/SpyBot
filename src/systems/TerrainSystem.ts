@@ -7,8 +7,8 @@ import { TransformComponent } from '../components/TransformComponent';
 export class TerrainSystem extends System {
   private textureLoader = new THREE.TextureLoader();
 
-  constructor(componentMask: number, private _scene: THREE.Scene) {
-    super(componentMask);
+  constructor(private _scene: THREE.Scene) {
+    super();
   }
 
   update(data: UpdateEvent): void {

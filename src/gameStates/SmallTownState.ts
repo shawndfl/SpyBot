@@ -13,14 +13,11 @@ import type { GameState } from '../core/GameState';
 import type { TransitionContext } from '../core/TransitionContext';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { InputSystem } from '../systems/InputSystem';
-import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
 import { MovementSystem } from '../systems/MovementSystem';
 import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
 import { TerrainSystem } from '../systems/TerrainSystem';
-import { LightComponent } from '../components/lights/LightComponent';
 import { LightSystem } from '../systems/rendering/LightSystem';
-import { RendererComponent } from '../components/mesh/RendererComponent';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { RenderSystem } from '../systems/RenderSystem';
@@ -31,10 +28,7 @@ import { BattleBackgroundComponent } from '../components/BattleBackgroundCompone
 import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
 import { SunSystem } from '../systems/SunSystem';
 import { Engine } from '../core/Engine';
-import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
 import { ParticleEmitterSystem } from '../systems/ParticleEmitterSystem';
-import { ParticleEmitterComponent } from '../components/particles/ParticleEmitterComponent';
-import { ParticleEmitterStateComponent } from '../components/particles/ParticleStateComponent';
 import { DebugModeSystem } from '../systems/DebugModeSystem';
 import { DebugHudSystem } from '../systems/DebugHudSystem';
 import { GuiDebugComponent } from '../components/GuiDebugComponent';
@@ -73,31 +67,35 @@ export class SmallTownState implements GameState {
   }
 
   protected createWorld(): World {
-    const fn = (x: ComponentCtor) => ComponentRegistry.getId(x);
     const scene = this._scene;
     const renderer = Engine.renderer;
 
-    this._inputSystem = new InputSystem(fn(TransformComponent));
+    this._inputSystem = new InputSystem();
     const world = new World([
       this._inputSystem,
-      new DebugModeSystem(fn(CameraComponent)),
-      new MovementSystem(fn(PlayerComponent) | fn(TransformComponent)),
-      new ConstraintSystem(fn(ConstraintComponent) | fn(TransformComponent)),
-      new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
-      new BoxCollisionSystem(fn(BoxColliderComponent), scene),
-      new TerrainSystem(fn(TerrainComponent) | fn(TransformComponent), scene),
+      new DebugModeSystem(),
 
-      new BattleBackgroundSystem(fn(BattleBackgroundComponent), renderer),
+      // load glbs and create rendererComponents
+      new RenderInitSystem(scene),
 
-      new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
+      new MovementSystem(),
+      new ConstraintSystem(),
+      new CameraSyncSystem(),
+      new BoxCollisionSystem(scene),
+      new TerrainSystem(scene),
 
-      new LightSystem(fn(LightComponent) | fn(TransformComponent), scene),
+      new BattleBackgroundSystem(renderer),
 
-      new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
-      new AnimationSystem(fn(AnimationComponent)),
-      new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
-      new ParticleEmitterSystem(fn(ParticleEmitterComponent), scene),
-      new DebugHudSystem(fn(GuiDebugComponent)),
+      new SunSystem(scene, renderer),
+
+      new LightSystem(scene),
+
+      new AnimationSystem(),
+
+      // render systems
+      new RenderSystem(scene, renderer),
+      new ParticleEmitterSystem(scene),
+      new DebugHudSystem(),
     ]);
 
     // root level entity

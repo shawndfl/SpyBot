@@ -11,11 +11,8 @@ import { TransformComponent } from '../components/TransformComponent';
  * Initialize gltf files and loads their animations into animation components
  */
 export class RenderInitSystem extends System {
-  constructor(
-    componentMask: number,
-    private _scene: THREE.Scene,
-  ) {
-    super(componentMask);
+  constructor(private _scene: THREE.Scene) {
+    super();
   }
 
   update({ world, dt, events, commands }: UpdateEvent): void {

@@ -28,11 +28,8 @@ export class LightSystem extends System {
   private readonly debugStates = new WeakMap<LightComponent, LightDebugState>();
   private nextDebugId = 1;
 
-  constructor(
-    componentMask: number,
-    private scene: THREE.Scene,
-  ) {
-    super(componentMask);
+  constructor(private scene: THREE.Scene) {
+    super();
   }
 
   update({ world }: UpdateEvent): void {
@@ -61,7 +58,7 @@ export class LightSystem extends System {
       }
 
       // update shadows
-      //this.syncShadow(light, lightComponent);
+      this.syncShadow(light, lightComponent);
 
       // setup debug. Show Gui and helpers for lights
       if (lightComponent.debug) {

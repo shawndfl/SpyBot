@@ -5,7 +5,6 @@ import { ParticleEmitterComponent } from '../components/particles/ParticleEmitte
 import { ParticleEmitterStateComponent } from '../components/particles/ParticleStateComponent';
 import { TransformComponent } from '../components/TransformComponent';
 import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
-import { BattleBackgroundComponent } from '../components/BattleBackgroundComponent';
 
 export interface EnemySpawnFactoryArgs {
   position: THREE.Vector3;

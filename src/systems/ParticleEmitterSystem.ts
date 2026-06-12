@@ -15,8 +15,8 @@ export class ParticleEmitterSystem extends System {
   private readonly _tempPosition = new THREE.Vector3();
   private readonly _tempVelocity = new THREE.Vector3();
 
-  constructor(componentMask: number, private readonly _scene: THREE.Scene) {
-    super(componentMask);
+  constructor(private readonly _scene: THREE.Scene) {
+    super();
     this._pool = new ParticlePool(this._scene);
   }
 
@@ -24,7 +24,7 @@ export class ParticleEmitterSystem extends System {
     for (const [transform, emitter, state] of world.query(
       TransformComponent,
       ParticleEmitterComponent,
-      ParticleEmitterStateComponent
+      ParticleEmitterStateComponent,
     )) {
       if (!emitter.playing) {
         continue;
@@ -33,7 +33,7 @@ export class ParticleEmitterSystem extends System {
       state.elapsed += dt;
 
       const batch = this._pool.getOrCreateBatch(emitter.materialId, emitter.maxParticles, () =>
-        this.createDefaultMaterial()
+        this.createDefaultMaterial(),
       );
 
       if (emitter.burstCount > 0 && !state.hasBurstFired) {
@@ -64,7 +64,7 @@ export class ParticleEmitterSystem extends System {
     batch: ParticleBatch,
     transform: TransformComponent,
     emitter: ParticleEmitterComponent,
-    count: number
+    count: number,
   ): void {
     for (let i = 0; i < count; i++) {
       const particle = batch.getDeadParticle();

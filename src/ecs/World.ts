@@ -18,7 +18,6 @@ import type { System } from './System';
 export class World {
   private components = new Map<number, Map<number, Component>>();
   private entityManager: EntityManager = new EntityManager();
-  private entityMasks: number[] = [];
   private _resources: ResourceManager = new ResourceManager();
 
   get resources(): ResourceManager {
@@ -32,9 +31,7 @@ export class World {
   constructor(private _systems: System[]) {}
 
   createEntity(): Entity {
-    const entity = this.entityManager.create();
-    this.entityMasks[entity.id] = 0;
-    return entity;
+    return this.entityManager.create();
   }
 
   destroyEntity(entity: Entity) {
@@ -52,7 +49,6 @@ export class World {
     }
 
     this.entityManager.destroy(entity);
-    this.entityMasks[entity.id] = 0;
   }
 
   removeComponent(entity: Entity, componentType: ComponentCtor): void {
@@ -60,7 +56,6 @@ export class World {
       return;
     }
     const key = ComponentRegistry.getId(componentType);
-    this.entityMasks[entity.id] &= ~key;
 
     // if there is a component destroy it
     if (this.components.get(key)?.has(entity.id)) {
@@ -80,11 +75,8 @@ export class World {
         this.components.set(key, new Map<number, Component>());
       }
 
-      this.entityMasks[entity.id] |= component.mask;
-
       this.components.get(key)!.set(entity.id, component);
     }
-    this.updateEntitySystems(entity);
   }
 
   hasComponent(entity: Entity, ...components: ComponentCtor[]): boolean {
@@ -95,20 +87,6 @@ export class World {
       }
     }
     return false;
-  }
-
-  private updateEntitySystems(entity: Entity) {
-    const entityMask = this.entityMasks[entity.id];
-
-    for (const system of this.systems) {
-      const matches = (entityMask & system.mask) === system.mask;
-
-      if (matches) {
-        system.entities.add(entity);
-      } else {
-        system.entities.delete(entity);
-      }
-    }
   }
 
   getComponent<T extends ComponentCtor>(entity: Entity, componentType: T): ComponentFromCtor<T> {

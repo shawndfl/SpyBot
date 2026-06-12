@@ -9,18 +9,14 @@ import { PlayerComponent } from '../components/PlayerComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { CameraComponent } from '../components/CameraComponent';
 import { CameraAnimationComponent } from '../components/CameraAnimationComponent';
-import { ConstraintComponent } from '../components/ConstraintComponent';
 
 import type { GameState } from '../core/GameState';
 import type { TransitionContext } from '../core/TransitionContext';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { InputSystem } from '../systems/InputSystem';
-import { ComponentRegistry, type ComponentCtor } from '../ecs/ComponentRegistry';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
 import { CameraAnimationSystem } from '../systems/CameraAnimationSystem';
-import { LightComponent } from '../components/lights/LightComponent';
 import { LightSystem } from '../systems/rendering/LightSystem';
-import { RendererComponent } from '../components/mesh/RendererComponent';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { RenderSystem } from '../systems/RenderSystem';
@@ -72,7 +68,6 @@ export class BattleState implements GameState {
   }
 
   protected createWorld(): World {
-    const fn = (x: ComponentCtor) => ComponentRegistry.getId(x);
     const scene = this._scene;
     const renderer = Engine.renderer;
 
@@ -93,25 +88,25 @@ export class BattleState implements GameState {
       //scene.background = hdr; // optional: visible sky
     });
 
-    this._inputSystem = new InputSystem(fn(TransformComponent));
+    this._inputSystem = new InputSystem();
     const world = new World([
       this._inputSystem,
-      new DebugModeSystem(fn(CameraComponent)),
-      new BattleMenuSystem(fn(BattleMenuComponent)),
-      new CameraAnimationSystem(fn(CameraAnimationComponent) | fn(TransformComponent)),
-      new CameraSyncSystem(fn(CameraComponent) | fn(TransformComponent)),
-      new BoxCollisionSystem(fn(BoxColliderComponent), scene),
-      new BattleGroundSystem(fn(BattleFieldComponent) | fn(TransformComponent), scene),
+      new DebugModeSystem(),
+      new BattleMenuSystem(),
+      new CameraAnimationSystem(),
+      new CameraSyncSystem(),
+      new BoxCollisionSystem(scene),
+      new BattleGroundSystem(scene),
 
-      new BattleBackgroundSystem(fn(BattleBackgroundComponent), renderer),
+      new BattleBackgroundSystem(renderer),
 
-      //new SunSystem(fn(SunLightComponent) | fn(CameraComponent) | fn(PlayerComponent), scene, renderer),
-      new LightSystem(fn(LightComponent) | fn(TransformComponent), scene),
-      new RenderInitSystem(fn(TransformComponent) | fn(MeshGlbComponent), scene),
-      new AnimationSystem(fn(AnimationComponent)),
-      new RenderSystem(fn(RendererComponent) | fn(TransformComponent) | fn(SunLightComponent), scene, renderer),
+      //new SunSystem(scene, renderer),
+      new LightSystem(scene),
+      new RenderInitSystem(scene),
+      new AnimationSystem(),
+      new RenderSystem(scene, renderer),
 
-      new DebugHudSystem(fn(GuiDebugComponent)),
+      new DebugHudSystem(),
     ]);
 
     // root level entity

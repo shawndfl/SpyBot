@@ -11,8 +11,8 @@ export class InputSystem extends System {
   private keyboardAdapter: KeyboardAdapter;
   private gameInputEvent: GameInputEvent;
 
-  constructor(componentMask: number) {
-    super(componentMask);
+  constructor() {
+    super();
     this.InputManager = new InputManager();
     this.keyboardAdapter = new KeyboardAdapter(this.InputManager);
     this.gameInputEvent = new GameInputEvent(this.InputManager);

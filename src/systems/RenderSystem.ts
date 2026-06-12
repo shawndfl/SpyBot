@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { System } from '../ecs/System';
 
 import type { UpdateEvent } from '../core/UpdateEvent';
@@ -11,8 +10,6 @@ export class RenderSystem extends System {
   private windowResize: () => void;
 
   private _resizedCalled?: boolean;
-
-  private _orbitControls?: OrbitControls;
 
   public get scene(): THREE.Scene {
     return this._scene;
@@ -27,17 +24,14 @@ export class RenderSystem extends System {
   private _pixelRatio: number = 0;
 
   constructor(
-    componentMask: number,
     private _scene: THREE.Scene,
     private _renderer: THREE.WebGLRenderer,
   ) {
-    super(componentMask);
+    super();
     this.windowResize = this.onWindowResize.bind(this);
   }
 
   initialize(): void {
-    //this.renderer.setSize(window.innerWidth, window.innerHeight);
-
     document.body.appendChild(this.renderer.domElement);
     document.body.appendChild(this.stats.dom);
 
@@ -50,27 +44,6 @@ export class RenderSystem extends System {
 
     //const helper = new THREE.GridHelper(100, 200, 0xffffff, 0xffffff);
     //this.scene.add(helper);
-  }
-
-  initOrbit(cameraComponent: CameraComponent): void {
-    if (this._orbitControls?.object == cameraComponent.camera) {
-      return;
-    }
-
-    if (!this._orbitControls) {
-      this._orbitControls = new OrbitControls(cameraComponent.camera, this.renderer.domElement);
-    }
-    this._orbitControls.object = cameraComponent.camera;
-
-    this._orbitControls.disconnect();
-    (this._orbitControls as any)._onContextMenu = () => {};
-    this._orbitControls.connect(this.renderer.domElement);
-
-    this._orbitControls.enablePan = true;
-    this._orbitControls.enableZoom = true;
-    this._orbitControls.target.set(0, 1, 0);
-    this._orbitControls.position0.set(1, 2, 1);
-    this._orbitControls.update();
   }
 
   onWindowResize() {
