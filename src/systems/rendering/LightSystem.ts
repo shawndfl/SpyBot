@@ -61,7 +61,7 @@ export class LightSystem extends System {
       }
 
       // update shadows
-      this.syncShadow(light, lightComponent);
+      //this.syncShadow(light, lightComponent);
 
       // setup debug. Show Gui and helpers for lights
       if (lightComponent.debug) {
@@ -327,7 +327,7 @@ export class LightSystem extends System {
   }
 
   private syncShadow(light: Light3Type, lightComponent: LightComponent): void {
-    if (!light.shadow) {
+    if (!light.shadow && lightComponent.castShadow) {
       return;
     }
 

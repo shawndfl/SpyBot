@@ -38,7 +38,8 @@ import { ParticleEmitterStateComponent } from '../components/particles/ParticleS
 import { DebugModeSystem } from '../systems/DebugModeSystem';
 import { DebugHudSystem } from '../systems/DebugHudSystem';
 import { GuiDebugComponent } from '../components/GuiDebugComponent';
-import { SpotLightComponent } from '../components/lights/SpotLightComponent';
+import { PropFactory } from '../entities/PropFactory';
+import { EnemySpawnFactory } from '../entities/EnemySpawnFactory';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -146,36 +147,11 @@ export class SmallTownState implements GameState {
     const sun = world.createEntity();
     world.addComponent(sun, new SunLightComponent().setDayLengthInMs(120000).setStartTime(8));
 
-    // create lamp post
-    const lampPost = world.createEntity();
-    const lampPostTransform = new TransformComponent({
-      position: new THREE.Vector3(0, 0, -2),
+    PropFactory.addLampPost(world, {
+      position: new THREE.Vector3(1, 0, 3),
+      debug: false,
+      color: new THREE.Color(THREE.Color.NAMES.yellow),
     });
-    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
-    world.addComponent(lampPost, lampPostTransform);
-
-    const lampLight = world.createEntity();
-    world.addComponent(
-      lampLight,
-      new SpotLightComponent({
-        castShadow: true,
-        debug: true,
-        color: new THREE.Color(THREE.Color.NAMES.yellow),
-        distance: 15,
-        decay: 0.65,
-        angle: 0.512,
-        penumbra: 0.58,
-        shadowCameraNear: 0.5,
-        shadowCameraFar: 20,
-        intensity: 10,
-      }),
-    );
-    world.addComponent(
-      lampLight,
-      new TransformComponent({
-        position: new THREE.Vector3(0, 2, 0),
-      }).parentTo(lampPostTransform.root),
-    );
 
     // terrain
     const terrain = world.createEntity();
@@ -192,40 +168,10 @@ export class SmallTownState implements GameState {
       }),
     );
 
-    // battle boxCollider
-    const portalBox = world.createEntity();
-    world.addComponent(
-      portalBox,
-      new BoxColliderComponent({
-        size: new THREE.Vector3(1, 1, 1),
-        debug: true,
-      }),
-      new ParticleEmitterComponent({
-        speedMin: 5.0,
-        speedMax: 7.0,
-        alphaStart: 1,
-        alphaEnd: 0.8,
-        minDirection: new THREE.Vector3(-0.05, 1, 0.05),
-        maxDirection: new THREE.Vector3(-0.05, 1, 0.05),
-        colorStart: new THREE.Color(0, 0, 1),
-        colorEnd: new THREE.Color(1, 1, 0),
-        emissionRate: 80,
-        sizeStart: 0.1,
-        sizeEnd: 0.5,
-        burstCount: 10,
-        lifetimeMin: 0.5,
-        lifetimeMax: 0.5,
-      }),
-      new ParticleEmitterStateComponent(),
-      new TransformComponent({
-        position: new THREE.Vector3(0, 0, -10),
-      }),
-      new BattleTriggerComponent({
-        context: {
-          battleId: 'openField',
-        },
-      }),
-    );
+    EnemySpawnFactory.knightEnemy(world, {
+      position: new THREE.Vector3(-5, 0, 5),
+      debug: false,
+    });
 
     const battleScene = world.createEntity();
     world.addComponent(battleScene, new BattleBackgroundComponent({}));

@@ -50,15 +50,13 @@ export class BoxCollisionSystem extends System {
         if (collider.debug) {
           const mat = collider.debugMesh?.material as THREE.LineBasicMaterial;
           mat.color.set(0xff0000);
-
-          // enter a battle
-
-          commands.requestTransition({
-            context: battleTriggerComponent.context,
-            gameState: new BattleState(),
-            type: 'push',
-          });
         }
+        // enter a battle
+        commands.requestTransition({
+          context: battleTriggerComponent.context,
+          gameState: new BattleState(),
+          type: 'push',
+        });
       } else {
         if (collider.debug) {
           const mat = collider.debugMesh?.material as THREE.LineBasicMaterial;

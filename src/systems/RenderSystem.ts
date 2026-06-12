@@ -22,6 +22,10 @@ export class RenderSystem extends System {
     return this._renderer;
   }
 
+  private _width: number = 0;
+  private _height: number = 0;
+  private _pixelRatio: number = 0;
+
   constructor(
     componentMask: number,
     private _scene: THREE.Scene,
@@ -32,12 +36,13 @@ export class RenderSystem extends System {
   }
 
   initialize(): void {
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    //this.renderer.setSize(window.innerWidth, window.innerHeight);
 
     document.body.appendChild(this.renderer.domElement);
     document.body.appendChild(this.stats.dom);
 
     window.addEventListener('resize', this.windowResize);
+    this.onWindowResize();
 
     this.renderer.setClearColor(0xcececf); // light blue-gray
     this.renderer.shadowMap.enabled = true;
@@ -70,8 +75,12 @@ export class RenderSystem extends System {
 
   onWindowResize() {
     this._resizedCalled = true;
+    this._width = Math.min(window.innerWidth, 1280);
+    this._height = Math.min(window.innerWidth, 960);
+    this._pixelRatio = Math.min(window.devicePixelRatio, 2);
+    this.renderer.setPixelRatio(this._pixelRatio);
 
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(this._width, this._height);
   }
 
   update(data: UpdateEvent): void {
@@ -82,7 +91,7 @@ export class RenderSystem extends System {
     // handle resize for camera
     if (this._resizedCalled) {
       for (let [camera] of world.query(CameraComponent)) {
-        camera.camera.aspect = window.innerWidth / window.innerHeight;
+        camera.camera.aspect = this._width / this._height;
         camera.camera.updateProjectionMatrix();
       }
     }

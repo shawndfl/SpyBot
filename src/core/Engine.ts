@@ -48,7 +48,7 @@ export class Engine {
     const delta = Math.min(this.timer.getDelta(), maxFrameDelay);
     this.accumulator += delta;
 
-    while (this.accumulator >= this.fixedStep) {
+    if (this.accumulator >= this.fixedStep) {
       this.update(this.fixedStep);
       this.accumulator -= this.fixedStep;
     }

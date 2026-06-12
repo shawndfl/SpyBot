@@ -37,8 +37,6 @@ export class GameSky {
     this.onGuiChanged = this.guiChanged.bind(this);
 
     this.renderer = renderer;
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1;
     document.body.appendChild(renderer.domElement);
