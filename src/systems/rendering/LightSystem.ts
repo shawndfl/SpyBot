@@ -12,6 +12,7 @@ import type { UpdateEvent } from '../../core/UpdateEvent';
 import { System } from '../../ecs/System';
 import type { World } from '../../ecs/World';
 import { GuiDebugComponent } from '../../components/GuiDebugComponent';
+import { PlayerComponent } from '../../components/PlayerComponent';
 
 interface LightDebugState {
   id: number;
@@ -27,12 +28,27 @@ export class LightSystem extends System {
   private readonly spotDirection = new THREE.Vector3();
   private readonly debugStates = new WeakMap<LightComponent, LightDebugState>();
   private nextDebugId = 1;
+  private _playerPosition = new THREE.Vector3();
 
   constructor(private scene: THREE.Scene) {
     super();
   }
 
   update({ world }: UpdateEvent): void {
+    //const closestLight = this.getClosestLightToPlayer(world);
+
+    const [[, playerTransform]] = world.query(PlayerComponent, TransformComponent);
+
+    if (playerTransform) {
+      this._playerPosition = playerTransform.worldPosition;
+    } else {
+      this._playerPosition.set(0, 0, 0);
+    }
+
+    // find the closest light to the player
+    let closestLight: LightComponent;
+    let closestDistance = Number.MAX_VALUE;
+
     for (const [transform, lightComponent] of world.query(TransformComponent, LightComponent)) {
       const light = this.getOrCreateLight(lightComponent);
 
@@ -41,14 +57,28 @@ export class LightSystem extends System {
         continue;
       }
 
-      light.visible = true;
+      const lightDistanceToPlayer = this._playerPosition.distanceTo(transform.worldPosition);
+      if (lightDistanceToPlayer < closestDistance) {
+        closestDistance = lightDistanceToPlayer;
+        closestLight = lightComponent;
+      }
+
+      if (lightDistanceToPlayer < 20) {
+        light.visible = lightComponent.visible;
+      } else {
+        // create a light orb in this area
+        light.visible = false;
+      }
+
       light.color.copy(lightComponent.color);
       light.intensity = lightComponent.intensity;
       if (light instanceof THREE.PointLight || light instanceof THREE.SpotLight) {
         light.distance = lightComponent.distance;
         light.decay = lightComponent.decay;
       }
-      light.castShadow = lightComponent.castShadow;
+
+      // make it false until we know what light is closest
+      light.castShadow = false;
 
       // sync position of the light
       light.position.copy(transform.worldPosition);
@@ -63,9 +93,6 @@ export class LightSystem extends System {
         this.syncDirectionalLight(light, lightComponent, transform);
       }
 
-      // update shadows
-      this.syncShadow(light, lightComponent);
-
       // setup debug. Show Gui and helpers for lights
       if (lightComponent.debug) {
         this.setupDebug(world, lightComponent, transform);
@@ -73,6 +100,36 @@ export class LightSystem extends System {
         this.cleanupDebug(lightComponent);
       }
     }
+
+    // update the shadow only on the closest
+    if (!!closestLight!) {
+      const light = closestLight.light!;
+      light.castShadow = closestLight.castShadow;
+      // update shadows
+      this.syncShadow(light, closestLight);
+    }
+  }
+
+  private getClosestLightToPlayer(world: World): LightComponent | undefined {
+    const [[, playerTransform]] = world.query(PlayerComponent, TransformComponent);
+
+    if (playerTransform) {
+      this._playerPosition = playerTransform.worldPosition;
+    } else {
+      this._playerPosition.set(0, 0, 0);
+    }
+
+    // find the closest light to the player
+    let closestLight: LightComponent;
+    let closestDistance = Number.MAX_VALUE;
+    for (const [transform, lightComponent] of world.query(TransformComponent, LightComponent)) {
+      const distance = this._playerPosition.distanceTo(transform.worldPosition);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closestLight = lightComponent;
+      }
+    }
+    return closestLight!;
   }
 
   private setupDebug(world: World, lightComponent: LightComponent, transform: TransformComponent): void {

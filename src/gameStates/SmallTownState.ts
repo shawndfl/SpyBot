@@ -76,6 +76,9 @@ export class SmallTownState implements GameState {
       this._inputSystem,
       new DebugModeSystem(),
 
+      // needed first so that getHeight can be set to the TerrainComponent
+      new TerrainSystem(scene),
+
       // load glbs and create rendererComponents
       new RenderInitSystem(scene),
 
@@ -83,7 +86,6 @@ export class SmallTownState implements GameState {
       new ConstraintSystem(),
       new CameraSyncSystem(),
       new BoxCollisionSystem(scene),
-      new TerrainSystem(scene),
 
       new BattleBackgroundSystem(renderer),
 
@@ -109,7 +111,7 @@ export class SmallTownState implements GameState {
     const playerTransform = new TransformComponent({ scale: new THREE.Vector3(1, 1, -1) });
     const playerComponent = new PlayerComponent();
     playerComponent.speed = 5.5;
-    world.addComponent(player, new MeshGlbComponent({ filename: 'player.glb', name: 'player' }));
+    world.addComponent(player, new MeshGlbComponent({ filename: 'player.glb', name: 'player', castShadow: true }));
     world.addComponent(player, new AnimationComponent());
     world.addComponent(player, new PlayerComponent());
     world.addComponent(
@@ -146,12 +148,13 @@ export class SmallTownState implements GameState {
     // create sun
     const sun = world.createEntity();
     world.addComponent(sun, new SunLightComponent().setDayLengthInMs(120000).setStartTime(8));
-
-    PropFactory.addLampPost(world, {
-      position: new THREE.Vector3(1, 0, 3),
-      debug: false,
-      color: new THREE.Color(THREE.Color.NAMES.yellow),
-    });
+    for (let i = 0; i < 50; i++) {
+      PropFactory.addLampPost(world, {
+        position: new THREE.Vector3(10 * i, 0, 3),
+        debug: false,
+        color: new THREE.Color(THREE.Color.NAMES.yellow),
+      });
+    }
 
     // terrain
     const terrain = world.createEntity();

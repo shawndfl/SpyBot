@@ -6,6 +6,7 @@ import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { TransformComponent } from '../components/TransformComponent';
+import { TerrainComponent } from '../components/mesh/TerrainComponent';
 
 /**
  * Initialize gltf files and loads their animations into animation components
@@ -23,24 +24,36 @@ export class RenderInitSystem extends System {
         // see if there is an animation
         const animation = world.getComponent(entity, AnimationComponent);
 
-        const rootMesh = this.loadGltf(transform.root, glb.filename, animation);
+        const rootMesh = this.loadGlb(transform.root, glb.filename, glb, animation);
         const rendererComponent = new RendererComponent(rootMesh);
         world.addComponent(entity, rendererComponent);
+
+        // set the height to the height of the terrain if it's there.
+        // this should be done only once to allow other systems to manipulate
+        // the transformation
+        if (glb.useTerrainHeight) {
+          let [[terrainComponent]] = world.query(TerrainComponent);
+          let getHeightFromTerrain = terrainComponent?.getHeight;
+          if (getHeightFromTerrain) {
+            transform.position.y = getHeightFromTerrain(transform.position.x, transform.position.z);
+          }
+        }
       }
     }
   }
 
   /**
-   * Loads a gltf object. This includes its animations and sets up the materials.
+   * Loads a glb object. This includes its animations and sets up the materials.
    * It will also load the first frame of the first animation
    * @param mesh
    * @param path
    * @param animation
    * @returns
    */
-  protected async loadGltf(
+  protected async loadGlb(
     transform: THREE.Object3D,
     path: string,
+    glbComponent: MeshGlbComponent,
     animation?: AnimationComponent,
   ): Promise<THREE.Object3D | undefined> {
     if (!path) {
@@ -52,7 +65,7 @@ export class RenderInitSystem extends System {
         path,
         (gltf) => {
           // load the model and parse out the object3d and meshes
-          this.loadModel(gltf.scene, transform);
+          this.loadModel(gltf.scene, transform, glbComponent);
           this.loadAnimation(gltf.scene, gltf.animations, animation);
           resolve(transform);
         },
@@ -84,7 +97,7 @@ export class RenderInitSystem extends System {
    * @param model
    * @param root
    */
-  private loadModel(model: THREE.Group, root: THREE.Object3D): void {
+  private loadModel(model: THREE.Group, root: THREE.Object3D, glbComponent: MeshGlbComponent): void {
     // connect the model to the root and to the scene
     root.add(model);
     this._scene.add(root);
@@ -92,7 +105,7 @@ export class RenderInitSystem extends System {
     // loop over the children in this model
     model.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
-        this.processMesh(child as THREE.Mesh);
+        this.processMesh(child as THREE.Mesh, glbComponent);
       } else if ((child as THREE.Object3D).isObject3D) {
         this.processNode(child);
       }
@@ -103,8 +116,8 @@ export class RenderInitSystem extends System {
    * Process the mesh
    * @param mesh
    */
-  private processMesh(mesh: THREE.Mesh): void {
-    mesh.castShadow = true;
+  private processMesh(mesh: THREE.Mesh, glbComponent: MeshGlbComponent): void {
+    mesh.castShadow = !!glbComponent.castShadow;
 
     // Optional: ensure correct color space
     if (mesh.material instanceof THREE.MeshStandardMaterial) {

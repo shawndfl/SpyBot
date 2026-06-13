@@ -34,7 +34,7 @@ export class PropFactory {
       position: position,
     });
 
-    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
+    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb', useTerrainHeight: true }));
     world.addComponent(lampPost, new LampPostComponent());
     world.addComponent(lampPost, lampPostTransform);
     world.addComponent(lampPost, new LinkedEntity({ name: 'light', entity: lampLight }));

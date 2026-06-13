@@ -19,11 +19,9 @@ export class MovementSystem extends System {
         }
       }
 
-      let getHeightFromTerrain: (x: number, z: number) => number;
+      let [[terrainComponent]] = world.query(TerrainComponent);
+      let getHeightFromTerrain = terrainComponent?.getHeight;
 
-      for (let [terrainComponent] of world.query(TerrainComponent)) {
-        getHeightFromTerrain = terrainComponent.getHeight!;
-      }
       // player update
       for (let [player, transform, animation] of world.query(PlayerComponent, TransformComponent, AnimationComponent)) {
         if (inputEvents.payload.state.moveX != 0 || inputEvents.payload.state.moveY != 0) {
