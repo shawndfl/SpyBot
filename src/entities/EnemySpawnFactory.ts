@@ -1,10 +1,12 @@
 import * as THREE from 'three';
-import { BoxColliderComponent } from '../components/BoxColliderComponent';
 import type { World } from '../ecs/World';
 import { ParticleEmitterComponent } from '../components/particles/ParticleEmitterComponent';
 import { ParticleEmitterStateComponent } from '../components/particles/ParticleStateComponent';
 import { TransformComponent } from '../components/TransformComponent';
 import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
+import { ColliderComponent } from '../components/physics/ColliderComponent';
+import { RigidBody } from '@dimforge/rapier3d-compat';
+import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 
 export interface EnemySpawnFactoryArgs {
   position: THREE.Vector3;
@@ -19,10 +21,11 @@ export class EnemySpawnFactory {
     const portalBox = world.createEntity();
     world.addComponent(
       portalBox,
-      new BoxColliderComponent({
+      new ColliderComponent({
         size: new THREE.Vector3(1, 1, 1),
         debug: args.debug,
       }),
+      new RigidBodyComponent({ type: 'fixed' }),
       new ParticleEmitterComponent({
         speedMin: 5.0,
         speedMax: 7.0,

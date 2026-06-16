@@ -6,6 +6,7 @@ import { EventBus } from '../ecs/EventBus';
 
 import { GamesStateFactory } from './GameStateFactory';
 import { GameStateManager } from './GameStateManager';
+import { PhysicsContext } from './PhysiscContext';
 
 /**
  * This is the engine that runs the game. It creates an instance of the world and adds all
@@ -17,11 +18,16 @@ export class Engine {
   private fixedStep = 1 / 60;
 
   private static _renderer = new THREE.WebGLRenderer({ antialias: true });
+  private static _physics = new PhysicsContext();
 
   protected _eventBus: EventBus;
   protected _command: CommandBuffer;
   protected _gameStateFactory: GamesStateFactory;
   protected _gameStateManager: GameStateManager;
+
+  public static get physicsContext(): PhysicsContext {
+    return this._physics;
+  }
 
   public static get renderer(): THREE.WebGLRenderer {
     return this._renderer;

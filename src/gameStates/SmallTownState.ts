@@ -21,8 +21,6 @@ import { LightSystem } from '../systems/rendering/LightSystem';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { RenderSystem } from '../systems/RenderSystem';
-import { BoxCollisionSystem } from '../systems/BoxCollisionSystem';
-
 import { BoxColliderComponent } from '../components/BoxColliderComponent';
 import { BattleBackgroundComponent } from '../components/BattleBackgroundComponent';
 import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
@@ -35,6 +33,11 @@ import { GuiDebugComponent } from '../components/GuiDebugComponent';
 import { PropFactory } from '../entities/PropFactory';
 import { EnemySpawnFactory } from '../entities/EnemySpawnFactory';
 import { LampPostSystem } from '../systems/LampPostSystem';
+import { PhysicsSystem } from '../systems/PhysicsSystem';
+import { EntityTriggerDispatchSystem } from '../systems/EntityTriggerDispatchSystem';
+import { ColliderComponent } from '../components/physics/ColliderComponent';
+import { RigidBody } from '@dimforge/rapier3d-compat';
+import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -82,10 +85,14 @@ export class SmallTownState implements GameState {
       // load glbs and create rendererComponents
       new RenderInitSystem(scene),
 
+      // physics
+      new PhysicsSystem(scene, Engine.physicsContext),
+      new EntityTriggerDispatchSystem(),
+
       new MovementSystem(),
       new ConstraintSystem(),
       new CameraSyncSystem(),
-      new BoxCollisionSystem(scene),
+      //new BoxCollisionSystem(scene),
 
       new BattleBackgroundSystem(renderer),
 
@@ -116,12 +123,11 @@ export class SmallTownState implements GameState {
     world.addComponent(player, new PlayerComponent());
     world.addComponent(
       player,
-      new BoxColliderComponent({
+      new ColliderComponent({
         debug: true,
-        offset: new THREE.Vector3(0, 0.5, 0),
         size: new THREE.Vector3(0.5, 1.2, 0.5),
-        dynamic: true,
       }),
+      new RigidBodyComponent({ type: 'dynamic' }),
     );
     world.addComponent(player, playerTransform);
 
@@ -173,7 +179,7 @@ export class SmallTownState implements GameState {
 
     EnemySpawnFactory.knightEnemy(world, {
       position: new THREE.Vector3(-5, 0, 5),
-      debug: false,
+      debug: true,
     });
 
     const battleScene = world.createEntity();

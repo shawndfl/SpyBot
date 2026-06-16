@@ -110,28 +110,6 @@ export class LightSystem extends System {
     }
   }
 
-  private getClosestLightToPlayer(world: World): LightComponent | undefined {
-    const [[, playerTransform]] = world.query(PlayerComponent, TransformComponent);
-
-    if (playerTransform) {
-      this._playerPosition = playerTransform.worldPosition;
-    } else {
-      this._playerPosition.set(0, 0, 0);
-    }
-
-    // find the closest light to the player
-    let closestLight: LightComponent;
-    let closestDistance = Number.MAX_VALUE;
-    for (const [transform, lightComponent] of world.query(TransformComponent, LightComponent)) {
-      const distance = this._playerPosition.distanceTo(transform.worldPosition);
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        closestLight = lightComponent;
-      }
-    }
-    return closestLight!;
-  }
-
   private setupDebug(world: World, lightComponent: LightComponent, transform: TransformComponent): void {
     const light = lightComponent.light;
     if (!light) {
