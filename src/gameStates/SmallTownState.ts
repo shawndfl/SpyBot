@@ -126,8 +126,9 @@ export class SmallTownState implements GameState {
       new ColliderComponent({
         debug: true,
         size: new THREE.Vector3(0.5, 1.2, 0.5),
+        isSensor: true,
       }),
-      new RigidBodyComponent({ type: 'dynamic' }),
+      new RigidBodyComponent({ type: 'kinematic' }),
     );
     world.addComponent(player, playerTransform);
 

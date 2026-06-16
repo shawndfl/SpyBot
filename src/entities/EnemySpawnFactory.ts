@@ -24,8 +24,9 @@ export class EnemySpawnFactory {
       new ColliderComponent({
         size: new THREE.Vector3(1, 1, 1),
         debug: args.debug,
+        isSensor: true,
       }),
-      new RigidBodyComponent({ type: 'fixed' }),
+      new RigidBodyComponent({ type: 'kinematic' }),
       new ParticleEmitterComponent({
         speedMin: 5.0,
         speedMax: 7.0,

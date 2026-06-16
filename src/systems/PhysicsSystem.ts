@@ -63,11 +63,19 @@ export class PhysicsSystem extends System {
 
         desc.setSensor(collider.isSensor);
         desc.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
+        // need when all triggers are kinematic, at least one needs to be dynamic
+        //desc.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
 
         collider.collider = this.physics.world.createCollider(desc, rigidBody.body);
 
         // map the handle to the entity
         this.colliderHandleToEntity.set(collider.collider?.handle, entity);
+      }
+
+      // update kinematic bodies with the current transform
+      if (rigidBody.type == 'kinematic') {
+        rigidBody.body.setNextKinematicTranslation(transform.worldPosition);
+        rigidBody.body.setNextKinematicRotation(transform.worldRotation);
       }
 
       // debug the colliders
@@ -81,14 +89,14 @@ export class PhysicsSystem extends System {
       }
     }
 
+    this.physics.step(dt);
+
     this.physics.eventQueue.drainCollisionEvents((h1, h2, started) => {
       const entityA = this.colliderHandleToEntity.get(h1)!;
       const entityB = this.colliderHandleToEntity.get(h2)!;
 
       events.emit(new EntityTriggerEvent(started ? 'trigger-enter' : 'trigger-exit', entityA, entityB));
     });
-
-    this.physics.step(dt);
   }
 
   private _material = new THREE.LineBasicMaterial({
