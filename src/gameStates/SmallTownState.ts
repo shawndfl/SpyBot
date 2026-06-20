@@ -171,6 +171,16 @@ export class SmallTownState implements GameState {
       });
     }
 
+    const npc = world.createEntity();
+    world.addComponent(
+      npc,
+      new TransformComponent(),
+      new RigidBodyComponent({ type: 'kinematic' }),
+      new ColliderComponent({ debug: true, isSensor: true }),
+      new MeshGlbComponent({ castShadow: true, skeletonMesh: true, filename: 'NpcY.glb' }),
+      new AnimationComponent(),
+    );
+
     // terrain
     const terrain = world.createEntity();
     world.addComponent(terrain, new TransformComponent());

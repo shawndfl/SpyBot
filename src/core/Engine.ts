@@ -57,7 +57,7 @@ export class Engine {
     //TODO add loading state then
     this._gameStateManager.push(new LoadingState(), {
       assetManifest: {
-        glbs: ['player.glb', 'lampPost.glb'],
+        glbs: ['player.glb', 'lampPost.glb', 'NpcY.glb'],
         sounds: [],
         textures: ['grass.jpg'],
         physics: true,
