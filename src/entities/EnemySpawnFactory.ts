@@ -26,7 +26,7 @@ export class EnemySpawnFactory {
         debug: args.debug,
         isSensor: true,
       }),
-      new RigidBodyComponent({ type: 'kinematic' }),
+      new RigidBodyComponent({ type: 'kinematic', initialPosition: position, name: 'enemySpawn' }),
       new ParticleEmitterComponent({
         speedMin: 5.0,
         speedMax: 7.0,
@@ -44,9 +44,7 @@ export class EnemySpawnFactory {
         lifetimeMax: 0.5,
       }),
       new ParticleEmitterStateComponent(),
-      new TransformComponent({
-        position: position,
-      }),
+      new TransformComponent({ name: 'enemy' }),
       new BattleTriggerComponent({
         context: {
           battleId: 'openField',

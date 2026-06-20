@@ -20,7 +20,6 @@ import { LightSystem } from '../systems/rendering/LightSystem';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { RenderSystem } from '../systems/RenderSystem';
-import { BoxCollisionSystem } from '../systems/BoxCollisionSystem';
 
 import { BoxColliderComponent } from '../components/BoxColliderComponent';
 import { BattleBackgroundComponent } from '../components/BattleBackgroundComponent';
@@ -95,7 +94,7 @@ export class BattleState implements GameState {
       new BattleMenuSystem(),
       new CameraAnimationSystem(),
       new CameraSyncSystem(),
-      new BoxCollisionSystem(scene),
+
       new BattleGroundSystem(scene),
 
       new BattleBackgroundSystem(renderer),

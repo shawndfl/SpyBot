@@ -6,6 +6,8 @@ import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { PointLightComponent } from '../components/lights/PointLightComponent';
 import { LampPostComponent } from '../components/LampPostComponent';
 import { LinkedEntity } from '../components/LinkedEntity';
+import { ColliderComponent } from '../components/physics/ColliderComponent';
+import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 
 export interface LampPostArgs {
   position: THREE.Vector3;
@@ -30,14 +32,18 @@ export class PropFactory {
     const lampPost = world.createEntity();
     const lampLight = world.createEntity();
 
-    const lampPostTransform = new TransformComponent({
-      position: position,
-    });
+    // linked to the light
+    const lampPostTransform = new TransformComponent();
 
     world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb', useTerrainHeight: true }));
     world.addComponent(lampPost, new LampPostComponent());
     world.addComponent(lampPost, lampPostTransform);
     world.addComponent(lampPost, new LinkedEntity({ name: 'light', entity: lampLight }));
+    world.addComponent(
+      lampPost,
+      new ColliderComponent({}),
+      new RigidBodyComponent({ type: 'fixed', initialPosition: position }),
+    );
 
     world.addComponent(
       lampLight,

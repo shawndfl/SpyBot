@@ -21,7 +21,6 @@ import { LightSystem } from '../systems/rendering/LightSystem';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { RenderSystem } from '../systems/RenderSystem';
-import { BoxColliderComponent } from '../components/BoxColliderComponent';
 import { BattleBackgroundComponent } from '../components/BattleBackgroundComponent';
 import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
 import { SunSystem } from '../systems/SunSystem';
@@ -30,14 +29,13 @@ import { ParticleEmitterSystem } from '../systems/ParticleEmitterSystem';
 import { DebugModeSystem } from '../systems/DebugModeSystem';
 import { DebugHudSystem } from '../systems/DebugHudSystem';
 import { GuiDebugComponent } from '../components/GuiDebugComponent';
-import { PropFactory } from '../entities/PropFactory';
 import { EnemySpawnFactory } from '../entities/EnemySpawnFactory';
 import { LampPostSystem } from '../systems/LampPostSystem';
 import { PhysicsSystem } from '../systems/PhysicsSystem';
 import { EntityTriggerDispatchSystem } from '../systems/EntityTriggerDispatchSystem';
 import { ColliderComponent } from '../components/physics/ColliderComponent';
-import { RigidBody } from '@dimforge/rapier3d-compat';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
+import { PropFactory } from '../entities/PropFactory';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -85,14 +83,15 @@ export class SmallTownState implements GameState {
       // load glbs and create rendererComponents
       new RenderInitSystem(scene),
 
+      // update the player movement
+      new MovementSystem(),
+
       // physics
       new PhysicsSystem(scene, Engine.physicsContext),
       new EntityTriggerDispatchSystem(),
 
-      new MovementSystem(),
       new ConstraintSystem(),
       new CameraSyncSystem(),
-      //new BoxCollisionSystem(scene),
 
       new BattleBackgroundSystem(renderer),
 
@@ -120,7 +119,7 @@ export class SmallTownState implements GameState {
     playerComponent.speed = 5.5;
     world.addComponent(player, new MeshGlbComponent({ filename: 'player.glb', name: 'player', castShadow: true }));
     world.addComponent(player, new AnimationComponent());
-    world.addComponent(player, new PlayerComponent());
+    world.addComponent(player, playerComponent);
     world.addComponent(
       player,
       new ColliderComponent({
@@ -128,9 +127,13 @@ export class SmallTownState implements GameState {
         size: new THREE.Vector3(0.5, 1.2, 0.5),
         isSensor: true,
       }),
-      new RigidBodyComponent({ type: 'kinematic' }),
+      new RigidBodyComponent({
+        type: 'kinematic',
+        requestPlayerController: true,
+        initialPosition: new THREE.Vector3(0, 0, 0),
+      }),
+      playerTransform,
     );
-    world.addComponent(player, playerTransform);
 
     // camera
     const camera = world.createEntity();
@@ -155,7 +158,9 @@ export class SmallTownState implements GameState {
     // create sun
     const sun = world.createEntity();
     world.addComponent(sun, new SunLightComponent().setDayLengthInMs(120000).setStartTime(8));
-    for (let i = 0; i < 50; i++) {
+
+    // create a bunch of lamps
+    for (let i = 0; i < 5; i++) {
       PropFactory.addLampPost(world, {
         position: new THREE.Vector3(10 * i, 0, 3),
         debug: false,

@@ -7,6 +7,9 @@ import { EventBus } from '../ecs/EventBus';
 import { GamesStateFactory } from './GameStateFactory';
 import { GameStateManager } from './GameStateManager';
 import { PhysicsContext } from './PhysiscContext';
+import { AssetManager } from './AssetManager';
+import { LoadingState } from '../gameStates/LoadingState';
+import { SmallTownState } from '../gameStates/SmallTownState';
 
 /**
  * This is the engine that runs the game. It creates an instance of the world and adds all
@@ -19,6 +22,7 @@ export class Engine {
 
   private static _renderer = new THREE.WebGLRenderer({ antialias: true });
   private static _physics = new PhysicsContext();
+  private static _assets = new AssetManager();
 
   protected _eventBus: EventBus;
   protected _command: CommandBuffer;
@@ -27,6 +31,10 @@ export class Engine {
 
   public static get physicsContext(): PhysicsContext {
     return this._physics;
+  }
+
+  public static get assets(): AssetManager {
+    return this._assets;
   }
 
   public static get renderer(): THREE.WebGLRenderer {
@@ -42,8 +50,23 @@ export class Engine {
 
   initialize(): void {
     // build the initial game state
-    const gameState = this._gameStateFactory.create('SmallTown');
-    this._gameStateManager.push(gameState);
+
+    //const gameState = this._gameStateFactory.create('SmallTown');
+    //this._gameStateManager.push(gameState);
+
+    //TODO add loading state then
+    this._gameStateManager.push(new LoadingState(), {
+      assetManifest: {
+        glbs: ['player.glb'],
+        sounds: [],
+        physics: true,
+      },
+      nextStateAfterLoading: {
+        context: {},
+        gameState: new SmallTownState(),
+        type: 'change',
+      },
+    });
   }
 
   run() {

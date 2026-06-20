@@ -18,6 +18,8 @@ export class PhysicsSystem extends System {
    *
    */
   private colliderHandleToEntity = new Map<RAPIER.ColliderHandle, Entity>();
+  private desiredMovement = new THREE.Vector3();
+  private correctedPosition = new THREE.Vector3();
 
   constructor(
     private scene: Scene,
@@ -47,6 +49,10 @@ export class PhysicsSystem extends System {
         desc.setTranslation(transform.position.x, transform.position.y, transform.position.z);
 
         rigidBody.body = this.physics.world.createRigidBody(desc);
+        rigidBody.body.setTranslation(rigidBody.initialPosition || { x: 0, y: 0, z: 0 }, false);
+        rigidBody.body.setRotation(rigidBody.initialRotation || { x: 0, y: 0, z: 0, w: 1 }, false);
+        rigidBody.body.setNextKinematicTranslation(rigidBody.initialPosition || { x: 0, y: 0, z: 0 });
+        rigidBody.body.setNextKinematicRotation(rigidBody.initialRotation || { x: 0, y: 0, z: 0, w: 1 });
       }
 
       // create collider
@@ -64,7 +70,7 @@ export class PhysicsSystem extends System {
         desc.setSensor(collider.isSensor);
         desc.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
         // need when all triggers are kinematic, at least one needs to be dynamic
-        //desc.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
+        desc.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
 
         collider.collider = this.physics.world.createCollider(desc, rigidBody.body);
 
@@ -72,11 +78,52 @@ export class PhysicsSystem extends System {
         this.colliderHandleToEntity.set(collider.collider?.handle, entity);
       }
 
-      // update kinematic bodies with the current transform
-      if (rigidBody.type == 'kinematic') {
-        rigidBody.body.setNextKinematicTranslation(transform.worldPosition);
-        rigidBody.body.setNextKinematicRotation(transform.worldRotation);
+      // create player controller
+      if (rigidBody.requestPlayerController && collider.collider && rigidBody.body) {
+        if (!rigidBody.playerController) {
+          rigidBody.playerController = this.physics.world.createCharacterController(0.01);
+        }
+
+        const currentTranslation = rigidBody.body.translation();
+        const nextTranslation = rigidBody.body.nextTranslation();
+        this.desiredMovement.set(
+          nextTranslation.x - currentTranslation.x,
+          nextTranslation.y - currentTranslation.y,
+          nextTranslation.z - currentTranslation.z,
+        );
+        rigidBody.playerController.computeColliderMovement(
+          collider.collider,
+          this.desiredMovement,
+          RAPIER.QueryFilterFlags.EXCLUDE_KINEMATIC,
+        );
+
+        const correctedMovement = rigidBody.playerController.computedMovement();
+        this.correctedPosition.set(
+          currentTranslation.x + correctedMovement.x,
+          currentTranslation.y + correctedMovement.y,
+          currentTranslation.z + correctedMovement.z,
+        );
+        rigidBody.body.setNextKinematicTranslation(this.correctedPosition);
       }
+    }
+
+    this.physics.step(dt);
+
+    for (const [transform, rigidBody, collider] of world.query(
+      TransformComponent,
+      RigidBodyComponent,
+      ColliderComponent,
+    )) {
+      if (!rigidBody.body) {
+        continue;
+      }
+
+      const position = rigidBody.body.translation();
+      const rotation = rigidBody.body.rotation();
+
+      transform.position.set(position.x, position.y, position.z);
+      transform.root.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+      transform.root.updateMatrixWorld(true);
 
       // debug the colliders
       if (collider.debug) {
@@ -84,12 +131,11 @@ export class PhysicsSystem extends System {
           collider.debugMesh = this.createDebugMesh(collider);
           this.scene.add(collider.debugMesh);
         }
-        // update debug mesh position
+
         collider.debugMesh.position.copy(transform.worldPosition);
+        collider.debugMesh.quaternion.copy(transform.worldRotation);
       }
     }
-
-    this.physics.step(dt);
 
     this.physics.eventQueue.drainCollisionEvents((h1, h2, started) => {
       const entityA = this.colliderHandleToEntity.get(h1)!;
