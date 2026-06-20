@@ -80,15 +80,15 @@ export class SmallTownState implements GameState {
       // needed first so that getHeight can be set to the TerrainComponent
       new TerrainSystem(scene),
 
-      // load glbs and create rendererComponents
-      new RenderInitSystem(scene),
-
       // update the player movement
       new MovementSystem(),
 
       // physics
       new PhysicsSystem(scene, Engine.physicsContext),
       new EntityTriggerDispatchSystem(),
+
+      // load glbs and create rendererComponents
+      new RenderInitSystem(scene),
 
       new ConstraintSystem(),
       new CameraSyncSystem(),
@@ -117,7 +117,10 @@ export class SmallTownState implements GameState {
     const playerTransform = new TransformComponent({ scale: new THREE.Vector3(1, 1, -1) });
     const playerComponent = new PlayerComponent();
     playerComponent.speed = 5.5;
-    world.addComponent(player, new MeshGlbComponent({ filename: 'player.glb', name: 'player', castShadow: true }));
+    world.addComponent(
+      player,
+      new MeshGlbComponent({ filename: 'player.glb', name: 'player', castShadow: true, skeletonMesh: true }),
+    );
     world.addComponent(player, new AnimationComponent());
     world.addComponent(player, playerComponent);
     world.addComponent(
@@ -179,7 +182,7 @@ export class SmallTownState implements GameState {
         segments: 150,
         heightScale: 0.2,
         repeat: new THREE.Vector2(100, 100),
-        grassTexturePath: '/grass.jpg',
+        grassTexturePath: 'grass.jpg',
       }),
     );
 

@@ -1,3 +1,4 @@
+import { texture } from 'three/tsl';
 import { Engine } from '../core/Engine';
 import type { GameState } from '../core/GameState';
 import type { TransitionContext } from '../core/TransitionContext';
@@ -34,6 +35,7 @@ export class LoadingState implements GameState {
         context?.assetManifest.physics ? Engine.physicsContext.loadPromise : null,
         ...manifest.glbs.map((path) => Engine.assets.preloadGlb(path)),
         ...manifest.sounds.map((path) => Engine.assets.preloadSound(path)),
+        ...manifest.textures.map((path) => Engine.assets.preloadTexture(path)),
       ];
 
       // when everything loads go to the next state

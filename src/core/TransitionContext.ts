@@ -4,6 +4,7 @@ export interface LoadingManifest {
   physics: boolean;
   glbs: string[];
   sounds: string[];
+  textures: string[];
 }
 
 export interface TransitionContext {

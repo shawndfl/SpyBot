@@ -3,10 +3,9 @@ import { System } from '../ecs/System';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { TerrainComponent } from '../components/mesh/TerrainComponent';
 import { TransformComponent } from '../components/TransformComponent';
+import { Engine } from '../core/Engine';
 
 export class TerrainSystem extends System {
-  private textureLoader = new THREE.TextureLoader();
-
   constructor(private _scene: THREE.Scene) {
     super();
   }
@@ -67,7 +66,7 @@ export class TerrainSystem extends System {
   }
 
   private createGrassMaterial(texturePath: string, terrain: TerrainComponent): THREE.MeshStandardMaterial {
-    const grassTexture = this.textureLoader.load(texturePath);
+    const grassTexture = Engine.assets.getTexture(texturePath);
 
     grassTexture.wrapS = THREE.RepeatWrapping;
     grassTexture.wrapT = THREE.RepeatWrapping;

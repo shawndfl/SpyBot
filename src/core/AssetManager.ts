@@ -1,5 +1,7 @@
+import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/Addons.js';
 import { AudioLoader } from 'three';
+import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js';
 
 /**
  * Manages async asset requires
@@ -7,16 +9,33 @@ import { AudioLoader } from 'three';
 export class AssetManager {
   private modelPromises = new Map<string, Promise<GLTF | undefined>>();
   private soundPromises = new Map<string, Promise<AudioBuffer | undefined>>();
+  private texturePromises = new Map<string, Promise<THREE.Texture<HTMLImageElement> | undefined>>();
   private models = new Map<string, GLTF>();
   private sounds = new Map<string, AudioBuffer>();
+  private textures = new Map<string, THREE.Texture<HTMLImageElement>>();
 
-  getGlb(path: string): GLTF {
-    const model = this.models.get(path);
-    if (!model) {
+  private textureLoader = new THREE.TextureLoader();
+
+  createGlb(path: string, isSkeleton?: boolean): Partial<GLTF> {
+    const gltf = this.models.get(path);
+
+    if (!gltf) {
       throw new Error(`GLB has not been loaded: ${path}`);
     }
 
-    return model;
+    return {
+      scene: isSkeleton ? (cloneSkeleton(gltf.scene) as THREE.Group) : (gltf.scene.clone() as THREE.Group),
+      animations: gltf.animations,
+    };
+  }
+
+  getTexture(path: string): THREE.Texture<HTMLImageElement> {
+    const texture = this.textures.get(path);
+    if (!texture) {
+      throw new Error(`TExture has not been loaded: ${path}`);
+    }
+
+    return texture;
   }
 
   getSound(path: string): AudioBuffer {
@@ -68,6 +87,28 @@ export class AssetManager {
     }
 
     return this.soundPromises.get(path)!;
+  }
+
+  preloadTexture(path: string): Promise<THREE.Texture<HTMLImageElement> | undefined> {
+    if (this.textures.has(path)) {
+      return Promise.resolve(this.textures.get(path)!);
+    }
+
+    if (!this.texturePromises.has(path)) {
+      const promise = this.textureLoader
+        .loadAsync(path)
+        .then((texture) => {
+          this.textures.set(path, texture);
+          return texture;
+        })
+        .catch((r: any) => {
+          console.error('error loading ' + path);
+          return undefined;
+        });
+      this.texturePromises.set(path, promise);
+    }
+
+    return this.texturePromises.get(path)!;
   }
 
   /**

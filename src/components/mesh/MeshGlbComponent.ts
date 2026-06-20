@@ -8,6 +8,7 @@ export class MeshGlbComponent extends Component {
 
   filename: string = '';
   castShadow?: boolean;
+  skeletonMesh?: boolean;
   useTerrainHeight?: boolean;
 
   constructor(init?: Partial<MeshGlbComponent>) {
