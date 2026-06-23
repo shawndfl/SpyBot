@@ -13,6 +13,7 @@ export class RigidBodyComponent extends Component {
 
   initialPosition?: THREE.Vector3;
   initialRotation?: THREE.Quaternion;
+  useTerrainHeight?: boolean;
 
   type: RigidBodyType = 'dynamic';
   body?: RAPIER.RigidBody;

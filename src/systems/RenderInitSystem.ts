@@ -6,9 +6,7 @@ import { MeshGlbComponent } from '../components/mesh/MeshGlbComponent';
 import { RendererComponent } from '../components/mesh/RendererComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { TransformComponent } from '../components/TransformComponent';
-import { TerrainComponent } from '../components/mesh/TerrainComponent';
 import { Engine } from '../core/Engine';
-import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 
 /**
  * Initialize gltf files and loads their animations into animation components
@@ -29,25 +27,6 @@ export class RenderInitSystem extends System {
         const rootMesh = this.loadGlb(transform.root, glb.filename, glb, animation);
         const rendererComponent = new RendererComponent(rootMesh);
         world.addComponent(entity, rendererComponent);
-
-        // set the height to the height of the terrain if it's there.
-        // this should be done only once to allow other systems to manipulate
-        // the transformation
-        if (glb.useTerrainHeight) {
-          const [[terrainComponent]] = world.query(TerrainComponent);
-          let getHeightFromTerrain = terrainComponent?.getHeight;
-          if (getHeightFromTerrain) {
-            const height = getHeightFromTerrain(transform.position.x, transform.position.z);
-
-            const rigidBody = world.getComponent(entity, RigidBodyComponent);
-            if (rigidBody.body) {
-              const current = rigidBody.body?.translation();
-              rigidBody.body?.setNextKinematicTranslation({ x: current.x, y: height, z: current.z });
-            } else {
-              transform.position.y = height;
-            }
-          }
-        }
       }
     }
   }

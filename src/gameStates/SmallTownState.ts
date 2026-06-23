@@ -119,7 +119,12 @@ export class SmallTownState implements GameState {
     playerComponent.speed = 5.5;
     world.addComponent(
       player,
-      new MeshGlbComponent({ filename: 'player.glb', name: 'player', castShadow: true, skeletonMesh: true }),
+      new MeshGlbComponent({
+        filename: 'player.glb',
+        name: 'player',
+        castShadow: true,
+        skeletonMesh: true,
+      }),
     );
     world.addComponent(player, new AnimationComponent());
     world.addComponent(player, playerComponent);
@@ -133,7 +138,8 @@ export class SmallTownState implements GameState {
       new RigidBodyComponent({
         type: 'kinematic',
         requestPlayerController: true,
-        initialPosition: new THREE.Vector3(0, 0, 0),
+        initialPosition: new THREE.Vector3(5, 0, 3),
+        useTerrainHeight: true,
       }),
       playerTransform,
     );
@@ -175,8 +181,8 @@ export class SmallTownState implements GameState {
     world.addComponent(
       npc,
       new TransformComponent(),
-      new RigidBodyComponent({ type: 'kinematic' }),
-      new ColliderComponent({ debug: true, isSensor: true }),
+      new RigidBodyComponent({ type: 'kinematic', useTerrainHeight: true }),
+      new ColliderComponent({ debug: true, isSensor: false }),
       new MeshGlbComponent({ castShadow: true, skeletonMesh: true, filename: 'NpcY.glb' }),
       new AnimationComponent(),
     );

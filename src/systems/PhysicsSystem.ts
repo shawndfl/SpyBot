@@ -9,6 +9,13 @@ import { ColliderComponent } from '../components/physics/ColliderComponent';
 import type { Entity } from '../ecs/Entity';
 import { EntityTriggerEvent } from '../events/EntityTriggerEvent';
 import type { Scene } from 'three';
+import { TerrainComponent } from '../components/mesh/TerrainComponent';
+
+type ColliderState = {
+  id: RAPIER.ColliderHandle;
+  isKinematic: boolean;
+  isSensor: boolean;
+};
 
 /**
  * Manages the rapier physics engine
@@ -21,6 +28,8 @@ export class PhysicsSystem extends System {
   private desiredMovement = new THREE.Vector3();
   private correctedPosition = new THREE.Vector3();
 
+  private colliderStateByHandle = new Map<RAPIER.ColliderHandle, ColliderState>();
+
   constructor(
     private scene: Scene,
     private physics: PhysicsContext,
@@ -32,11 +41,7 @@ export class PhysicsSystem extends System {
     if (!this.physics.isReady) {
       return;
     }
-    for (const [entity, transform, rigidBody, collider] of world.queryWithEntity(
-      TransformComponent,
-      RigidBodyComponent,
-      ColliderComponent,
-    )) {
+    for (const [entity, rigidBody, colliderCom] of world.queryWithEntity(RigidBodyComponent, ColliderComponent)) {
       // create rigid body
       if (!rigidBody.body) {
         const desc =
@@ -46,40 +51,53 @@ export class PhysicsSystem extends System {
               ? RAPIER.RigidBodyDesc.fixed()
               : RAPIER.RigidBodyDesc.kinematicPositionBased();
 
-        desc.setTranslation(transform.position.x, transform.position.y, transform.position.z);
+        const initialPosition = rigidBody.initialPosition || { x: 0, y: 0, z: 0 };
+        const [[initialHeight]] = world.query(TerrainComponent);
+        if (initialHeight) {
+          initialPosition.y = initialHeight.getHeight?.(initialPosition.x, initialPosition.z) ?? 0;
+        }
+        desc.setTranslation(initialPosition.x, initialPosition.y, initialPosition.z);
 
         rigidBody.body = this.physics.world.createRigidBody(desc);
-        rigidBody.body.setTranslation(rigidBody.initialPosition || { x: 0, y: 0, z: 0 }, false);
         rigidBody.body.setRotation(rigidBody.initialRotation || { x: 0, y: 0, z: 0, w: 1 }, false);
-        rigidBody.body.setNextKinematicTranslation(rigidBody.initialPosition || { x: 0, y: 0, z: 0 });
+        rigidBody.body.setNextKinematicTranslation(initialPosition);
         rigidBody.body.setNextKinematicRotation(rigidBody.initialRotation || { x: 0, y: 0, z: 0, w: 1 });
       }
 
       // create collider
-      if (!collider.collider && rigidBody.body) {
+      if (!colliderCom.collider && rigidBody.body) {
         let desc: RAPIER.ColliderDesc;
 
-        if (collider.shape === 'box') {
-          desc = RAPIER.ColliderDesc.cuboid(collider.size.x / 2, collider.size.y / 2, collider.size.z / 2);
-        } else if (collider.shape === 'sphere') {
-          desc = RAPIER.ColliderDesc.ball(collider.size.x / 2);
+        if (colliderCom.shape === 'box') {
+          desc = RAPIER.ColliderDesc.cuboid(colliderCom.size.x / 2, colliderCom.size.y / 2, colliderCom.size.z / 2);
+        } else if (colliderCom.shape === 'sphere') {
+          desc = RAPIER.ColliderDesc.ball(colliderCom.size.x / 2);
         } else {
-          desc = RAPIER.ColliderDesc.capsule(collider.size.y / 2, collider.size.x / 2);
+          desc = RAPIER.ColliderDesc.capsule(colliderCom.size.y / 2, colliderCom.size.x / 2);
         }
 
-        desc.setSensor(collider.isSensor);
+        desc.setSensor(colliderCom.isSensor);
         desc.setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
         // need when all triggers are kinematic, at least one needs to be dynamic
         desc.setActiveCollisionTypes(RAPIER.ActiveCollisionTypes.ALL);
 
-        collider.collider = this.physics.world.createCollider(desc, rigidBody.body);
+        colliderCom.collider = this.physics.world.createCollider(desc, rigidBody.body);
+
+        // need to keep track of the state so that this can be queried
+        // from computeColliderMovement and not get a rust exception thrown
+        const id = colliderCom.collider.handle;
+        this.colliderStateByHandle.set(id, {
+          id: id,
+          isKinematic: colliderCom.collider.parent()?.isKinematic()!,
+          isSensor: colliderCom.collider.isSensor(),
+        });
 
         // map the handle to the entity
-        this.colliderHandleToEntity.set(collider.collider?.handle, entity);
+        this.colliderHandleToEntity.set(colliderCom.collider?.handle, entity);
       }
 
       // create player controller
-      if (rigidBody.requestPlayerController && collider.collider && rigidBody.body) {
+      if (rigidBody.requestPlayerController && colliderCom.collider && rigidBody.body) {
         if (!rigidBody.playerController) {
           rigidBody.playerController = this.physics.world.createCharacterController(0.01);
         }
@@ -91,10 +109,25 @@ export class PhysicsSystem extends System {
           nextTranslation.y - currentTranslation.y,
           nextTranslation.z - currentTranslation.z,
         );
+
+        // Character movement. We do not want to collide with things
+        // that are kinematic sensors. We just want to run through them
+        // and trigger events in EntityTriggerDispatchSystem
         rigidBody.playerController.computeColliderMovement(
-          collider.collider,
+          colliderCom.collider!,
           this.desiredMovement,
-          RAPIER.QueryFilterFlags.EXCLUDE_KINEMATIC,
+          undefined, //RAPIER.QueryFilterFlags.EXCLUDE_KINEMATIC,
+          undefined,
+          (c) => {
+            const data = this.colliderStateByHandle.get(c.handle);
+            if (data) {
+              const isKinematic = data.isKinematic;
+              if (isKinematic) {
+                return !data.isSensor;
+              }
+            }
+            return true;
+          },
         );
 
         const correctedMovement = rigidBody.playerController.computedMovement();
