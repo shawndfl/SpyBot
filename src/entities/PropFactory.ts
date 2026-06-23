@@ -35,14 +35,14 @@ export class PropFactory {
     // linked to the light
     const lampPostTransform = new TransformComponent();
 
-    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb', useTerrainHeight: true }));
+    world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
     world.addComponent(lampPost, new LampPostComponent());
     world.addComponent(lampPost, lampPostTransform);
     world.addComponent(lampPost, new LinkedEntity({ name: 'light', entity: lampLight }));
     world.addComponent(
       lampPost,
       new ColliderComponent({}),
-      new RigidBodyComponent({ type: 'fixed', initialPosition: position }),
+      new RigidBodyComponent({ type: 'fixed', initialPosition: position, useTerrainHeight: true }),
     );
 
     world.addComponent(

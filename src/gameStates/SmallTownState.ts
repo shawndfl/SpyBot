@@ -36,6 +36,8 @@ import { EntityTriggerDispatchSystem } from '../systems/EntityTriggerDispatchSys
 import { ColliderComponent } from '../components/physics/ColliderComponent';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 import { PropFactory } from '../entities/PropFactory';
+import { DialogComponent } from '../components/DialogComponent';
+import { DialogSystem } from '../systems/DialogSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -105,12 +107,16 @@ export class SmallTownState implements GameState {
       // render systems
       new RenderSystem(scene, renderer),
       new ParticleEmitterSystem(scene),
+      new DialogSystem(),
       new DebugHudSystem(),
     ]);
 
     // root level entity
     const sceneRoot = world.createEntity();
     world.addComponent(sceneRoot, new GuiDebugComponent({}));
+
+    const dialogEntity = world.createEntity();
+    world.addComponent(dialogEntity, new DialogComponent());
 
     // create player
     const player = world.createEntity();

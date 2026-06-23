@@ -1,4 +1,3 @@
-import { texture } from 'three/tsl';
 import { Engine } from '../core/Engine';
 import type { GameState } from '../core/GameState';
 import type { TransitionContext } from '../core/TransitionContext';

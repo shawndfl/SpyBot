@@ -5,7 +5,6 @@ import { ParticleEmitterStateComponent } from '../components/particles/ParticleS
 import { TransformComponent } from '../components/TransformComponent';
 import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
 import { ColliderComponent } from '../components/physics/ColliderComponent';
-import { RigidBody } from '@dimforge/rapier3d-compat';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 
 export interface EnemySpawnFactoryArgs {
@@ -26,7 +25,12 @@ export class EnemySpawnFactory {
         debug: args.debug,
         isSensor: true,
       }),
-      new RigidBodyComponent({ type: 'kinematic', initialPosition: position, name: 'enemySpawn' }),
+      new RigidBodyComponent({
+        type: 'kinematic',
+        initialPosition: position,
+        name: 'enemySpawn',
+        useTerrainHeight: true,
+      }),
       new ParticleEmitterComponent({
         speedMin: 5.0,
         speedMax: 7.0,
