@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { PlayerComponent } from '../components/PlayerComponent';
-import { TransformComponent } from '../components/TransformComponent';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
 import { GameInputEvent } from '../events/GameInputEvent';
@@ -30,13 +29,10 @@ export class MovementSystem extends System {
       let [[terrainComponent]] = world.query(TerrainComponent);
       let getHeightFromTerrain = terrainComponent?.getHeight;
 
-      // player update
-      for (let [player, transform, animation, rigid] of world.query(
-        PlayerComponent,
-        TransformComponent,
-        AnimationComponent,
-        RigidBodyComponent,
-      )) {
+      // update the player rigidy body component. This should not update the
+      // transformComponent because the rigid body is the source of truth.
+      // transformComponent will be update in the physicsSystem
+      for (let [player, animation, rigid] of world.query(PlayerComponent, AnimationComponent, RigidBodyComponent)) {
         if (!rigid.body) {
           continue;
         }
@@ -68,7 +64,7 @@ export class MovementSystem extends System {
         }
 
         // set the final height
-        const height = getHeightFromTerrain! ? getHeightFromTerrain(transform.position.x, transform.position.z) : 0;
+        const height = getHeightFromTerrain! ? getHeightFromTerrain(this.tempPosition1.x, this.tempPosition1.z) : 0;
         this.tempPosition1.y = height;
 
         // set the next position

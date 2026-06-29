@@ -45,7 +45,7 @@ export class TerrainSystem extends System {
     geometry.computeVertexNormals();
 
     const material = terrain.grassTexturePath
-      ? this.createGrassMaterial(terrain.grassTexturePath, terrain)
+      ? this.createTerrainMaterial(terrain.grassTexturePath, terrain)
       : new THREE.MeshStandardMaterial({
           color: 0x3f8f3f,
           roughness: 1,
@@ -65,7 +65,7 @@ export class TerrainSystem extends System {
     );
   }
 
-  private createGrassMaterial(texturePath: string, terrain: TerrainComponent): THREE.MeshStandardMaterial {
+  private createTerrainMaterial(texturePath: string, terrain: TerrainComponent): THREE.MeshStandardMaterial {
     const grassTexture = Engine.assets.getTexture(texturePath);
 
     grassTexture.wrapS = THREE.RepeatWrapping;

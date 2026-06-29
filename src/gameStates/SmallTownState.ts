@@ -38,6 +38,8 @@ import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 import { PropFactory } from '../entities/PropFactory';
 import { DialogComponent } from '../components/DialogComponent';
 import { DialogSystem } from '../systems/DialogSystem';
+import { TargetingComponent } from '../components/TargetingComponent';
+import { TargetingSystem } from '../systems/TargetingSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -85,9 +87,11 @@ export class SmallTownState implements GameState {
       // update the player movement
       new MovementSystem(),
 
-      // physics
+      // physics. this will perform the physics step and update the transform component.
       new PhysicsSystem(scene, Engine.physicsContext),
       new EntityTriggerDispatchSystem(),
+
+      new TargetingSystem(scene),
 
       // load glbs and create rendererComponents
       new RenderInitSystem(scene),
@@ -114,6 +118,7 @@ export class SmallTownState implements GameState {
     // root level entity
     const sceneRoot = world.createEntity();
     world.addComponent(sceneRoot, new GuiDebugComponent({}));
+    world.addComponent(sceneRoot, new TargetingComponent());
 
     const dialogEntity = world.createEntity();
     world.addComponent(dialogEntity, new DialogComponent());
@@ -180,6 +185,7 @@ export class SmallTownState implements GameState {
         position: new THREE.Vector3(10 * i, 0, 3),
         debug: false,
         color: new THREE.Color(THREE.Color.NAMES.yellow),
+        lampId: 'lamp_' + i,
       });
     }
 
@@ -223,6 +229,7 @@ export class SmallTownState implements GameState {
 
     return world;
   }
+
   /*
   createBrickTextures(): void {
     const brick = new ProceduralBrickMaterial();

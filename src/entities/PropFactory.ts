@@ -8,8 +8,10 @@ import { LampPostComponent } from '../components/LampPostComponent';
 import { LinkedEntity } from '../components/LinkedEntity';
 import { ColliderComponent } from '../components/physics/ColliderComponent';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
+import { TargetComponent, TargetType } from '../components/TargetComponent';
 
 export interface LampPostArgs {
+  lampId: string;
   position: THREE.Vector3;
   debug?: boolean;
   color: THREE.Color; //new THREE.Color(THREE.Color.NAMES.yellow),
@@ -20,7 +22,9 @@ export interface LampPostArgs {
  */
 export class PropFactory {
   /**
-   * Adds a lampPost to the world
+   * Adds a lampPost to the world. This entity has a fixed collision system
+   * a light that turns on at night
+   * and a waypoint targeting system.
    * @param world
    * @param args
    */
@@ -37,6 +41,7 @@ export class PropFactory {
 
     world.addComponent(lampPost, new MeshGlbComponent({ filename: 'lampPost.glb' }));
     world.addComponent(lampPost, new LampPostComponent());
+    world.addComponent(lampPost, new TargetComponent({ type: TargetType.wayPoint, name: args.lampId }));
     world.addComponent(lampPost, lampPostTransform);
     world.addComponent(lampPost, new LinkedEntity({ name: 'light', entity: lampLight }));
     world.addComponent(
