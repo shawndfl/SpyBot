@@ -6,6 +6,7 @@ import { TransformComponent } from '../components/TransformComponent';
 import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
 import { ColliderComponent } from '../components/physics/ColliderComponent';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
+import { ColliderSensorComponent } from '../components/physics/ColliderSensorComponent';
 
 export interface EnemySpawnFactoryArgs {
   position: THREE.Vector3;
@@ -20,10 +21,9 @@ export class EnemySpawnFactory {
     const portalBox = world.createEntity();
     world.addComponent(
       portalBox,
-      new ColliderComponent({
+      new ColliderSensorComponent({
         size: new THREE.Vector3(1, 1, 1),
         debug: args.debug,
-        isSensor: true,
       }),
       new RigidBodyComponent({
         type: 'kinematic',

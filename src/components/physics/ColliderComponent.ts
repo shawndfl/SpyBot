@@ -12,7 +12,10 @@ export class ColliderComponent extends Component {
 
   shape: ColliderShape = 'box';
   size: THREE.Vector3 = new THREE.Vector3(1, 1, 1);
-  isSensor = false;
+
+  get isSensor(): boolean {
+    return false;
+  }
   collider?: RAPIER.Collider;
 
   /**

@@ -40,6 +40,8 @@ import { DialogComponent } from '../components/DialogComponent';
 import { DialogSystem } from '../systems/DialogSystem';
 import { TargetingComponent } from '../components/TargetingComponent';
 import { TargetingSystem } from '../systems/TargetingSystem';
+import { NpcFactory } from '../entities/NpcFactory';
+import { ColliderSensorComponent } from '../components/physics/ColliderSensorComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -141,10 +143,9 @@ export class SmallTownState implements GameState {
     world.addComponent(player, playerComponent);
     world.addComponent(
       player,
-      new ColliderComponent({
+      new ColliderSensorComponent({
         debug: true,
         size: new THREE.Vector3(0.5, 1.2, 0.5),
-        isSensor: true,
       }),
       new RigidBodyComponent({
         type: 'kinematic',
@@ -189,15 +190,8 @@ export class SmallTownState implements GameState {
       });
     }
 
-    const npc = world.createEntity();
-    world.addComponent(
-      npc,
-      new TransformComponent(),
-      new RigidBodyComponent({ type: 'kinematic', useTerrainHeight: true }),
-      new ColliderComponent({ debug: true, isSensor: false }),
-      new MeshGlbComponent({ castShadow: true, skeletonMesh: true, filename: 'NpcY.glb' }),
-      new AnimationComponent(),
-    );
+    // create an NPC
+    NpcFactory.addNpc(world, { debug: true });
 
     // terrain
     const terrain = world.createEntity();
