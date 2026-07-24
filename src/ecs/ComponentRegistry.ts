@@ -24,11 +24,7 @@ export class ComponentRegistry {
   static register(...ctors: ComponentCtor[]): void {
     for (let ctor of ctors) {
       if (!this.ids.has(ctor)) {
-        const next = this.nextId++;
-        if (this.nextId >= 32) {
-          throw new Error('no more component ids');
-        }
-        const id = 1 << next;
+        const id = this.nextId++;
         console.debug('registering ' + ctor.name + ' at ' + id);
         this.ids.set(ctor, id);
       }
