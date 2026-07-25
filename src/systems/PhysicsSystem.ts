@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import RAPIER, { Collider } from '@dimforge/rapier3d-compat';
+import RAPIER from '@dimforge/rapier3d-compat';
 import { System } from '../ecs/System';
 import { PhysicsContext } from '../core/PhysiscContext';
 import type { UpdateEvent } from '../core/UpdateEvent';

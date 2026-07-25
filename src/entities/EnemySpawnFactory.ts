@@ -4,7 +4,6 @@ import { ParticleEmitterComponent } from '../components/particles/ParticleEmitte
 import { ParticleEmitterStateComponent } from '../components/particles/ParticleStateComponent';
 import { TransformComponent } from '../components/TransformComponent';
 import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
-import { ColliderComponent } from '../components/physics/ColliderComponent';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 import { ColliderSensorComponent } from '../components/physics/ColliderSensorComponent';
 

@@ -33,7 +33,6 @@ import { EnemySpawnFactory } from '../entities/EnemySpawnFactory';
 import { LampPostSystem } from '../systems/LampPostSystem';
 import { PhysicsSystem } from '../systems/PhysicsSystem';
 import { EntityTriggerDispatchSystem } from '../systems/EntityTriggerDispatchSystem';
-import { ColliderComponent } from '../components/physics/ColliderComponent';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
 import { PropFactory } from '../entities/PropFactory';
 import { DialogComponent } from '../components/DialogComponent';
