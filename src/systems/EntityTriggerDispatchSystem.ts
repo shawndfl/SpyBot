@@ -1,6 +1,8 @@
 import { BattleTriggerComponent } from '../components/BattleTriggerComponent';
 import { DialogComponent } from '../components/DialogComponent';
+import { DialogContentComponent } from '../components/DialogContentComponent';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
+import { PlayerComponent } from '../components/PlayerComponent';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
 import { EntityTriggerEvent } from '../events/EntityTriggerEvent';
@@ -21,21 +23,32 @@ export class EntityTriggerDispatchSystem extends System {
 
         if (hitKinematic) {
           const [[dialog]] = world.query(DialogComponent);
+          const playerIsEntityA = world.getHasComponent(event.entityA, PlayerComponent);
+          const playerIsEntityB = world.getHasComponent(event.entityB, PlayerComponent);
 
-          if (dialog && !dialog.visible) {
-            dialog.show(
-              'Strange Signal',
-              'The air shimmers around the marker. Something is waiting just beyond the edge of town. The signal pulses once, then again, like it is answering your footsteps. A thin line of blue light crawls across the ground and points toward the old road. For a moment, the whole town goes quiet.',
-              battleTriggerComponent
-                ? () => {
-                    commands.requestTransition({
-                      context: battleTriggerComponent.context,
-                      gameState: new BattleState(),
-                      type: 'push',
-                    });
-                  }
-                : undefined,
-            );
+          if (!playerIsEntityA && !playerIsEntityB) {
+            throw new Error('PlayerComponent is missing!');
+          }
+
+          const triggerEntity = playerIsEntityA ? event.entityB : event.entityA;
+          const dialogContent = world.getComponent(triggerEntity, DialogContentComponent);
+
+          if (dialog && dialogContent) {
+            if (!dialog.visible) {
+              dialog.show(
+                dialogContent.title,
+                dialogContent.text,
+                battleTriggerComponent
+                  ? () => {
+                      commands.requestTransition({
+                        context: battleTriggerComponent.context,
+                        gameState: new BattleState(),
+                        type: 'push',
+                      });
+                    }
+                  : undefined,
+              );
+            }
             return;
           }
         }

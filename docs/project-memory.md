@@ -22,17 +22,15 @@ The active editor file is `src/components/DialogTriggerComponent.ts`.
 
 Confirmed current behavior:
 
-- `DialogTriggerComponent` is an empty ECS marker component.
-- Its comment currently says it triggers a battle, but the component is named
-  for dialogs.
-- `EntityTriggerDispatchSystem` currently handles collision-driven dialog and
-  battle behavior directly.
-- `DialogTriggerComponent` is not currently imported or queried by that
-  system.
-
-No intended redesign has been recorded yet. Before changing this area, clarify
-whether dialog triggers should carry dialog content, identify a conversation,
-or remain marker-only.
+- `DialogContentComponent` owns the authored title and text for a trigger
+  entity.
+- `EntityTriggerDispatchSystem` reads dialog content from the non-player entity
+  involved in a player collision.
+- `NpcFactory` currently attaches the authored dialog content to NPC entities.
+- Battle triggers without dialog content transition immediately. If dialog
+  content is attached to one in the future, it will transition after dialog
+  completion.
+- `DialogTriggerComponent` remains an unused marker component.
 
 ## Recorded architectural decisions
 
@@ -67,4 +65,3 @@ relevant document as part of the same change.
 - Which browser and device targets must the game support?
 - What level of automated coverage is expected for rendering and physics
   behavior?
-

@@ -88,14 +88,16 @@ HUD views.
 `SmallTownState` creates a singleton-like entity with `DialogComponent` and
 adds `DialogSystem` near the end of its system order.
 
-`EntityTriggerDispatchSystem` consumes collision events. When a kinematic body
-enters a trigger, it can show dialog through `DialogComponent`. For battle
-triggers, completing that dialog requests a pushed `BattleState`.
+`EntityTriggerDispatchSystem` consumes collision events. When the player enters
+a trigger whose entity has `DialogContentComponent`, it copies that component's
+authored title and text into `DialogComponent`. For battle triggers, completing
+that dialog requests a pushed `BattleState`. Battle triggers without dialog
+content transition immediately.
 
 `DialogSystem` progressively reveals text and renders `DialogView`. Select or
 attack input, as well as the view callback, first completes text revelation and
 then closes a fully revealed dialog and invokes its completion callback.
 
 `DialogTriggerComponent` exists but is currently an empty marker component and
-is not part of the observed dispatch path.
-
+is not part of the observed dispatch path. Dialog dispatch currently keys
+directly off the presence of `DialogContentComponent`.
