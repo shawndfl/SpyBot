@@ -34,6 +34,20 @@ Confirmed current behavior:
 
 ## Recorded architectural decisions
 
+### 2026-07-26 — Procedural terrain MVP
+
+Decision: Generate deterministic terrain in 64-unit chunks. Keep a 3-by-3
+chunk area materialized around the player, and expose the generator's canonical
+world-space height function through `TerrainHeightResource` for movement and
+physics.
+
+Reason: Terrain rendering can follow the player without making mesh state the
+source of truth for gameplay height calculations.
+
+Consequence: `SmallTownState` no longer creates a singleton `TerrainComponent`
+or runs `TerrainSystem`. Procedural generation remains separate from Three.js
+materialization.
+
 ### 2026-07-24 — Repository memory
 
 Decision: Store durable Codex guidance in the root `AGENTS.md`, stable technical

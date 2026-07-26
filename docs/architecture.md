@@ -73,6 +73,13 @@ Rigid bodies, colliders, and collider sensors are ECS components. Physics
 trigger events become `EntityTriggerEvent` instances that later systems can
 interpret as gameplay actions.
 
+The overworld terrain is generated in deterministic 64-unit chunks by
+`TerrainGenerator`. `ProceduralTerrainSystem` keeps a 3-by-3 set of chunk meshes
+loaded around the player and unloads meshes outside that radius. Movement and
+physics obtain the same world-space height function through
+`TerrainHeightResource`; the legacy `TerrainSystem` is no longer used by
+`SmallTownState`.
+
 ## Input and UI
 
 `InputSystem` publishes frame input through `GameInputEvent` and resets

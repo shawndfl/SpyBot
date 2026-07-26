@@ -9,9 +9,9 @@ import { ColliderComponent } from '../components/physics/ColliderComponent';
 import type { Entity } from '../ecs/Entity';
 import { EntityTriggerEvent } from '../events/EntityTriggerEvent';
 import type { Scene } from 'three';
-import { TerrainComponent } from '../components/mesh/TerrainComponent';
 import type { World } from '../ecs/World';
 import { ColliderSensorComponent } from '../components/physics/ColliderSensorComponent';
+import { TerrainHeightResource } from '../procedural/resources/TerrainHeightResource';
 
 type ColliderState = {
   id: RAPIER.ColliderHandle;
@@ -197,9 +197,9 @@ export class PhysicsSystem extends System {
             : RAPIER.RigidBodyDesc.kinematicPositionBased();
 
       const initialPosition = rigidBody.initialPosition || { x: 0, y: 0, z: 0 };
-      const [[initialHeight]] = world.query(TerrainComponent);
-      if (initialHeight) {
-        initialPosition.y = initialHeight.getHeight?.(initialPosition.x, initialPosition.z) ?? 0;
+      if (world.resources.hasResource(TerrainHeightResource)) {
+        const terrain = world.resources.getResource(TerrainHeightResource);
+        initialPosition.y = terrain.getHeight(initialPosition.x, initialPosition.z);
       }
       desc.setTranslation(initialPosition.x, initialPosition.y, initialPosition.z);
 

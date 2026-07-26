@@ -4,9 +4,9 @@ import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
 import { GameInputEvent } from '../events/GameInputEvent';
 import { AnimationComponent } from '../components/AnimationComponent';
-import { TerrainComponent } from '../components/mesh/TerrainComponent';
 import { CameraComponent } from '../components/CameraComponent';
 import { RigidBodyComponent } from '../components/physics/RigidBodyComponent';
+import { TerrainHeightResource } from '../procedural/resources/TerrainHeightResource';
 
 export class MovementSystem extends System {
   private tempPosition1: THREE.Vector3 = new THREE.Vector3();
@@ -26,8 +26,9 @@ export class MovementSystem extends System {
         }
       }
 
-      let [[terrainComponent]] = world.query(TerrainComponent);
-      let getHeightFromTerrain = terrainComponent?.getHeight;
+      const terrain = world.resources.hasResource(TerrainHeightResource)
+        ? world.resources.getResource(TerrainHeightResource)
+        : undefined;
 
       // update the player rigidy body component. This should not update the
       // transformComponent because the rigid body is the source of truth.
@@ -64,7 +65,7 @@ export class MovementSystem extends System {
         }
 
         // set the final height
-        const height = getHeightFromTerrain! ? getHeightFromTerrain(this.tempPosition1.x, this.tempPosition1.z) : 0;
+        const height = terrain?.getHeight(this.tempPosition1.x, this.tempPosition1.z) ?? 0;
         this.tempPosition1.y = height;
 
         // set the next position

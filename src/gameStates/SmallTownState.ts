@@ -8,7 +8,6 @@ import { PlayerComponent } from '../components/PlayerComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { CameraComponent } from '../components/CameraComponent';
 import { ConstraintComponent } from '../components/ConstraintComponent';
-import { TerrainComponent } from '../components/mesh/TerrainComponent';
 import type { GameState } from '../core/GameState';
 import type { TransitionContext } from '../core/TransitionContext';
 import type { UpdateEvent } from '../core/UpdateEvent';
@@ -16,7 +15,6 @@ import { InputSystem } from '../systems/InputSystem';
 import { MovementSystem } from '../systems/MovementSystem';
 import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
-import { TerrainSystem } from '../systems/TerrainSystem';
 import { LightSystem } from '../systems/rendering/LightSystem';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
@@ -41,6 +39,10 @@ import { TargetingComponent } from '../components/TargetingComponent';
 import { TargetingSystem } from '../systems/TargetingSystem';
 import { NpcFactory } from '../entities/NpcFactory';
 import { ColliderSensorComponent } from '../components/physics/ColliderSensorComponent';
+import { DEFAULT_PROCEDURAL_TERRAIN_CONFIG } from '../procedural/ProceduralConfig';
+import { TerrainGenerator } from '../procedural/generators/TerrainGenerator';
+import { ProceduralTerrainSystem } from '../procedural/materialization/ProceduralTerrainSystem';
+import { TerrainHeightResource } from '../procedural/resources/TerrainHeightResource';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -76,14 +78,15 @@ export class SmallTownState implements GameState {
   protected createWorld(): World {
     const scene = this._scene;
     const renderer = Engine.renderer;
+    const terrainGenerator = new TerrainGenerator(DEFAULT_PROCEDURAL_TERRAIN_CONFIG);
 
     this._inputSystem = new InputSystem();
     const world = new World([
       this._inputSystem,
       new DebugModeSystem(),
 
-      // needed first so that getHeight can be set to the TerrainComponent
-      new TerrainSystem(scene),
+      // Stream generated terrain before movement and physics consume its height.
+      new ProceduralTerrainSystem(scene, terrainGenerator, DEFAULT_PROCEDURAL_TERRAIN_CONFIG),
 
       // update the player movement
       new MovementSystem(),
@@ -115,6 +118,8 @@ export class SmallTownState implements GameState {
       new DialogSystem(),
       new DebugHudSystem(),
     ]);
+
+    world.resources.addResource(new TerrainHeightResource(terrainGenerator));
 
     // root level entity
     const sceneRoot = world.createEntity();
@@ -191,21 +196,6 @@ export class SmallTownState implements GameState {
 
     // create an NPC
     NpcFactory.addNpc(world, { debug: true });
-
-    // terrain
-    const terrain = world.createEntity();
-    world.addComponent(terrain, new TransformComponent());
-    world.addComponent(
-      terrain,
-      new TerrainComponent({
-        width: 200,
-        depth: 200,
-        segments: 150,
-        heightScale: 0.2,
-        repeat: new THREE.Vector2(100, 100),
-        grassTexturePath: 'grass.jpg',
-      }),
-    );
 
     EnemySpawnFactory.knightEnemy(world, {
       position: new THREE.Vector3(-5, 0, 5),
