@@ -48,6 +48,19 @@ Consequence: `SmallTownState` no longer creates a singleton `TerrainComponent`
 or runs `TerrainSystem`. Procedural generation remains separate from Three.js
 materialization.
 
+### 2026-07-26 — Procedural road MVP
+
+Decision: Generate one deterministic, six-unit-wide east-west road per chunk.
+Use canonical boundary seeds so neighboring chunks independently choose the
+same shared endpoint, and materialize roads with the streamed terrain. Render
+the road with the tiled `rocky_trail_diff_1k.jpg` texture.
+
+Reason: Roads provide the spatial foundation needed by plots, buildings,
+navigation, decorations, and NPC placement.
+
+Consequence: `ChunkGenerator` now coordinates terrain and road generation, and
+`ProceduralChunkSystem` owns both terrain and road mesh lifecycle.
+
 ### 2026-07-24 — Repository memory
 
 Decision: Store durable Codex guidance in the root `AGENTS.md`, stable technical

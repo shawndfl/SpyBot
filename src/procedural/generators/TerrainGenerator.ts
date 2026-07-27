@@ -1,6 +1,6 @@
-import type { TerrainGenerationContext } from '../GenerationContext';
+import type { ChunkGenerationContext } from '../GenerationContext';
 import type { TerrainData } from '../GenerationTypes';
-import type { ProceduralTerrainConfig } from '../ProceduralConfig';
+import type { ProceduralConfig } from '../ProceduralConfig';
 
 /**
  * Generates deterministic terrain data and provides the canonical world-space
@@ -10,7 +10,7 @@ export class TerrainGenerator {
   private readonly phaseX: number;
   private readonly phaseZ: number;
 
-  constructor(private readonly config: Readonly<ProceduralTerrainConfig>) {
+  constructor(private readonly config: Readonly<ProceduralConfig>) {
     if (config.chunkSize <= 0) {
       throw new Error('Procedural terrain chunkSize must be greater than zero');
     }
@@ -22,7 +22,7 @@ export class TerrainGenerator {
     this.phaseZ = this.seedToUnit(config.seed, 0x02e5be93) * Math.PI * 2;
   }
 
-  generate(context: TerrainGenerationContext): TerrainData {
+  generate(context: ChunkGenerationContext): TerrainData {
     const { chunkX, chunkZ } = context;
     const { chunkSize, sampleSpacing } = context.config;
     const verticesPerSide = chunkSize / sampleSpacing + 1;

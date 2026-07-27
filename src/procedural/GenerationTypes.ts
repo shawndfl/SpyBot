@@ -9,3 +9,24 @@ export interface TerrainData {
   heights: Float32Array;
   normals: Float32Array;
 }
+
+export interface RoadPoint {
+  x: number;
+  y: number;
+  z: number;
+  tangentX: number;
+  tangentZ: number;
+}
+
+export interface RoadData {
+  id: string;
+  width: number;
+  points: RoadPoint[];
+}
+
+export interface ChunkData {
+  chunkX: number;
+  chunkZ: number;
+  terrain: TerrainData;
+  roads: RoadData[];
+}

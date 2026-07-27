@@ -161,9 +161,9 @@ physics engine and allows chunks to be serialized, regenerated, or streamed.
 
 `TerrainGenerator` is the canonical source of terrain samples. The overworld
 registers `TerrainHeightResource` so movement and physics use the same height
-function, while `ProceduralTerrainSystem` only materializes and streams meshes
-around the player. The legacy `TerrainSystem` and `TerrainComponent` are not
-part of the active overworld path.
+function, while `ProceduralChunkSystem` materializes and streams terrain and
+road meshes around the player. The legacy `TerrainSystem` and
+`TerrainComponent` are not part of the active overworld path.
 
 ### `RoadGenerator`
 
@@ -171,6 +171,11 @@ part of the active overworld path.
 - Connects important locations without crossing invalid terrain.
 - Coordinates entrances with neighboring chunks deterministically.
 - Leaves enough metadata for plots, decorations, collision, and navigation.
+
+The MVP generates one six-unit-wide east-west road per chunk. Shared boundary
+keys make neighboring chunks agree on endpoints, while a seeded midpoint gives
+each road a gentle curve. Road meshes currently follow sampled terrain heights
+without flattening the underlying terrain.
 
 ### `PlotGenerator`
 

@@ -59,7 +59,7 @@ export class Engine {
       assetManifest: {
         glbs: ['player.glb', 'lampPost.glb', 'NpcY.glb', 'knight.glb'],
         sounds: [],
-        textures: ['grass.jpg'],
+        textures: ['grass.jpg', 'rocky_trail_diff_1k.jpg'],
         physics: true,
       },
       nextStateAfterLoading: {

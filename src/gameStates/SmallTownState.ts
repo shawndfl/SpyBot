@@ -39,9 +39,9 @@ import { TargetingComponent } from '../components/TargetingComponent';
 import { TargetingSystem } from '../systems/TargetingSystem';
 import { NpcFactory } from '../entities/NpcFactory';
 import { ColliderSensorComponent } from '../components/physics/ColliderSensorComponent';
-import { DEFAULT_PROCEDURAL_TERRAIN_CONFIG } from '../procedural/ProceduralConfig';
-import { TerrainGenerator } from '../procedural/generators/TerrainGenerator';
-import { ProceduralTerrainSystem } from '../procedural/materialization/ProceduralTerrainSystem';
+import { DEFAULT_PROCEDURAL_CONFIG } from '../procedural/ProceduralConfig';
+import { ChunkGenerator } from '../procedural/ChunkGenerator';
+import { ProceduralChunkSystem } from '../procedural/materialization/ProceduralChunkSystem';
 import { TerrainHeightResource } from '../procedural/resources/TerrainHeightResource';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
@@ -78,7 +78,7 @@ export class SmallTownState implements GameState {
   protected createWorld(): World {
     const scene = this._scene;
     const renderer = Engine.renderer;
-    const terrainGenerator = new TerrainGenerator(DEFAULT_PROCEDURAL_TERRAIN_CONFIG);
+    const chunkGenerator = new ChunkGenerator(DEFAULT_PROCEDURAL_CONFIG);
 
     this._inputSystem = new InputSystem();
     const world = new World([
@@ -86,7 +86,7 @@ export class SmallTownState implements GameState {
       new DebugModeSystem(),
 
       // Stream generated terrain before movement and physics consume its height.
-      new ProceduralTerrainSystem(scene, terrainGenerator, DEFAULT_PROCEDURAL_TERRAIN_CONFIG),
+      new ProceduralChunkSystem(scene, chunkGenerator, DEFAULT_PROCEDURAL_CONFIG),
 
       // update the player movement
       new MovementSystem(),
@@ -119,7 +119,7 @@ export class SmallTownState implements GameState {
       new DebugHudSystem(),
     ]);
 
-    world.resources.addResource(new TerrainHeightResource(terrainGenerator));
+    world.resources.addResource(new TerrainHeightResource(chunkGenerator));
 
     // root level entity
     const sceneRoot = world.createEntity();
