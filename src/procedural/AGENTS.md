@@ -184,6 +184,11 @@ without flattening the underlying terrain.
 - Rejects excessive slope and intersections with roads or reserved areas.
 - Does not select or instantiate render assets.
 
+The MVP places up to three rectangular plots on each side of every road. Plots
+that would leave their owning chunk are rejected. `ProceduralChunkSystem`
+visualizes accepted plot footprints with gold Three.js `BoxHelper` outlines;
+the helpers are temporary development visualization, not generated plot data.
+
 ### `BuildingGenerator`
 
 - Selects valid buildings for plots.

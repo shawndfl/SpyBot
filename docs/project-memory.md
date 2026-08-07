@@ -61,6 +61,18 @@ navigation, decorations, and NPC placement.
 Consequence: `ChunkGenerator` now coordinates terrain and road generation, and
 `ProceduralChunkSystem` owns both terrain and road mesh lifecycle.
 
+### 2026-07-26 — Procedural plot MVP
+
+Decision: Generate rectangular plots beside both sides of procedural roads,
+reject plots whose rotated corners leave their owning chunk, and visualize
+accepted plots with gold Three.js `BoxHelper` outlines.
+
+Reason: Visible plot footprints validate placement and chunk-boundary rules
+before building generation begins.
+
+Consequence: `ChunkGenerator` runs `PlotGenerator` after `RoadGenerator`, while
+`ProceduralChunkSystem` owns the temporary plot-helper lifecycle.
+
 ### 2026-07-24 — Repository memory
 
 Decision: Store durable Codex guidance in the root `AGENTS.md`, stable technical

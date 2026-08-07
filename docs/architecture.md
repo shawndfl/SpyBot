@@ -75,11 +75,13 @@ interpret as gameplay actions.
 
 The overworld is generated in deterministic 64-unit chunks coordinated by
 `ChunkGenerator`. `TerrainGenerator` creates height data and `RoadGenerator`
-creates a continuous east-west road through each chunk. `ProceduralChunkSystem`
-keeps a 3-by-3 set of terrain and road meshes loaded around the player and
-unloads meshes outside that radius. Movement and physics obtain the same
-world-space height function through `TerrainHeightResource`; the legacy
-`TerrainSystem` is no longer used by `SmallTownState`.
+creates a continuous east-west road through each chunk. `PlotGenerator` places
+rectangular building plots beside roads and rejects plots outside their owning
+chunk. `ProceduralChunkSystem` keeps a 3-by-3 set of terrain, road meshes, and
+gold `BoxHelper` plot outlines loaded around the player, unloading them outside
+that radius. Movement and physics obtain the same world-space height function
+through `TerrainHeightResource`; the legacy `TerrainSystem` is no longer used
+by `SmallTownState`.
 
 ## Input and UI
 

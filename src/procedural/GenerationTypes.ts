@@ -24,9 +24,22 @@ export interface RoadData {
   points: RoadPoint[];
 }
 
+export interface PlotData {
+  id: string;
+  roadId: string;
+  centerX: number;
+  centerY: number;
+  centerZ: number;
+  width: number;
+  depth: number;
+  rotationY: number;
+  side: 'left' | 'right';
+}
+
 export interface ChunkData {
   chunkX: number;
   chunkZ: number;
   terrain: TerrainData;
   roads: RoadData[];
+  plots: PlotData[];
 }

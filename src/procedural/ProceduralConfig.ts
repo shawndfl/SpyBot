@@ -9,6 +9,10 @@ export interface ProceduralConfig {
   roadWidth: number;
   roadSamples: number;
   roadTexturePath: string;
+  plotsPerRoadSide: number;
+  plotWidth: number;
+  plotDepth: number;
+  plotRoadSetback: number;
 }
 
 export const DEFAULT_PROCEDURAL_CONFIG: Readonly<ProceduralConfig> = {
@@ -22,4 +26,8 @@ export const DEFAULT_PROCEDURAL_CONFIG: Readonly<ProceduralConfig> = {
   roadWidth: 6,
   roadSamples: 16,
   roadTexturePath: 'rocky_trail_diff_1k.jpg',
+  plotsPerRoadSide: 3,
+  plotWidth: 10,
+  plotDepth: 12,
+  plotRoadSetback: 2,
 };

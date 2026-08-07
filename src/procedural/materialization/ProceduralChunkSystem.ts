@@ -6,13 +6,19 @@ import { Engine } from '../../core/Engine';
 import type { UpdateEvent } from '../../core/UpdateEvent';
 import { System } from '../../ecs/System';
 import type { ChunkGenerator } from '../ChunkGenerator';
-import type { ChunkData, RoadData, TerrainData } from '../GenerationTypes';
+import type { ChunkData, PlotData, RoadData, TerrainData } from '../GenerationTypes';
 import type { ProceduralConfig } from '../ProceduralConfig';
 
 interface LoadedChunk {
   data: ChunkData;
   terrainMesh: THREE.Mesh;
   roadMeshes: THREE.Mesh[];
+  plotVisualizations: PlotVisualization[];
+}
+
+interface PlotVisualization {
+  source: THREE.Mesh;
+  helper: THREE.BoxHelper;
 }
 
 /** Materializes and streams generated chunks around the player. */
@@ -20,6 +26,7 @@ export class ProceduralChunkSystem extends System {
   private readonly loadedChunks = new Map<string, LoadedChunk>();
   private terrainMaterial?: THREE.MeshStandardMaterial;
   private roadMaterial?: THREE.MeshStandardMaterial;
+  private readonly plotSourceMaterial = new THREE.MeshBasicMaterial({ visible: false });
 
   constructor(
     private readonly scene: THREE.Scene,
@@ -70,15 +77,33 @@ export class ProceduralChunkSystem extends System {
     const data = this.generator.generate(chunkX, chunkZ);
     const terrainMesh = this.createTerrainMesh(data.terrain);
     const roadMeshes = data.roads.map((road) => this.createRoadMesh(road));
-    this.scene.add(terrainMesh, ...roadMeshes);
-    this.loadedChunks.set(this.getChunkKey(chunkX, chunkZ), { data, terrainMesh, roadMeshes });
+    const plotVisualizations = data.plots.map((plot) => this.createPlotVisualization(plot));
+    this.scene.add(
+      terrainMesh,
+      ...roadMeshes,
+      ...plotVisualizations.map((visualization) => visualization.helper),
+    );
+    this.loadedChunks.set(this.getChunkKey(chunkX, chunkZ), {
+      data,
+      terrainMesh,
+      roadMeshes,
+      plotVisualizations,
+    });
   }
 
   private unloadChunk(chunk: LoadedChunk): void {
-    this.scene.remove(chunk.terrainMesh, ...chunk.roadMeshes);
+    this.scene.remove(
+      chunk.terrainMesh,
+      ...chunk.roadMeshes,
+      ...chunk.plotVisualizations.map((visualization) => visualization.helper),
+    );
     chunk.terrainMesh.geometry.dispose();
     for (const road of chunk.roadMeshes) {
       road.geometry.dispose();
+    }
+    for (const visualization of chunk.plotVisualizations) {
+      visualization.source.geometry.dispose();
+      visualization.helper.dispose();
     }
   }
 
@@ -166,6 +191,20 @@ export class ProceduralChunkSystem extends System {
     mesh.name = road.id;
     mesh.receiveShadow = true;
     return mesh;
+  }
+
+  private createPlotVisualization(plot: PlotData): PlotVisualization {
+    const geometry = new THREE.BoxGeometry(plot.width, 0.25, plot.depth);
+    const source = new THREE.Mesh(geometry, this.plotSourceMaterial);
+    source.name = plot.id;
+    source.position.set(plot.centerX, plot.centerY + 0.125, plot.centerZ);
+    source.rotation.y = plot.rotationY;
+    source.updateMatrixWorld(true);
+
+    const helper = new THREE.BoxHelper(source, 0xffd700);
+    helper.name = `${plot.id}_helper`;
+    helper.update();
+    return { source, helper };
   }
 
   private getTerrainMaterial(): THREE.MeshStandardMaterial {
