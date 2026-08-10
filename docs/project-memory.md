@@ -34,14 +34,28 @@ Confirmed current behavior:
 
 ## Recorded architectural decisions
 
-### 2026-08-07 — Fixed-angle overworld camera
+### 2026-08-10 — Procedural grass terrain material
+
+Decision: Render streamed terrain with the Perlin-noise grass shader instead
+of loading a grass texture. Share the material factory with the legacy
+`TerrainSystem` and preserve the configured terrain repeat density.
+
+Reason: Terrain grass should be generated procedurally from the authored shader
+without depending on a grass texture asset.
+
+Consequence: `ProceduralConfig` no longer contains `grassTexturePath`.
+`ProceduralChunkSystem` uses an unlit `ShaderMaterial`; road rendering continues
+to use its configured texture.
+
+### 2026-08-07 — Player-oriented overworld camera
 
 Decision: Follow the player with a dedicated `PlayerFollowCameraSystem` using a
-fixed `(10, 12, 10)` three-quarter-view offset and frame-rate-independent
-position smoothing. Do not rotate the camera with the player.
+behind-and-above offset and frame-rate-independent position smoothing. Orbit
+the offset with a frame-rate-independent smoothed player yaw and look ahead in
+the direction of that orbit.
 
-Reason: The overworld should keep the character in view while preserving a
-stable viewing direction.
+Reason: The overworld should keep the character in view while showing the area
+in front of the player.
 
 Consequence: `SmallTownState` no longer attaches a `ConstraintComponent` to the
 camera. The follow system owns the camera transform outside debug free-camera

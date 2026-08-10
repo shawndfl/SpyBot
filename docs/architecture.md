@@ -79,20 +79,23 @@ creates a continuous east-west road through each chunk. `PlotGenerator` places
 rectangular building plots beside roads and rejects plots outside their owning
 chunk. `ProceduralChunkSystem` keeps a 3-by-3 set of terrain, road meshes, and
 gold `BoxHelper` plot outlines loaded around the player, unloading them outside
-that radius. Movement and physics obtain the same world-space height function
-through `TerrainHeightResource`; the legacy `TerrainSystem` is no longer used
-by `SmallTownState`.
+that radius. Terrain uses the procedural Perlin-noise grass shader shared with
+the legacy `TerrainSystem`, while roads retain their tiled texture. Movement
+and physics obtain the same world-space height function through
+`TerrainHeightResource`; the legacy `TerrainSystem` is no longer used by
+`SmallTownState`.
 
 ## Input and UI
 
 `InputSystem` publishes frame input through `GameInputEvent` and resets
 edge-triggered inputs after the state's systems update.
 
-In the overworld, `PlayerFollowCameraSystem` translates the camera toward a
-fixed offset from the player using frame-rate-independent smoothing. Its
-three-quarter orientation is fixed and does not inherit player rotation.
-`CameraSyncSystem` applies the resulting transform to the Three.js camera. The
-follow system yields camera ownership while debug free-camera mode is active.
+In the overworld, `PlayerFollowCameraSystem` rotates a behind-and-above offset
+with a smoothed version of the player's yaw and translates the camera toward it
+using independent frame-rate-independent orbit and position smoothing. The
+camera looks ahead in the direction of the smoothed orbit. `CameraSyncSystem`
+applies the resulting transform to the Three.js camera. The follow system
+yields camera ownership while debug free-camera mode is active.
 
 React is used as an overlay rather than as the owner of the game loop.
 UI-oriented ECS systems create DOM containers and React roots, then render

@@ -3,7 +3,7 @@ import { System } from '../ecs/System';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { TerrainComponent } from '../components/mesh/TerrainComponent';
 import { TransformComponent } from '../components/TransformComponent';
-import { Engine } from '../core/Engine';
+import { createProceduralGrassMaterial } from '../rendering/ProceduralGrassMaterial';
 
 export class TerrainSystem extends System {
   constructor(private _scene: THREE.Scene) {
@@ -44,12 +44,7 @@ export class TerrainSystem extends System {
 
     geometry.computeVertexNormals();
 
-    const material = terrain.grassTexturePath
-      ? this.createTerrainMaterial(terrain.grassTexturePath, terrain)
-      : new THREE.MeshStandardMaterial({
-          color: 0x3f8f3f,
-          roughness: 1,
-        });
+    const material = this.createTerrainMaterial(terrain);
 
     const mesh = new THREE.Mesh(geometry, material);
     mesh.receiveShadow = true;
@@ -65,17 +60,7 @@ export class TerrainSystem extends System {
     );
   }
 
-  private createTerrainMaterial(texturePath: string, terrain: TerrainComponent): THREE.MeshStandardMaterial {
-    const grassTexture = Engine.assets.getTexture(texturePath);
-
-    grassTexture.wrapS = THREE.RepeatWrapping;
-    grassTexture.wrapT = THREE.RepeatWrapping;
-    grassTexture.repeat.set(terrain.repeat.x, terrain.repeat.y);
-    grassTexture.colorSpace = THREE.SRGBColorSpace;
-
-    return new THREE.MeshStandardMaterial({
-      map: grassTexture,
-      roughness: 1,
-    });
+  private createTerrainMaterial(terrain: TerrainComponent): THREE.ShaderMaterial {
+    return createProceduralGrassMaterial(terrain.repeat);
   }
 }

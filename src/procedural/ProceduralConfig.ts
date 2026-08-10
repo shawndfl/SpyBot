@@ -4,7 +4,6 @@ export interface ProceduralConfig {
   sampleSpacing: number;
   activeChunkRadius: number;
   heightScale: number;
-  grassTexturePath: string;
   textureRepeatPerUnit: number;
   roadWidth: number;
   roadSamples: number;
@@ -21,7 +20,6 @@ export const DEFAULT_PROCEDURAL_CONFIG: Readonly<ProceduralConfig> = {
   sampleSpacing: 2,
   activeChunkRadius: 1,
   heightScale: 0.2,
-  grassTexturePath: 'grass.jpg',
   textureRepeatPerUnit: 0.5,
   roadWidth: 6,
   roadSamples: 16,

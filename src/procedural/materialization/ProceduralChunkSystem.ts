@@ -5,6 +5,7 @@ import { TransformComponent } from '../../components/TransformComponent';
 import { Engine } from '../../core/Engine';
 import type { UpdateEvent } from '../../core/UpdateEvent';
 import { System } from '../../ecs/System';
+import { createProceduralGrassMaterial } from '../../rendering/ProceduralGrassMaterial';
 import type { ChunkGenerator } from '../ChunkGenerator';
 import type { ChunkData, PlotData, RoadData, TerrainData } from '../GenerationTypes';
 import type { ProceduralConfig } from '../ProceduralConfig';
@@ -24,7 +25,7 @@ interface PlotVisualization {
 /** Materializes and streams generated chunks around the player. */
 export class ProceduralChunkSystem extends System {
   private readonly loadedChunks = new Map<string, LoadedChunk>();
-  private terrainMaterial?: THREE.MeshStandardMaterial;
+  private terrainMaterial?: THREE.ShaderMaterial;
   private roadMaterial?: THREE.MeshStandardMaterial;
   private readonly plotSourceMaterial = new THREE.MeshBasicMaterial({ visible: false });
 
@@ -207,17 +208,13 @@ export class ProceduralChunkSystem extends System {
     return { source, helper };
   }
 
-  private getTerrainMaterial(): THREE.MeshStandardMaterial {
+  private getTerrainMaterial(): THREE.ShaderMaterial {
     if (!this.terrainMaterial) {
-      const grassTexture = Engine.assets.getTexture(this.config.grassTexturePath);
-      grassTexture.wrapS = THREE.RepeatWrapping;
-      grassTexture.wrapT = THREE.RepeatWrapping;
-      grassTexture.repeat.set(
-        this.config.chunkSize * this.config.textureRepeatPerUnit,
-        this.config.chunkSize * this.config.textureRepeatPerUnit,
+      const worldScale = new THREE.Vector2(
+        this.config.textureRepeatPerUnit,
+        this.config.textureRepeatPerUnit,
       );
-      grassTexture.colorSpace = THREE.SRGBColorSpace;
-      this.terrainMaterial = new THREE.MeshStandardMaterial({ map: grassTexture, roughness: 1 });
+      this.terrainMaterial = createProceduralGrassMaterial(new THREE.Vector2(1, 1), worldScale);
     }
     return this.terrainMaterial;
   }
