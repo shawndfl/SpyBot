@@ -7,14 +7,13 @@ import { SunLightComponent } from '../components/SunLightComponent';
 import { PlayerComponent } from '../components/PlayerComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { CameraComponent } from '../components/CameraComponent';
-import { ConstraintComponent } from '../components/ConstraintComponent';
 import type { GameState } from '../core/GameState';
 import type { TransitionContext } from '../core/TransitionContext';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { InputSystem } from '../systems/InputSystem';
 import { MovementSystem } from '../systems/MovementSystem';
-import { ConstraintSystem } from '../systems/rendering/ConstraintSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
+import { PlayerFollowCameraSystem } from '../systems/PlayerFollowCameraSystem';
 import { LightSystem } from '../systems/rendering/LightSystem';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
@@ -100,7 +99,7 @@ export class SmallTownState implements GameState {
       // load glbs and create rendererComponents
       new RenderInitSystem(scene),
 
-      new ConstraintSystem(),
+      new PlayerFollowCameraSystem(),
       new CameraSyncSystem(),
 
       new BattleBackgroundSystem(renderer),
@@ -167,18 +166,6 @@ export class SmallTownState implements GameState {
       position: new THREE.Vector3(10, 10, 10),
     });
     world.addComponent(camera, cameraTransform);
-
-    // make sure the camera can follow the player
-    const followPlayerConstraint = new ConstraintComponent({
-      targetOffset: new THREE.Vector3(0, 1.5, 5.5),
-      FarMovementSpeed: 10,
-      closeMovementSpeed: playerComponent.speed + 0.01,
-      outerDistance: 10,
-      innerDistance: 7,
-      source: cameraTransform,
-      target: playerTransform,
-    });
-    world.addComponent(camera, followPlayerConstraint);
 
     // create sun
     const sun = world.createEntity();

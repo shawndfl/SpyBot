@@ -34,6 +34,19 @@ Confirmed current behavior:
 
 ## Recorded architectural decisions
 
+### 2026-08-07 — Fixed-angle overworld camera
+
+Decision: Follow the player with a dedicated `PlayerFollowCameraSystem` using a
+fixed `(10, 12, 10)` three-quarter-view offset and frame-rate-independent
+position smoothing. Do not rotate the camera with the player.
+
+Reason: The overworld should keep the character in view while preserving a
+stable viewing direction.
+
+Consequence: `SmallTownState` no longer attaches a `ConstraintComponent` to the
+camera. The follow system owns the camera transform outside debug free-camera
+mode and runs immediately before `CameraSyncSystem`.
+
 ### 2026-07-26 — Procedural terrain MVP
 
 Decision: Generate deterministic terrain in 64-unit chunks. Keep a 3-by-3

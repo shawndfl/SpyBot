@@ -88,6 +88,12 @@ by `SmallTownState`.
 `InputSystem` publishes frame input through `GameInputEvent` and resets
 edge-triggered inputs after the state's systems update.
 
+In the overworld, `PlayerFollowCameraSystem` translates the camera toward a
+fixed offset from the player using frame-rate-independent smoothing. Its
+three-quarter orientation is fixed and does not inherit player rotation.
+`CameraSyncSystem` applies the resulting transform to the Three.js camera. The
+follow system yields camera ownership while debug free-camera mode is active.
+
 React is used as an overlay rather than as the owner of the game loop.
 UI-oriented ECS systems create DOM containers and React roots, then render
 views from `src/ui/`. Current examples include dialog, battle-menu, and debug
