@@ -84,10 +84,15 @@ export class GameSky {
     uniforms['sunPosition'].value.copy(this.sun);
   }
 
+  setCenter(position: THREE.Vector3Like): void {
+    this.sky.position.copy(position);
+  }
+
   private initSky() {
     const effectController = this.effectController;
     // Add Sky
     this.sky.scale.setScalar(450);
+    this.sky.frustumCulled = false;
     const gui = this.gui;
     if (gui) {
       gui.add(effectController, 'turbidity', 0.0, 20.0, 0.1).onChange(this.onGuiChanged);

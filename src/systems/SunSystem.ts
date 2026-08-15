@@ -90,6 +90,7 @@ export class SunSystem extends System {
       }
 
       this._sky.setSunPosition(sun.azimuth!, sun.elevation!);
+      this._sky.setCenter(camera.camera.position);
 
       // there should only be one sun
       break;
