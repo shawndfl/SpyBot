@@ -42,6 +42,9 @@ import { DEFAULT_PROCEDURAL_CONFIG } from '../procedural/ProceduralConfig';
 import { ChunkGenerator } from '../procedural/ChunkGenerator';
 import { ProceduralChunkSystem } from '../procedural/materialization/ProceduralChunkSystem';
 import { TerrainHeightResource } from '../procedural/resources/TerrainHeightResource';
+import { PlayerProgressResource } from '../procedural/resources/PlayerProgressResource';
+import { LocalSaveStore } from '../persistence/LocalSaveStore';
+import { GoldCollectionSystem } from '../systems/GoldCollectionSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -92,6 +95,7 @@ export class SmallTownState implements GameState {
 
       // physics. this will perform the physics step and update the transform component.
       new PhysicsSystem(scene, Engine.physicsContext),
+      new GoldCollectionSystem(),
       new EntityTriggerDispatchSystem(),
 
       new TargetingSystem(scene),
@@ -119,6 +123,7 @@ export class SmallTownState implements GameState {
     ]);
 
     world.resources.addResource(new TerrainHeightResource(chunkGenerator));
+    world.resources.addResource(new PlayerProgressResource(new LocalSaveStore(window.localStorage)));
 
     // root level entity
     const sceneRoot = world.createEntity();

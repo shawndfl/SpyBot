@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PlayerComponent } from '../../components/PlayerComponent';
+import { GoldCollectibleComponent } from '../../components/GoldCollectibleComponent';
 import { ParticleEmitterComponent } from '../../components/particles/ParticleEmitterComponent';
 import { ParticleEmitterStateComponent } from '../../components/particles/ParticleStateComponent';
 import { RigidBodyComponent } from '../../components/physics/RigidBodyComponent';
@@ -13,6 +14,7 @@ import { createProceduralGrassMaterial } from '../../rendering/ProceduralGrassMa
 import type { ChunkGenerator } from '../ChunkGenerator';
 import type { ChunkData, PlotData, RoadData, TerrainData } from '../GenerationTypes';
 import type { ProceduralConfig } from '../ProceduralConfig';
+import { PlayerProgressResource } from '../resources/PlayerProgressResource';
 
 interface LoadedChunk {
   data: ChunkData;
@@ -80,11 +82,19 @@ export class ProceduralChunkSystem extends System {
   }
 
   private loadChunk(world: World, chunkX: number, chunkZ: number): void {
+    // this will be used to filter out collectables
+    const progress = world.resources.hasResource(PlayerProgressResource)
+      ? world.resources.getResource(PlayerProgressResource)
+      : undefined;
+
     const data = this.generator.generate(chunkX, chunkZ);
     const terrainMesh = this.createTerrainMesh(data.terrain);
     const roadMeshes = data.roads.map((road) => this.createRoadMesh(road));
     const plotVisualizations = data.plots.map((plot) => this.createPlotVisualization(plot));
-    const goldEmitterEntities = data.gold.map((gold) => this.createGoldEmitter(world, gold));
+
+    const goldEmitterEntities = data.gold
+      .filter((gold) => !progress?.collectedGoldIds.has(gold.id))
+      .map((gold) => this.createGoldEmitter(world, gold));
     this.scene.add(terrainMesh, ...roadMeshes, ...plotVisualizations.map((visualization) => visualization.helper));
     this.loadedChunks.set(this.getChunkKey(chunkX, chunkZ), {
       data,
@@ -142,6 +152,7 @@ export class ProceduralChunkSystem extends System {
         spawnRadius: 0.03,
       }),
       new ParticleEmitterStateComponent(),
+      new GoldCollectibleComponent({ goldId: gold.id, amount: gold.amount }),
     );
     return entity;
   }

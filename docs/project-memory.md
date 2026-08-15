@@ -44,7 +44,11 @@ and remain stable when chunks unload and regenerate.
 
 Consequence: `ChunkData` exposes `gold`, and `ProceduralChunkSystem` materializes
 each deposit as a small additive particle emitter whose emission density
-reflects its amount. Gold is not yet collectible.
+reflects its amount. Approaching a deposit collects it through
+`GoldCollectionSystem`. `PlayerProgressResource` immediately saves the balance
+and collected deterministic IDs to the versioned `spyhero.save.v1` localStorage
+entry; chunk reloads filter collected IDs instead of persisting generated world
+data.
 
 ### 2026-08-10 — Procedural grass terrain material
 

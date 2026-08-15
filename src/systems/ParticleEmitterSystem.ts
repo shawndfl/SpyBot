@@ -122,6 +122,7 @@ export class ParticleEmitterSystem extends System {
 
     particle.age = 0;
     particle.lifetime = init.lifetime;
+    particle.gravityY = init.gravityY;
 
     particle.position.copy(init.position);
     particle.velocity.copy(init.velocity);

@@ -87,6 +87,12 @@ and physics obtain the same world-space height function through
 `TerrainHeightResource`; the legacy `TerrainSystem` is no longer used by
 `SmallTownState`.
 
+Collected gold is stored as a deterministic-world delta. `GoldCollectionSystem`
+adds nearby deposit IDs and amounts to `PlayerProgressResource`, which persists
+immediately through `LocalSaveStore`. Chunk materialization filters those IDs,
+so regenerated chunks retain their procedural layout without respawning
+collected deposits.
+
 ## Input and UI
 
 `InputSystem` publishes frame input through `GameInputEvent` and resets

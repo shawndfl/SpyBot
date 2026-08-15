@@ -18,7 +18,7 @@ export class GoldGenerator {
       const z = originZ + random.range(0, config.chunkSize);
 
       gold.push({
-        id: `gold_${chunkX}_${chunkZ}_${index}`,
+        id: `gold_v1_${chunkX}_${chunkZ}_${index}`,
         x,
         y: this.terrainGenerator.getHeight(x, z),
         z,
