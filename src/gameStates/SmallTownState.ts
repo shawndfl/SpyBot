@@ -46,6 +46,7 @@ import { PlayerProgressResource } from '../procedural/resources/PlayerProgressRe
 import { LocalSaveStore } from '../persistence/LocalSaveStore';
 import { GoldCollectionSystem } from '../systems/GoldCollectionSystem';
 import { AudioSystem } from '../systems/AudioSystem';
+import { PlayerProgressSystem } from '../systems/PlayerProgressSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -60,7 +61,18 @@ export class SmallTownState implements GameState {
     this._world = this.createWorld();
   }
 
-  exit(): void {}
+  exit(): void {
+    if (!this._world?.resources.hasResource(PlayerProgressResource)) {
+      return;
+    }
+    const playerResult = this._world.query(PlayerComponent, TransformComponent).next();
+    if (!playerResult.done) {
+      const [, transform] = playerResult.value;
+      const progress = this._world.resources.getResource(PlayerProgressResource);
+      progress.updatePlayerPosition(transform.position);
+      progress.save();
+    }
+  }
 
   /**
    * update the game state
@@ -96,6 +108,7 @@ export class SmallTownState implements GameState {
 
       // physics. this will perform the physics step and update the transform component.
       new PhysicsSystem(scene, Engine.physicsContext),
+      new PlayerProgressSystem(),
       new GoldCollectionSystem(),
       new AudioSystem(Engine.audio),
       new EntityTriggerDispatchSystem(),
@@ -125,7 +138,8 @@ export class SmallTownState implements GameState {
     ]);
 
     world.resources.addResource(new TerrainHeightResource(chunkGenerator));
-    world.resources.addResource(new PlayerProgressResource(new LocalSaveStore(window.localStorage)));
+    const progress = new PlayerProgressResource(new LocalSaveStore(window.localStorage));
+    world.resources.addResource(progress);
 
     // root level entity
     const sceneRoot = world.createEntity();
@@ -137,7 +151,11 @@ export class SmallTownState implements GameState {
 
     // create player
     const player = world.createEntity();
-    const playerTransform = new TransformComponent({ scale: new THREE.Vector3(1, 1, -1) });
+    const spawnPosition = progress.playerPosition.clone();
+    const playerTransform = new TransformComponent({
+      position: spawnPosition,
+      scale: new THREE.Vector3(1, 1, -1),
+    });
     const playerComponent = new PlayerComponent();
     playerComponent.speed = 5.5;
     world.addComponent(
@@ -160,7 +178,7 @@ export class SmallTownState implements GameState {
       new RigidBodyComponent({
         type: 'kinematic',
         requestPlayerController: true,
-        initialPosition: new THREE.Vector3(5, 0, 3),
+        initialPosition: spawnPosition.clone(),
         useTerrainHeight: true,
       }),
       playerTransform,

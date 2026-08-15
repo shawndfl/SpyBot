@@ -12,15 +12,28 @@ import { PlaySoundEvent } from '../src/events/PlaySoundEvent';
 import { SoundIds } from '../src/audio/SoundIds';
 
 class MemorySaveStore implements SaveStore {
-  data: GameSaveData = { version: 1, goldBalance: 0, collectedGoldIds: [] };
+  data: GameSaveData = {
+    version: 1,
+    goldBalance: 0,
+    collectedGoldIds: [],
+    playerPosition: { x: 5, y: 0, z: 3 },
+  };
   saveCount = 0;
 
   load(): GameSaveData {
-    return { ...this.data, collectedGoldIds: [...this.data.collectedGoldIds] };
+    return {
+      ...this.data,
+      collectedGoldIds: [...this.data.collectedGoldIds],
+      playerPosition: { ...this.data.playerPosition },
+    };
   }
 
   save(data: GameSaveData): void {
-    this.data = { ...data, collectedGoldIds: [...data.collectedGoldIds] };
+    this.data = {
+      ...data,
+      collectedGoldIds: [...data.collectedGoldIds],
+      playerPosition: { ...data.playerPosition },
+    };
     this.saveCount++;
   }
 }
