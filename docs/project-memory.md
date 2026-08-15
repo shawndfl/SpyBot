@@ -34,6 +34,19 @@ Confirmed current behavior:
 
 ## Recorded architectural decisions
 
+### 2026-08-15 — Event-driven shared audio
+
+Decision: Address public WAV assets through stable sound IDs, preload them with
+`AssetManager`, and route frame-scoped `PlaySoundEvent` requests through a
+shared Web Audio `AudioManager` owned by `Engine`.
+
+Reason: Gameplay systems should request sound without owning paths, browser
+audio nodes, concurrency, mixing, or autoplay-unlock behavior.
+
+Consequence: `AudioSystem` must run after sound-producing systems in each
+state. The initial manifest preloads `/collect.wav`, and collecting gold emits
+the `goldCollect` sound on the effects bus.
+
 ### 2026-08-14 — Deterministic gold generation
 
 Decision: Generate configurable gold deposits as part of each chunk, with

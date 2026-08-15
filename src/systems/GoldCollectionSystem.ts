@@ -4,12 +4,14 @@ import { TransformComponent } from '../components/TransformComponent';
 import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
 import { PlayerProgressResource } from '../procedural/resources/PlayerProgressResource';
+import { SoundIds } from '../audio/SoundIds';
+import { PlaySoundEvent } from '../events/PlaySoundEvent';
 
 /**
  * This system allows the player to pickup gold
  */
 export class GoldCollectionSystem extends System {
-  update({ world, commands }: UpdateEvent): void {
+  update({ world, commands, events }: UpdateEvent): void {
     const playerResult = world.query(PlayerComponent, TransformComponent).next();
     if (playerResult.done || !world.resources.hasResource(PlayerProgressResource)) {
       return;
@@ -24,6 +26,7 @@ export class GoldCollectionSystem extends System {
       }
 
       if (progress.collectGold(gold.goldId, gold.amount)) {
+        events.emit(new PlaySoundEvent(SoundIds.goldCollect, { volume: 0.8 }));
         commands.destroy(world, entity);
       }
     }

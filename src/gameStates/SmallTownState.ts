@@ -45,6 +45,7 @@ import { TerrainHeightResource } from '../procedural/resources/TerrainHeightReso
 import { PlayerProgressResource } from '../procedural/resources/PlayerProgressResource';
 import { LocalSaveStore } from '../persistence/LocalSaveStore';
 import { GoldCollectionSystem } from '../systems/GoldCollectionSystem';
+import { AudioSystem } from '../systems/AudioSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -96,6 +97,7 @@ export class SmallTownState implements GameState {
       // physics. this will perform the physics step and update the transform component.
       new PhysicsSystem(scene, Engine.physicsContext),
       new GoldCollectionSystem(),
+      new AudioSystem(Engine.audio),
       new EntityTriggerDispatchSystem(),
 
       new TargetingSystem(scene),

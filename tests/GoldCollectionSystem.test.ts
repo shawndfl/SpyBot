@@ -8,6 +8,8 @@ import { World } from '../src/ecs/World';
 import type { GameSaveData, SaveStore } from '../src/persistence/LocalSaveStore';
 import { PlayerProgressResource } from '../src/procedural/resources/PlayerProgressResource';
 import { GoldCollectionSystem } from '../src/systems/GoldCollectionSystem';
+import { PlaySoundEvent } from '../src/events/PlaySoundEvent';
+import { SoundIds } from '../src/audio/SoundIds';
 
 class MemorySaveStore implements SaveStore {
   data: GameSaveData = { version: 1, goldBalance: 0, collectedGoldIds: [] };
@@ -55,5 +57,7 @@ describe('GoldCollectionSystem', () => {
     expect(progress.collectedGoldIds.has('gold_v1_0_0_0')).toBe(true);
     expect(saveStore.saveCount).toBe(1);
     expect(saveStore.data.collectedGoldIds).toEqual(['gold_v1_0_0_0']);
+    expect(updateEvent.events.get(PlaySoundEvent)).toHaveLength(1);
+    expect(updateEvent.events.get(PlaySoundEvent)[0].soundId).toBe(SoundIds.goldCollect);
   });
 });

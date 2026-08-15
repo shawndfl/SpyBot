@@ -10,6 +10,8 @@ import { PhysicsContext } from './PhysiscContext';
 import { AssetManager } from './AssetManager';
 import { LoadingState } from '../gameStates/LoadingState';
 import { SmallTownState } from '../gameStates/SmallTownState';
+import { AudioManager } from '../audio/AudioManager';
+import { initialSoundPaths } from '../audio/SoundManifest';
 
 /**
  * This is the engine that runs the game. It creates an instance of the world and adds all
@@ -23,6 +25,7 @@ export class Engine {
   private static _renderer = new THREE.WebGLRenderer({ antialias: true });
   private static _physics = new PhysicsContext();
   private static _assets = new AssetManager();
+  private static _audio?: AudioManager;
 
   protected _eventBus: EventBus;
   protected _command: CommandBuffer;
@@ -39,6 +42,14 @@ export class Engine {
 
   public static get renderer(): THREE.WebGLRenderer {
     return this._renderer;
+  }
+
+  public static get audio(): AudioManager {
+    if (!this._audio) {
+      this._audio = new AudioManager((path) => this.assets.getSound(path));
+      this._audio.installUnlockListeners();
+    }
+    return this._audio;
   }
 
   constructor() {
@@ -58,7 +69,7 @@ export class Engine {
     this._gameStateManager.push(new LoadingState(), {
       assetManifest: {
         glbs: ['player.glb', 'lampPost.glb', 'NpcY.glb', 'knight.glb'],
-        sounds: [],
+        sounds: initialSoundPaths,
         textures: ['grass.jpg', 'rocky_trail_diff_1k.jpg'],
         physics: true,
       },

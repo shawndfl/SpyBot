@@ -110,6 +110,15 @@ UI-oriented ECS systems create DOM containers and React roots, then render
 views from `src/ui/`. Current examples include dialog, battle-menu, and debug
 HUD views.
 
+## Audio
+
+WAV files under `public/` are listed by stable IDs in `SoundManifest` and
+decoded through the loading state's existing `AssetManager` sound pipeline.
+Gameplay systems emit frame-scoped `PlaySoundEvent` instances; `AudioSystem`
+forwards them to the shared `AudioManager`, which owns Web Audio playback,
+effects/UI/music gain buses, per-sound concurrency limits, and first-input
+audio-context unlocking. Gold collection currently emits `goldCollect`.
+
 ## Current dialog flow
 
 `SmallTownState` creates a singleton-like entity with `DialogComponent` and
