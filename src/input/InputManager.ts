@@ -6,6 +6,9 @@ export class InputManager {
     moveY: 0,
 
     moveZ: 0,
+    lookX: 0,
+    lookY: 0,
+    aimCycleJustPressed: false,
     attackDown: false,
     attackJustReleased: false,
     openMenuJustReleased: false,
@@ -22,6 +25,9 @@ export class InputManager {
   };
 
   resetFrameInputs() {
+    this.state.lookX = 0;
+    this.state.lookY = 0;
+    this.state.aimCycleJustPressed = false;
     this.state.attackJustReleased = false;
     this.state.openMenuJustReleased = false;
 

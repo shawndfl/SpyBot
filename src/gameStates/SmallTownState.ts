@@ -13,7 +13,8 @@ import type { UpdateEvent } from '../core/UpdateEvent';
 import { InputSystem } from '../systems/InputSystem';
 import { MovementSystem } from '../systems/MovementSystem';
 import { CameraSyncSystem } from '../systems/CameraSyncSystem';
-import { PlayerFollowCameraSystem } from '../systems/PlayerFollowCameraSystem';
+import { PlayerCameraLookSystem } from '../systems/PlayerCameraLookSystem';
+import { PlayerViewCameraSystem } from '../systems/PlayerViewCameraSystem';
 import { LightSystem } from '../systems/rendering/LightSystem';
 import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
@@ -47,6 +48,7 @@ import { GoldCollectionSystem } from '../systems/GoldCollectionSystem';
 import { AudioSystem } from '../systems/AudioSystem';
 import { PlayerFootstepSystem } from '../systems/PlayerFootstepSystem';
 import { PlayerProgressSystem } from '../systems/PlayerProgressSystem';
+import { PlayerCameraRigComponent } from '../components/PlayerCameraRigComponent';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
@@ -62,6 +64,7 @@ export class SmallTownState implements GameState {
   }
 
   exit(): void {
+    this._inputSystem?.dispose();
     if (!this._world?.resources.hasResource(PlayerProgressResource)) {
       return;
     }
@@ -100,10 +103,11 @@ export class SmallTownState implements GameState {
       DEFAULT_PROCEDURAL_CONFIG.chunkSize * 0.75,
       DEFAULT_PROCEDURAL_CONFIG.chunkSize * 2.65,
     );
-    this._inputSystem = new InputSystem();
+    this._inputSystem = new InputSystem(renderer.domElement);
     const world = new World([
       this._inputSystem,
       new DebugModeSystem(),
+      new PlayerCameraLookSystem(),
 
       // Stream generated terrain before movement and physics consume its height.
       new ProceduralChunkSystem(scene, chunkGenerator, DEFAULT_PROCEDURAL_CONFIG),
@@ -124,7 +128,7 @@ export class SmallTownState implements GameState {
       // load glbs and create rendererComponents
       new RenderInitSystem(scene),
 
-      new PlayerFollowCameraSystem(),
+      new PlayerViewCameraSystem(),
       new CameraSyncSystem(),
 
       //new BattleBackgroundSystem(renderer),
@@ -192,7 +196,7 @@ export class SmallTownState implements GameState {
 
     // camera
     const camera = world.createEntity();
-    world.addComponent(camera, new CameraComponent());
+    world.addComponent(camera, new CameraComponent(), new PlayerCameraRigComponent());
     const cameraTransform = new TransformComponent({
       position: new THREE.Vector3(10, 10, 10),
     });

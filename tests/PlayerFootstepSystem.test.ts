@@ -35,7 +35,7 @@ describe('PlayerFootstepSystem', () => {
     expect(footsteps.map((event) => event.options.playbackRate)).toEqual([0.97, 1.03]);
   });
 
-  it('does not play footsteps while turning without translating', () => {
+  it('plays footsteps while strafing', () => {
     const system = new PlayerFootstepSystem();
     const world = new World([system]);
     const events = new EventBus();
@@ -50,6 +50,6 @@ describe('PlayerFootstepSystem', () => {
       commands: new CommandBuffer(),
     });
 
-    expect(events.get(PlaySoundEvent)).toHaveLength(0);
+    expect(events.get(PlaySoundEvent)).toHaveLength(1);
   });
 });

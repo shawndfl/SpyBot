@@ -34,6 +34,23 @@ Confirmed current behavior:
 
 ## Recorded architectural decisions
 
+### 2026-08-15 — Multi-mode player camera rig
+
+Decision: Represent third-person, first-person, and zoomed views as modes of a
+single `PlayerCameraRigComponent`. Pointer-lock mouse input publishes look
+deltas and a right-click mode-cycle action; separate look and placement systems
+update rig intent and the rendered camera respectively.
+
+Reason: Camera orientation, mode transitions, and sensitivity should remain
+device-independent so keyboard/mouse can be followed by gamepad and mobile
+adapters without rewriting camera behavior.
+
+Consequence: `SmallTownState` uses `PlayerCameraLookSystem` and
+`PlayerViewCameraSystem` instead of `PlayerFollowCameraSystem`. `MovementSystem`
+uses the rig yaw for player rotation and camera-relative forward/strafe motion.
+Crosshair/view-model rendering, targeting, and camera collision remain later
+slices.
+
 ### 2026-08-15 — Camera-centered overworld sky
 
 Decision: Recenter the `GameSky` sphere on the active Three.js camera every

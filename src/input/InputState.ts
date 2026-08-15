@@ -3,6 +3,10 @@ export interface InputState {
   moveY: number; // -1 to 1
   moveZ: number; // -1 to 1
 
+  lookX: number;
+  lookY: number;
+  aimCycleJustPressed: boolean;
+
   attackDown: boolean;
   attackJustReleased: boolean;
 

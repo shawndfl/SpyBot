@@ -110,12 +110,19 @@ saved spawn position and flushes it when the state exits.
 `InputSystem` publishes frame input through `GameInputEvent` and resets
 edge-triggered inputs after the state's systems update.
 
-In the overworld, `PlayerFollowCameraSystem` rotates a behind-and-above offset
-with a smoothed version of the player's yaw and translates the camera toward it
-using independent frame-rate-independent orbit and position smoothing. The
-camera looks ahead in the direction of the smoothed orbit. `CameraSyncSystem`
-applies the resulting transform to the Three.js camera. The follow system
-yields camera ownership while debug free-camera mode is active.
+In the overworld, pointer-lock mouse input publishes frame-scoped look deltas
+and an edge-triggered view-mode cycle action. `PlayerCameraLookSystem` owns the
+shared yaw, pitch, pitch limits, sensitivity, and the third-person,
+first-person, and zoomed mode cycle. `PlayerViewCameraSystem` converts that rig
+state into a smoothed over-the-shoulder or eye-level camera transform and FOV;
+zoom mode applies reduced look sensitivity. `CameraSyncSystem` then applies the
+resulting transform to the Three.js camera. Both player camera systems yield
+camera ownership while debug free-camera mode is active.
+
+`MovementSystem` uses the camera rig's mouse-controlled yaw as the player's
+facing direction. Forward/back and strafe input are combined in that horizontal
+frame and normalized before applying player speed, so diagonal movement is not
+faster. The kinematic player rotation follows the same yaw even while idle.
 
 React is used as an overlay rather than as the owner of the game loop.
 UI-oriented ECS systems create DOM containers and React roots, then render

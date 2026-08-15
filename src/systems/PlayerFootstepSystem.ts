@@ -25,7 +25,10 @@ export class PlayerFootstepSystem extends System {
   update({ world, dt, events }: UpdateEvent): void {
     const [inputEvent] = events.get(GameInputEvent);
     const debugCameraActive = [...world.query(CameraComponent)].some(([camera]) => camera.debugMode);
-    const isWalking = !!inputEvent && !debugCameraActive && Math.abs(inputEvent.payload.state.moveY) > 0.001;
+    const isWalking =
+      !!inputEvent &&
+      !debugCameraActive &&
+      (Math.abs(inputEvent.payload.state.moveX) > 0.001 || Math.abs(inputEvent.payload.state.moveY) > 0.001);
 
     if (!isWalking) {
       this.timeUntilNextStep = 0;

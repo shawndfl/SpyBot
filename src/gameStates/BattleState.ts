@@ -48,7 +48,9 @@ export class BattleState implements GameState {
     this._world = this.createWorld();
   }
 
-  exit(): void {}
+  exit(): void {
+    this._inputSystem?.dispose();
+  }
 
   /**
    * update the game state

@@ -5,13 +5,13 @@ export class KeyboardAdapter {
   private keysJustReleased = new Set<string>();
 
   constructor(private input: InputManager) {
-    window.addEventListener('keydown', (e) => this.keys.add(e.key));
-    window.addEventListener('keyup', (e) => {
-      if (this.keys.has(e.key)) {
-        this.keysJustReleased.add(e.key);
-      }
-      this.keys.delete(e.key);
-    });
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
+  }
+
+  dispose(): void {
+    window.removeEventListener('keydown', this.onKeyDown);
+    window.removeEventListener('keyup', this.onKeyUp);
   }
 
   update() {
@@ -51,4 +51,15 @@ export class KeyboardAdapter {
 
     return keys.some((key) => this.keysJustReleased.has(key));
   }
+
+  private readonly onKeyDown = (event: KeyboardEvent): void => {
+    this.keys.add(event.key);
+  };
+
+  private readonly onKeyUp = (event: KeyboardEvent): void => {
+    if (this.keys.has(event.key)) {
+      this.keysJustReleased.add(event.key);
+    }
+    this.keys.delete(event.key);
+  };
 }
