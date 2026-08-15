@@ -4,6 +4,7 @@ import type { ProceduralConfig } from './ProceduralConfig';
 import { RoadGenerator } from './generators/RoadGenerator';
 import { PlotGenerator } from './generators/PlotGenerator';
 import { TerrainGenerator } from './generators/TerrainGenerator';
+import { GoldGenerator } from './generators/GoldGenerator';
 import { SeededRandom } from './random/SeededRandom';
 
 /** Coordinates the ordered procedural stages for a single chunk. */
@@ -11,11 +12,13 @@ export class ChunkGenerator {
   readonly terrainGenerator: TerrainGenerator;
   readonly roadGenerator: RoadGenerator;
   readonly plotGenerator: PlotGenerator;
+  readonly goldGenerator: GoldGenerator;
 
   constructor(private readonly config: Readonly<ProceduralConfig>) {
     this.terrainGenerator = new TerrainGenerator(config);
     this.roadGenerator = new RoadGenerator(this.terrainGenerator);
     this.plotGenerator = new PlotGenerator(this.terrainGenerator);
+    this.goldGenerator = new GoldGenerator(this.terrainGenerator);
   }
 
   generate(chunkX: number, chunkZ: number): ChunkData {
@@ -35,6 +38,7 @@ export class ChunkGenerator {
       terrain,
       roads,
       plots: this.plotGenerator.generate(context, roads),
+      gold: this.goldGenerator.generate(context),
     };
   }
 }

@@ -15,7 +15,11 @@ export class ParticleBatch {
 
   aliveCount = 0;
 
-  constructor(readonly materialId: string, readonly maxParticles: number, material: THREE.Material) {
+  constructor(
+    readonly materialId: string,
+    readonly maxParticles: number,
+    material: THREE.Material,
+  ) {
     this.instancePositions = new Float32Array(maxParticles * 3);
     this.instanceColors = new Float32Array(maxParticles * 3);
     this.instanceAlphas = new Float32Array(maxParticles);
@@ -27,7 +31,7 @@ export class ParticleBatch {
     this.geometry.setIndex([0, 1, 2, 2, 1, 3]);
     this.geometry.setAttribute(
       'quadPosition',
-      new THREE.BufferAttribute(new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5]), 2)
+      new THREE.BufferAttribute(new Float32Array([-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5]), 2),
     );
     this.geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), 2));
 
@@ -50,7 +54,7 @@ export class ParticleBatch {
         velocity: new THREE.Vector3(),
         lifetime: 0,
 
-        gravityY: -9.8,
+        gravityY: 0,
 
         rotation: 0,
         angularVelocity: 0,

@@ -1,10 +1,14 @@
 import * as THREE from 'three';
 import { PlayerComponent } from '../../components/PlayerComponent';
+import { ParticleEmitterComponent } from '../../components/particles/ParticleEmitterComponent';
+import { ParticleEmitterStateComponent } from '../../components/particles/ParticleStateComponent';
 import { RigidBodyComponent } from '../../components/physics/RigidBodyComponent';
 import { TransformComponent } from '../../components/TransformComponent';
 import { Engine } from '../../core/Engine';
 import type { UpdateEvent } from '../../core/UpdateEvent';
 import { System } from '../../ecs/System';
+import type { Entity } from '../../ecs/Entity';
+import type { World } from '../../ecs/World';
 import { createProceduralGrassMaterial } from '../../rendering/ProceduralGrassMaterial';
 import type { ChunkGenerator } from '../ChunkGenerator';
 import type { ChunkData, PlotData, RoadData, TerrainData } from '../GenerationTypes';
@@ -15,6 +19,7 @@ interface LoadedChunk {
   terrainMesh: THREE.Mesh;
   roadMeshes: THREE.Mesh[];
   plotVisualizations: PlotVisualization[];
+  goldEmitterEntities: Entity[];
 }
 
 interface PlotVisualization {
@@ -54,14 +59,14 @@ export class ProceduralChunkSystem extends System {
         const key = this.getChunkKey(chunkX, chunkZ);
         desiredChunks.add(key);
         if (!this.loadedChunks.has(key)) {
-          this.loadChunk(chunkX, chunkZ);
+          this.loadChunk(world, chunkX, chunkZ);
         }
       }
     }
 
     for (const [key, chunk] of this.loadedChunks) {
       if (!desiredChunks.has(key)) {
-        this.unloadChunk(chunk);
+        this.unloadChunk(world, chunk);
         this.loadedChunks.delete(key);
       }
     }
@@ -74,25 +79,23 @@ export class ProceduralChunkSystem extends System {
     return undefined;
   }
 
-  private loadChunk(chunkX: number, chunkZ: number): void {
+  private loadChunk(world: World, chunkX: number, chunkZ: number): void {
     const data = this.generator.generate(chunkX, chunkZ);
     const terrainMesh = this.createTerrainMesh(data.terrain);
     const roadMeshes = data.roads.map((road) => this.createRoadMesh(road));
     const plotVisualizations = data.plots.map((plot) => this.createPlotVisualization(plot));
-    this.scene.add(
-      terrainMesh,
-      ...roadMeshes,
-      ...plotVisualizations.map((visualization) => visualization.helper),
-    );
+    const goldEmitterEntities = data.gold.map((gold) => this.createGoldEmitter(world, gold));
+    this.scene.add(terrainMesh, ...roadMeshes, ...plotVisualizations.map((visualization) => visualization.helper));
     this.loadedChunks.set(this.getChunkKey(chunkX, chunkZ), {
       data,
       terrainMesh,
       roadMeshes,
       plotVisualizations,
+      goldEmitterEntities,
     });
   }
 
-  private unloadChunk(chunk: LoadedChunk): void {
+  private unloadChunk(world: World, chunk: LoadedChunk): void {
     this.scene.remove(
       chunk.terrainMesh,
       ...chunk.roadMeshes,
@@ -106,6 +109,41 @@ export class ProceduralChunkSystem extends System {
       visualization.source.geometry.dispose();
       visualization.helper.dispose();
     }
+    for (const entity of chunk.goldEmitterEntities) {
+      world.destroyEntity(entity);
+    }
+  }
+
+  private createGoldEmitter(world: World, gold: ChunkData['gold'][number]): Entity {
+    const entity = world.createEntity();
+    world.addComponent(
+      entity,
+      new TransformComponent({
+        name: gold.id,
+        position: new THREE.Vector3(gold.x, gold.y + 0.35, gold.z),
+      }),
+      new ParticleEmitterComponent({
+        materialId: 'gold-sparkle',
+        maxParticles: 1024,
+        emissionRate: 3 + gold.amount,
+        lifetimeMin: 1.6,
+        lifetimeMax: 2.2,
+        speedMin: 0.05,
+        speedMax: 0.08,
+        sizeStart: 0.009,
+        sizeEnd: 0.295,
+        alphaStart: 1,
+        alphaEnd: 0,
+        minDirection: new THREE.Vector3(-0.4, 1, -0.4),
+        maxDirection: new THREE.Vector3(0.4, 1, 0.4),
+        colorStart: new THREE.Color(1, 0.72, 0.08),
+        colorEnd: new THREE.Color(1, 0.95, 0.55),
+        gravity: new THREE.Vector3(0, 0.01, 0),
+        spawnRadius: 0.03,
+      }),
+      new ParticleEmitterStateComponent(),
+    );
+    return entity;
   }
 
   private createTerrainMesh(data: TerrainData): THREE.Mesh {
@@ -210,10 +248,7 @@ export class ProceduralChunkSystem extends System {
 
   private getTerrainMaterial(): THREE.ShaderMaterial {
     if (!this.terrainMaterial) {
-      const worldScale = new THREE.Vector2(
-        this.config.textureRepeatPerUnit,
-        this.config.textureRepeatPerUnit,
-      );
+      const worldScale = new THREE.Vector2(this.config.textureRepeatPerUnit, this.config.textureRepeatPerUnit);
       this.terrainMaterial = createProceduralGrassMaterial(new THREE.Vector2(1, 1), worldScale);
     }
     return this.terrainMaterial;

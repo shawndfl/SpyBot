@@ -36,10 +36,19 @@ export interface PlotData {
   side: 'left' | 'right';
 }
 
+export interface GoldData {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  amount: number;
+}
+
 export interface ChunkData {
   chunkX: number;
   chunkZ: number;
   terrain: TerrainData;
   roads: RoadData[];
   plots: PlotData[];
+  gold: GoldData[];
 }

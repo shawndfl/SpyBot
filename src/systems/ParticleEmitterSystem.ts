@@ -98,7 +98,7 @@ export class ParticleEmitterSystem extends System {
     return {
       lifetime,
 
-      gravityY: -9.8,
+      gravityY: emitter.gravity.y,
 
       position: this._tempPosition,
       velocity: this._tempVelocity,

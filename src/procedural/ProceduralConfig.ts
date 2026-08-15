@@ -12,6 +12,9 @@ export interface ProceduralConfig {
   plotWidth: number;
   plotDepth: number;
   plotRoadSetback: number;
+  goldDepositsPerChunk: number;
+  goldMinAmount: number;
+  goldMaxAmount: number;
 }
 
 export const DEFAULT_PROCEDURAL_CONFIG: Readonly<ProceduralConfig> = {
@@ -28,4 +31,7 @@ export const DEFAULT_PROCEDURAL_CONFIG: Readonly<ProceduralConfig> = {
   plotWidth: 10,
   plotDepth: 12,
   plotRoadSetback: 2,
+  goldDepositsPerChunk: 4,
+  goldMinAmount: 1,
+  goldMaxAmount: 5,
 };

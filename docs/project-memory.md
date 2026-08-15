@@ -34,6 +34,18 @@ Confirmed current behavior:
 
 ## Recorded architectural decisions
 
+### 2026-08-14 — Deterministic gold generation
+
+Decision: Generate configurable gold deposits as part of each chunk, with
+deterministic world positions, terrain-aligned heights, and integer amounts.
+
+Reason: Gold placement should participate in the seeded procedural pipeline
+and remain stable when chunks unload and regenerate.
+
+Consequence: `ChunkData` exposes `gold`, and `ProceduralChunkSystem` materializes
+each deposit as a small additive particle emitter whose emission density
+reflects its amount. Gold is not yet collectible.
+
 ### 2026-08-10 — Procedural grass terrain material
 
 Decision: Render streamed terrain with the Perlin-noise grass shader instead
