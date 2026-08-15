@@ -45,7 +45,7 @@ audio nodes, concurrency, mixing, or autoplay-unlock behavior.
 
 Consequence: `AudioSystem` must run after sound-producing systems in each
 state. The initial manifest preloads `/collect.wav`, and collecting gold emits
-the `goldCollect` sound on the effects bus.
+the `goldCollect` sound with a subtle delay/feedback echo on the effects bus.
 
 ### 2026-08-14 — Deterministic gold generation
 

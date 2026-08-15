@@ -117,7 +117,9 @@ decoded through the loading state's existing `AssetManager` sound pipeline.
 Gameplay systems emit frame-scoped `PlaySoundEvent` instances; `AudioSystem`
 forwards them to the shared `AudioManager`, which owns Web Audio playback,
 effects/UI/music gain buses, per-sound concurrency limits, and first-input
-audio-context unlocking. Gold collection currently emits `goldCollect`.
+audio-context unlocking. Playback requests can optionally add a bounded
+delay/feedback echo with a dry/wet mix. Gold collection currently emits
+`goldCollect` with a subtle echo.
 
 ## Current dialog flow
 

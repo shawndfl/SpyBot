@@ -59,5 +59,10 @@ describe('GoldCollectionSystem', () => {
     expect(saveStore.data.collectedGoldIds).toEqual(['gold_v1_0_0_0']);
     expect(updateEvent.events.get(PlaySoundEvent)).toHaveLength(1);
     expect(updateEvent.events.get(PlaySoundEvent)[0].soundId).toBe(SoundIds.goldCollect);
+    expect(updateEvent.events.get(PlaySoundEvent)[0].options.echo).toEqual({
+      delay: 0.12,
+      feedback: 0.25,
+      mix: 0.2,
+    });
   });
 });

@@ -26,7 +26,16 @@ export class GoldCollectionSystem extends System {
       }
 
       if (progress.collectGold(gold.goldId, gold.amount)) {
-        events.emit(new PlaySoundEvent(SoundIds.goldCollect, { volume: 0.8 }));
+        events.emit(
+          new PlaySoundEvent(SoundIds.goldCollect, {
+            volume: 0.8,
+            echo: {
+              delay: 0.12,
+              feedback: 0.25,
+              mix: 0.2,
+            },
+          }),
+        );
         commands.destroy(world, entity);
       }
     }
