@@ -46,6 +46,7 @@ import { PlayerProgressResource } from '../procedural/resources/PlayerProgressRe
 import { LocalSaveStore } from '../persistence/LocalSaveStore';
 import { GoldCollectionSystem } from '../systems/GoldCollectionSystem';
 import { AudioSystem } from '../systems/AudioSystem';
+import { PlayerFootstepSystem } from '../systems/PlayerFootstepSystem';
 import { PlayerProgressSystem } from '../systems/PlayerProgressSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
@@ -105,6 +106,7 @@ export class SmallTownState implements GameState {
 
       // update the player movement
       new MovementSystem(),
+      new PlayerFootstepSystem(),
 
       // physics. this will perform the physics step and update the transform component.
       new PhysicsSystem(scene, Engine.physicsContext),
