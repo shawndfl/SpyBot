@@ -68,6 +68,10 @@ Three.js scenes are owned by game states. Mesh and light components describe
 renderable data, while initialization and rendering systems connect ECS state
 to Three.js objects.
 
+The overworld `GameSky` sphere is recentered on the active Three.js camera each
+frame and excluded from frustum culling. Its visual radius therefore does not
+place a travel boundary on the procedural world.
+
 Rapier integration is exposed through `PhysicsContext` and `PhysicsSystem`.
 Rigid bodies, colliders, and collider sensors are ECS components. Physics
 trigger events become `EntityTriggerEvent` instances that later systems can
@@ -91,7 +95,10 @@ Collected gold is stored as a deterministic-world delta. `GoldCollectionSystem`
 adds nearby deposit IDs and amounts to `PlayerProgressResource`, which persists
 immediately through `LocalSaveStore`. Chunk materialization filters those IDs,
 so regenerated chunks retain their procedural layout without respawning
-collected deposits.
+collected deposits. The same progress resource stores the player's overworld
+position. `PlayerProgressSystem` tracks the physics-synchronized transform and
+persists moved positions at a one-second cadence; `SmallTownState` restores the
+saved spawn position and flushes it when the state exits.
 
 ## Input and UI
 
@@ -119,7 +126,9 @@ forwards them to the shared `AudioManager`, which owns Web Audio playback,
 effects/UI/music gain buses, per-sound concurrency limits, and first-input
 audio-context unlocking. Playback requests can optionally add a bounded
 delay/feedback echo with a dry/wet mix. Gold collection currently emits
-`goldCollect` with a subtle echo.
+`goldCollect` with a subtle echo. `PlayerFootstepSystem` emits
+`footstepsGrass` at a fixed cadence while forward/backward movement input is
+active, with slight alternating pitch variation.
 
 ## Current dialog flow
 

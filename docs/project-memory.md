@@ -34,6 +34,17 @@ Confirmed current behavior:
 
 ## Recorded architectural decisions
 
+### 2026-08-15 — Camera-centered overworld sky
+
+Decision: Recenter the `GameSky` sphere on the active Three.js camera every
+frame and disable frustum culling for that mesh.
+
+Reason: The procedural overworld can extend beyond the fixed sky sphere that
+was previously centered at the world origin.
+
+Consequence: Sky scale controls rendering precision and appearance rather than
+the maximum distance the player can travel.
+
 ### 2026-08-15 — Event-driven shared audio
 
 Decision: Address public WAV assets through stable sound IDs, preload them with
@@ -44,8 +55,10 @@ Reason: Gameplay systems should request sound without owning paths, browser
 audio nodes, concurrency, mixing, or autoplay-unlock behavior.
 
 Consequence: `AudioSystem` must run after sound-producing systems in each
-state. The initial manifest preloads `/collect.wav`, and collecting gold emits
-the `goldCollect` sound with a subtle delay/feedback echo on the effects bus.
+state. The initial sound manifest preloads the registered collection and grass
+footstep assets. Collecting gold emits `goldCollect` with a subtle
+delay/feedback echo; `PlayerFootstepSystem` emits grass footsteps only while
+the player is translating, not while turning in place.
 
 ### 2026-08-14 — Deterministic gold generation
 
@@ -61,7 +74,10 @@ reflects its amount. Approaching a deposit collects it through
 `GoldCollectionSystem`. `PlayerProgressResource` immediately saves the balance
 and collected deterministic IDs to the versioned `spyhero.save.v1` localStorage
 entry; chunk reloads filter collected IDs instead of persisting generated world
-data.
+data. The same save stores the player's overworld position. Existing version-one
+saves without a position migrate to the original `(5, 0, 3)` spawn, while
+`PlayerProgressSystem` persists movement at most once per second and state exit
+flushes the latest position.
 
 ### 2026-08-10 — Procedural grass terrain material
 
