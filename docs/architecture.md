@@ -72,6 +72,11 @@ The overworld `GameSky` sphere is recentered on the active Three.js camera each
 frame and excluded from frustum culling. Its visual radius therefore does not
 place a travel boundary on the procedural world.
 
+`SmallTownState` applies linear distance fog beginning at 0.75 chunk widths
+and reaching full density at 2.65 chunk widths to soften streamed chunk edges.
+The procedural grass shader explicitly includes Three.js fog shader chunks so
+terrain and standard materials share the effect.
+
 Rapier integration is exposed through `PhysicsContext` and `PhysicsSystem`.
 Rigid bodies, colliders, and collider sensors are ECS components. Physics
 trigger events become `EntityTriggerEvent` instances that later systems can

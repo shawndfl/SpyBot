@@ -19,7 +19,6 @@ import { RenderInitSystem } from '../systems/RenderInitSystem';
 import { AnimationSystem } from '../systems/AnimationSystem';
 import { RenderSystem } from '../systems/RenderSystem';
 import { BattleBackgroundComponent } from '../components/BattleBackgroundComponent';
-import { BattleBackgroundSystem } from '../systems/BattleBackgroundSystem';
 import { SunSystem } from '../systems/SunSystem';
 import { Engine } from '../core/Engine';
 import { ParticleEmitterSystem } from '../systems/ParticleEmitterSystem';
@@ -96,6 +95,11 @@ export class SmallTownState implements GameState {
     const renderer = Engine.renderer;
     const chunkGenerator = new ChunkGenerator(DEFAULT_PROCEDURAL_CONFIG);
 
+    scene.fog = new THREE.Fog(
+      0x9fb8c8,
+      DEFAULT_PROCEDURAL_CONFIG.chunkSize * 0.75,
+      DEFAULT_PROCEDURAL_CONFIG.chunkSize * 2.65,
+    );
     this._inputSystem = new InputSystem();
     const world = new World([
       this._inputSystem,
@@ -123,7 +127,7 @@ export class SmallTownState implements GameState {
       new PlayerFollowCameraSystem(),
       new CameraSyncSystem(),
 
-      new BattleBackgroundSystem(renderer),
+      //new BattleBackgroundSystem(renderer),
 
       new SunSystem(scene, renderer),
 
