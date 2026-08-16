@@ -16,10 +16,11 @@ describe('PlayerViewCameraSystem', () => {
     const system = new PlayerViewCameraSystem();
     const world = new World([system]);
     const player = world.createEntity();
+    const playerTransform = new TransformComponent({ position: new THREE.Vector3(4, 2, 8) });
     world.addComponent(
       player,
       new PlayerComponent(),
-      new TransformComponent({ position: new THREE.Vector3(4, 2, 8) }),
+      playerTransform,
     );
 
     const cameraEntity = world.createEntity();
@@ -32,13 +33,20 @@ describe('PlayerViewCameraSystem', () => {
     system.update(updateEvent);
     expect(transform.position).toEqual(new THREE.Vector3(4.75, 3.65, 13));
     expect(camera.camera.fov).toBe(65);
+    expect(playerTransform.root.visible).toBe(true);
 
     rig.viewMode = PlayerViewMode.FirstPerson;
     system.update(updateEvent);
     expect(transform.position).toEqual(new THREE.Vector3(4, 3.65, 8));
+    expect(playerTransform.root.visible).toBe(false);
 
     rig.viewMode = PlayerViewMode.Zoomed;
     system.update(updateEvent);
     expect(camera.camera.fov).toBe(35);
+    expect(playerTransform.root.visible).toBe(false);
+
+    rig.viewMode = PlayerViewMode.ThirdPerson;
+    system.update(updateEvent);
+    expect(playerTransform.root.visible).toBe(true);
   });
 });

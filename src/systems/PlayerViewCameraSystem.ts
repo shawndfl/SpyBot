@@ -28,6 +28,7 @@ export class PlayerViewCameraSystem extends System {
       PlayerCameraRigComponent,
       TransformComponent,
     )) {
+      playerTransform.root.visible = camera.debugMode || rig.viewMode === PlayerViewMode.ThirdPerson;
       if (camera.debugMode) {
         continue;
       }

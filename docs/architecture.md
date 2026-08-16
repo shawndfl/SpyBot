@@ -115,9 +115,11 @@ and an edge-triggered view-mode cycle action. `PlayerCameraLookSystem` owns the
 shared yaw, pitch, pitch limits, sensitivity, and the third-person,
 first-person, and zoomed mode cycle. `PlayerViewCameraSystem` converts that rig
 state into a smoothed over-the-shoulder or eye-level camera transform and FOV;
-zoom mode applies reduced look sensitivity. `CameraSyncSystem` then applies the
-resulting transform to the Three.js camera. Both player camera systems yield
-camera ownership while debug free-camera mode is active.
+zoom mode applies reduced look sensitivity. The player render root is visible
+in third-person mode and hidden in first-person and zoomed modes.
+`CameraSyncSystem` then applies the resulting transform to the Three.js camera.
+Both player camera systems yield camera ownership while debug free-camera mode
+is active.
 
 `MovementSystem` uses the camera rig's mouse-controlled yaw as the player's
 facing direction. Forward/back and strafe input are combined in that horizontal

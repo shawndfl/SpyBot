@@ -5,7 +5,9 @@ import type { UpdateEvent } from '../core/UpdateEvent';
 import { System } from '../ecs/System';
 import { GameInputEvent } from '../events/GameInputEvent';
 
-/** Updates camera intent independently from camera placement and rendering. */
+/**
+ * Updates camera intent independently from camera placement and rendering.
+ */
 export class PlayerCameraLookSystem extends System {
   update({ world, events }: UpdateEvent): void {
     const [inputEvent] = events.get(GameInputEvent);
