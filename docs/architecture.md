@@ -82,7 +82,7 @@ Rigid bodies, colliders, and collider sensors are ECS components. Physics
 trigger events become `EntityTriggerEvent` instances that later systems can
 interpret as gameplay actions.
 
-The overworld is generated in deterministic 64-unit chunks coordinated by
+The overworld is generated in deterministic 128-unit chunks coordinated by
 `ChunkGenerator`. `TerrainGenerator` creates height data and `RoadGenerator`
 creates a continuous east-west road through each chunk. `PlotGenerator` places
 rectangular building plots beside roads and rejects plots outside their owning

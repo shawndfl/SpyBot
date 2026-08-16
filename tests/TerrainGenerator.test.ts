@@ -10,14 +10,15 @@ const createContext = (chunkX: number, chunkZ: number) => ({
 });
 
 describe('TerrainGenerator', () => {
-  it('generates a 64-unit chunk at the configured sample spacing', () => {
+  it('generates a chunk at the configured size and sample spacing', () => {
     const generator = new TerrainGenerator(DEFAULT_PROCEDURAL_CONFIG);
     const terrain = generator.generate(createContext(0, 0));
+    const verticesPerSide = DEFAULT_PROCEDURAL_CONFIG.chunkSize / DEFAULT_PROCEDURAL_CONFIG.sampleSpacing + 1;
 
-    expect(terrain.chunkSize).toBe(64);
-    expect(terrain.verticesPerSide).toBe(33);
-    expect(terrain.heights).toHaveLength(33 * 33);
-    expect(terrain.normals).toHaveLength(33 * 33 * 3);
+    expect(terrain.chunkSize).toBe(DEFAULT_PROCEDURAL_CONFIG.chunkSize);
+    expect(terrain.verticesPerSide).toBe(verticesPerSide);
+    expect(terrain.heights).toHaveLength(verticesPerSide * verticesPerSide);
+    expect(terrain.normals).toHaveLength(verticesPerSide * verticesPerSide * 3);
   });
 
   it('matches height samples across neighboring chunk boundaries', () => {

@@ -19,7 +19,7 @@ export interface ProceduralConfig {
 
 export const DEFAULT_PROCEDURAL_CONFIG: Readonly<ProceduralConfig> = {
   seed: 1337,
-  chunkSize: 64,
+  chunkSize: 128,
   sampleSpacing: 2,
   activeChunkRadius: 1,
   heightScale: 0.2,
