@@ -34,6 +34,19 @@ Confirmed current behavior:
 
 ## Recorded architectural decisions
 
+### 2026-08-16 — Named-node GLB attachments
+
+Decision: Describe model attachments on `MeshGlbComponent` using a preloaded
+GLB filename, named parent node, and explicit local transform. Resolve and
+parent cloned attachments during `RenderInitSystem` initialization.
+
+Reason: Equipment must follow animated skeleton bones without embedding asset
+lookups or Three.js scene mutation in gameplay systems.
+
+Consequence: The overworld player attaches `gun.glb` to
+`mixamorig:RightHand`. Its attachment transform can be tuned in
+`SmallTownState`; missing parent nodes fail with an identifying error.
+
 ### 2026-08-15 — Multi-mode player camera rig
 
 Decision: Represent third-person, first-person, and zoomed views as modes of a

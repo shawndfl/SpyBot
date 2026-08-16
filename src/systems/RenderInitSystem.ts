@@ -7,11 +7,14 @@ import { RendererComponent } from '../components/mesh/RendererComponent';
 import { AnimationComponent } from '../components/AnimationComponent';
 import { TransformComponent } from '../components/TransformComponent';
 import { Engine } from '../core/Engine';
+import { attachModelToNode } from '../rendering/ModelAttachment';
 
 /**
  * Initialize gltf files and loads their animations into animation components
  */
 export class RenderInitSystem extends System {
+  private readonly attachmentHelpers: Array<{ target: THREE.Object3D; helper: THREE.BoxHelper }> = [];
+
   constructor(private _scene: THREE.Scene) {
     super();
   }
@@ -28,6 +31,10 @@ export class RenderInitSystem extends System {
         const rendererComponent = new RendererComponent(rootMesh);
         world.addComponent(entity, rendererComponent);
       }
+    }
+
+    for (const { helper } of this.attachmentHelpers) {
+      helper.update();
     }
   }
 
@@ -52,8 +59,30 @@ export class RenderInitSystem extends System {
 
     // load the model and parse out the object3d and meshes
     this.loadModel(gltf.scene!, transform, glbComponent);
+    this.loadAttachments(transform, glbComponent);
     this.loadAnimation(gltf.scene!, gltf.animations!, animation);
     return transform;
+  }
+
+  private loadAttachments(root: THREE.Object3D, glbComponent: MeshGlbComponent): void {
+    for (const attachment of glbComponent.attachments ?? []) {
+      const attachmentGltf = Engine.assets.createGlb(attachment.filename);
+      const model = attachModelToNode(root, attachmentGltf.scene!, attachment);
+      model.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          (child as THREE.Mesh).castShadow = !!attachment.castShadow;
+        }
+      });
+      if (attachment.debugBounds) {
+        root.updateMatrixWorld(true);
+        const helper = new THREE.BoxHelper(model, 0xff00ff);
+        helper.name = `${model.name}-bounds`;
+        helper.renderOrder = 1000;
+        helper.material.depthTest = false;
+        this._scene.add(helper);
+        this.attachmentHelpers.push({ target: model, helper });
+      }
+    }
   }
 
   private loadAnimation(model: THREE.Group, clips: THREE.AnimationClip[], animation?: AnimationComponent): void {

@@ -68,7 +68,7 @@ export class Engine {
     //TODO add loading state then
     this._gameStateManager.push(new LoadingState(), {
       assetManifest: {
-        glbs: ['player.glb', 'lampPost.glb', 'NpcY.glb', 'knight.glb'],
+        glbs: ['player.glb', 'gun.glb', 'lampPost.glb', 'NpcY.glb', 'knight.glb'],
         sounds: initialSoundPaths,
         textures: ['grass.jpg', 'rocky_trail_diff_1k.jpg'],
         physics: true,

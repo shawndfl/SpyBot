@@ -68,6 +68,14 @@ Three.js scenes are owned by game states. Mesh and light components describe
 renderable data, while initialization and rendering systems connect ECS state
 to Three.js objects.
 
+`MeshGlbComponent` can describe additional GLB attachments by asset ID, named
+parent node, and local transform. `RenderInitSystem` clones each preloaded
+attachment and parents it to the requested node after loading the owning model.
+Authored node names are sanitized using the same rule as Three.js's
+`GLTFLoader` before runtime lookup.
+The overworld player uses this path to attach `gun.glb` to the animated
+`mixamorig:RightHand` bone.
+
 The overworld `GameSky` sphere is recentered on the active Three.js camera each
 frame and excluded from frustum culling. Its visual radius therefore does not
 place a travel boundary on the procedural world.
