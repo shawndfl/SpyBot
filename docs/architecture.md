@@ -127,7 +127,8 @@ faster. The kinematic player rotation follows the same yaw even while idle.
 React is used as an overlay rather than as the owner of the game loop.
 UI-oriented ECS systems create DOM containers and React roots, then render
 views from `src/ui/`. Current examples include dialog, battle-menu, and debug
-HUD views.
+HUD views. The overworld also mounts an always-visible, pointer-transparent
+crosshair at the viewport center and removes it when the state exits.
 
 ## Audio
 

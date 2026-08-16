@@ -1,0 +1,60 @@
+.crosshair-root {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  pointer-events: none;
+}
+
+.crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -50%);
+  color: rgb(255 255 255 / 92%);
+  filter: drop-shadow(0 0 1px rgb(0 0 0 / 95%));
+}
+
+.crosshair__line {
+  position: absolute;
+  display: block;
+  background: currentcolor;
+}
+
+.crosshair__line--top,
+.crosshair__line--bottom {
+  left: 12px;
+  width: 1px;
+  height: 9px;
+}
+
+.crosshair__line--top {
+  top: 0;
+}
+
+.crosshair__line--bottom {
+  bottom: 0;
+}
+
+.crosshair__line--left,
+.crosshair__line--right {
+  top: 12px;
+  width: 9px;
+  height: 1px;
+}
+
+.crosshair__line--left {
+  left: 0;
+}
+
+.crosshair__line--right {
+  right: 0;
+}
+
+.crosshair__dot {
+  top: 12px;
+  left: 12px;
+  width: 2px;
+  height: 2px;
+}

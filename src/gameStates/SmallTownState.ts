@@ -49,12 +49,14 @@ import { AudioSystem } from '../systems/AudioSystem';
 import { PlayerFootstepSystem } from '../systems/PlayerFootstepSystem';
 import { PlayerProgressSystem } from '../systems/PlayerProgressSystem';
 import { PlayerCameraRigComponent } from '../components/PlayerCameraRigComponent';
+import { CrosshairSystem } from '../systems/CrosshairSystem';
 //import { ProceduralTextureBaker } from '../rendering/ProceduralTextureBaker';
 //import { ProceduralBrickMaterial } from '../rendering/ProceduralBrickMaterial';
 
 export class SmallTownState implements GameState {
   protected _world?: World;
   private _inputSystem?: InputSystem;
+  private _crosshairSystem?: CrosshairSystem;
   protected _scene: THREE.Scene = new THREE.Scene();
 
   constructor() {}
@@ -65,6 +67,7 @@ export class SmallTownState implements GameState {
 
   exit(): void {
     this._inputSystem?.dispose();
+    this._crosshairSystem?.dispose();
     if (!this._world?.resources.hasResource(PlayerProgressResource)) {
       return;
     }
@@ -104,6 +107,7 @@ export class SmallTownState implements GameState {
       DEFAULT_PROCEDURAL_CONFIG.chunkSize * 2.65,
     );
     this._inputSystem = new InputSystem(renderer.domElement);
+    this._crosshairSystem = new CrosshairSystem();
     const world = new World([
       this._inputSystem,
       new DebugModeSystem(),
@@ -144,6 +148,7 @@ export class SmallTownState implements GameState {
       new RenderSystem(scene, renderer),
       new ParticleEmitterSystem(scene),
       new DialogSystem(),
+      this._crosshairSystem,
       new DebugHudSystem(),
     ]);
 
@@ -166,6 +171,7 @@ export class SmallTownState implements GameState {
       position: spawnPosition,
       scale: new THREE.Vector3(1, 1, -1),
     });
+
     const playerComponent = new PlayerComponent();
     playerComponent.speed = 5.5;
     world.addComponent(
