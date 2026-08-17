@@ -186,7 +186,7 @@ export class SmallTownState implements GameState {
             filename: 'gun.glb',
             parentNodeName: 'mixamorig:RightHand',
             name: 'player-gun',
-            position: [0, 10.4, 0],
+            position: [5, 15.4, 0],
             rotation: [90, 45, 0],
             scale: [100, 100, 100],
             castShadow: true,

@@ -133,6 +133,10 @@ is active.
 facing direction. Forward/back and strafe input are combined in that horizontal
 frame and normalized before applying player speed, so diagonal movement is not
 faster. The kinematic player rotation follows the same yaw even while idle.
+Lateral input selects the matching `Strafe_left` or `Strafe_right` player
+animation; movement without lateral input uses `Running`. Animation playback
+requests can supply a time-scale multiplier, including updates to an animation
+that is already active.
 
 React is used as an overlay rather than as the owner of the game loop.
 UI-oriented ECS systems create DOM containers and React roots, then render

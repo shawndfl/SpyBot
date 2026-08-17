@@ -26,7 +26,9 @@ describe('MovementSystem', () => {
       setNextKinematicTranslation: (value: THREE.Vector3) => nextPosition.copy(value),
       setNextKinematicRotation: (value: THREE.Quaternion) => nextRotation.copy(value),
     } as never;
-    world.addComponent(playerEntity, new PlayerComponent({ speed: 5 }), new AnimationComponent(), rigid);
+    const animation = new AnimationComponent();
+    const playAnimation = vi.spyOn(animation, 'play');
+    world.addComponent(playerEntity, new PlayerComponent({ speed: 5 }), animation, rigid);
 
     const rigEntity = world.createEntity();
     world.addComponent(rigEntity, new PlayerCameraRigComponent({ yaw }));
@@ -39,6 +41,7 @@ describe('MovementSystem', () => {
       update: () => system.update({ world, dt: 1, events, commands: new CommandBuffer() }),
       nextPosition: () => nextPosition,
       nextRotation: () => nextRotation,
+      playAnimation,
     };
   }
 
@@ -51,6 +54,15 @@ describe('MovementSystem', () => {
     expect(harness.nextPosition().z).toBeCloseTo(-5);
     const expectedRotation = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
     expect(harness.nextRotation().angleTo(expectedRotation)).toBeCloseTo(0);
+    expect(harness.playAnimation).toHaveBeenCalledWith('Strafe_left');
+  });
+
+  it('uses the left strafe animation while moving left', () => {
+    const harness = createHarness(0);
+    harness.input.state.moveX = -1;
+    harness.update();
+
+    expect(harness.playAnimation).toHaveBeenCalledWith('Strafe_right');
   });
 
   it('normalizes diagonal movement to the configured player speed', () => {
@@ -60,5 +72,6 @@ describe('MovementSystem', () => {
     harness.update();
 
     expect(harness.nextPosition().length()).toBeCloseTo(5);
+    expect(harness.playAnimation).toHaveBeenCalledWith('Strafe_left');
   });
 });

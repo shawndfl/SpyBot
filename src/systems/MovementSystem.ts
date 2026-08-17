@@ -62,7 +62,13 @@ export class MovementSystem extends System {
             .multiplyScalar(player.speed * dt);
           this.tempPosition1.add(this.moveDirection);
 
-          animation.play('Running');
+          if (inputEvents.payload.state.moveX > 0) {
+            animation.play('Strafe_right', 0, -1);
+          } else if (inputEvents.payload.state.moveX < 0) {
+            animation.play('Strafe_right', 0, 1);
+          } else {
+            animation.play('Running');
+          }
         } else {
           animation.play('Idle');
         }
