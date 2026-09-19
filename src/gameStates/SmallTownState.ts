@@ -107,9 +107,10 @@ export class SmallTownState implements GameState {
       DEFAULT_PROCEDURAL_CONFIG.chunkSize * 2.65,
     );
     this._inputSystem = new InputSystem(renderer.domElement);
-    this._crosshairSystem = new CrosshairSystem();
+    this._crosshairSystem = new CrosshairSystem(renderer.domElement);
     const world = new World([
       this._inputSystem,
+      this._crosshairSystem,
       new DebugModeSystem(),
       new PlayerCameraLookSystem(),
 
@@ -147,8 +148,7 @@ export class SmallTownState implements GameState {
       // render systems
       new RenderSystem(scene, renderer),
       new ParticleEmitterSystem(scene),
-      new DialogSystem(),
-      this._crosshairSystem,
+      new DialogSystem(),      
       new DebugHudSystem(),
     ]);
 
